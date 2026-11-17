@@ -1,0 +1,23 @@
+# world map jump disc + launcher patch: New Game, then Circle every 300 frames in the Gummi Menu
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5000 4 O
+5300 4 O
+5600 4 O
+5900 4 O
+6200 4 O
+6500 4 O
+6800 4 O
+7100 4 O
+7400 4 O
+7700 4 O
+8000 4 O
+8300 4 O
+8600 4 O
+8900 4 O
+9200 4 O
+12000 1 

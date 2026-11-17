@@ -1,0 +1,8 @@
+# real start: P2 does the two scene skips (START, Down, Circle)
+4200 4 START
+4230 4 DOWN
+4260 4 O
+4680 4 START
+4710 4 DOWN
+4740 4 O
+7100 1 

@@ -1,0 +1,6 @@
+# P2: hold one thing per window
+7600 1200 TRI
+8800 1200 SQ
+10000 1200 L1
+11200 1200 LX=255
+14900 1 

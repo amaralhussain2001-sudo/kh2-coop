@@ -1,0 +1,14 @@
+# lane F: free-roam jump disc, out the west door (variant b)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4500 34 LY=0
+4560 50 LX=0
+4620 10 LY=0
+4640 60 LX=0
+5600 150 LY=255
+6400 150 LY=255
+7300 1 

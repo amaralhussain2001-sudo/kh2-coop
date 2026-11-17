@@ -1,0 +1,19 @@
+# door disc: push into the door (4700), in the Borough step toward the Heartless, then NO buttons until defeated;
+# from frame 12600 Circle now and then picks Continue on the Game Over screen
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 60 LY=0
+5700 50 LY=0
+12600 4 O
+12900 4 O
+13200 4 O
+13500 4 O
+13800 4 O
+14100 4 O
+14400 4 O
+15500 60 LX=255
+17500 1 

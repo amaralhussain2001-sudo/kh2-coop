@@ -1,0 +1,16 @@
+title: seventh round - Agrabah (al00) free roam with its skateboards from the first visit on (tests only)
+game: kh2
+assets:
+  - name: ard/al00.ard
+    method: binarc
+    source:
+      - name: map
+        type: AreaDataScript
+        method: areadatascript
+        source:
+          - name: al00_map.txt
+      - name: evt
+        type: AreaDataScript
+        method: areadatascript
+        source:
+          - name: al00_evt.txt

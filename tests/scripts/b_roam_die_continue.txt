@@ -1,0 +1,31 @@
+# free-roam disc: save, leave by the west door, step toward the Heartless, later press Circle now and then (Continue on Game Over)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4500 4 TRI
+4620 4 O
+4740 4 O
+4860 4 O
+4980 4 LEFT
+5040 4 O
+5500 4 X
+5560 4 X
+5620 4 X
+5680 4 X
+5800 30 LY=0
+5860 90 LX=0
+6400 50 LY=0
+7600 4 O
+7900 4 O
+8200 4 O
+8500 4 O
+8800 4 O
+9100 4 O
+9400 4 O
+9700 4 O
+10000 4 O
+10300 4 O
+11000 1 

@@ -1,0 +1,43 @@
+# TEST (ninth round, plan row 39): player 1 starts the game, waits while player 2 changes his Keyblade (5000 to 5800),
+# then changes HIS Keyblade the same way from 6300 on (the same next Keyblade in the list) and attacks from 7400 on.
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+6300 4 START
+6400 4 O
+6500 4 O
+6600 4 O
+6700 4 DOWN
+6760 4 O
+6900 4 X
+7000 4 X
+7100 4 X
+7400 4 O
+7440 4 O
+7480 4 O
+7520 4 O
+7560 4 O
+7600 4 O
+7640 4 O
+7680 4 O
+7720 4 O
+7760 4 O
+7800 4 O
+7840 4 O
+7880 4 O
+7920 4 O
+7960 4 O
+8000 4 O
+8040 4 O
+8080 4 O
+8120 4 O
+8160 4 O
+8200 4 O
+8240 4 O
+8280 4 O
+8320 4 O
+8360 4 O
+999999 1

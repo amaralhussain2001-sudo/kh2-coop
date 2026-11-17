@@ -1,0 +1,2 @@
+# nothing until frame 4700 (then: idle or random buttons)
+4699 1 

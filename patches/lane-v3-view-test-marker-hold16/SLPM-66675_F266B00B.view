@@ -1,0 +1,10 @@
+; TEST ONLY: pretend a marker for the frame buffer on display came after the first draw of every 16th video frame,
+; and keep showing that copy until the next one. Player 1 PC then shows a picture that changes only every 16 video
+; frames; player 2 PC shows the final picture as always.
+LayoutAddress = 0
+TestLayout = 2
+MarkerId = 56570001
+MarkerPlayer = 1
+MarkerHold = 0
+MarkerTestDraws = 1
+MarkerTestEvery = 16

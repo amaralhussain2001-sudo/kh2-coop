@@ -1,0 +1,4 @@
+# player 2: closes the rules screen, then the harness goes on (random buttons with --then random)
+4800 4 O
+4900 4 O
+5000 4 O

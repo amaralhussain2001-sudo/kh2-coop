@@ -1,0 +1,5 @@
+# made by tools/lane-s1/run_s1.py from: hold:LX=91 LY=6:4800:20;press:TRI:4840;hold:LY=0:5500:90;end:forever
+4800 20 LX=91 LY=6
+4840 4 TRI
+5500 90 LY=0
+999999 1 

@@ -1,0 +1,3 @@
+# P2: walk away a little so the two views differ
+4500 30 LY=0
+5600 1 

@@ -1,0 +1,4 @@
+; TEST ONLY: pretend the game shows the players' pictures on alternating video frames.
+; Without an owner byte the session frame number decides: even frames = player 1, odd frames = player 2.
+LayoutAddress = 0
+TestLayout = 3

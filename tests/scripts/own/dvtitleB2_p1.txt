@@ -1,0 +1,10 @@
+# TEST (tenth round, title Load Game, run B variant 2): Circle first (a press-start screen?), Down + Circle, then Circle every 240 frames, then stand.
+3000 4 O
+3150 4 DOWN
+3210 4 O
+3450 4 O
+3690 4 O
+3930 4 O
+4170 4 O
+4410 4 O
+9000 1 

@@ -1,0 +1,6 @@
+﻿Quality=4
+Fullscreen=True
+Buffer=smooth
+Layout=1
+Game=Kingdom Hearts II - Final Mix (2 Players TEST v5).iso
+Screen=4:3

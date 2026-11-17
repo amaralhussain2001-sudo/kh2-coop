@@ -1,0 +1,11 @@
+sp-po54 | tests/scripts/lane-j/j_probe.txt | 6500 | 4400,4600,4800,5000,5200,5290,5340,5380,5512,5526,5715,5900,6100,6300 | --jump PO_54 --rooms po06 --also 35B
+sp-nm63 | tests/scripts/lane-j/j_probe.txt | 6500 | 4400,4600,4800,5000,5200,5290,5340,5380,5512,5526,5715,5900,6100,6300 | --jump NM_63 --rooms nm10 --also 3C8
+sp-al62 | tests/scripts/lane-j/j_probe.txt | 6500 | 4400,4600,4800,5000,5200,5290,5340,5380,5512,5526,5715,5900,6100,6300 | --jump AL_62 --rooms al05 --also 4FF
+sp-al86 | tests/scripts/lane-j/j_probe.txt | 6500 | 4400,4600,4800,5000,5200,5290,5340,5380,5512,5526,5715,5900,6100,6300 | --jump AL_86 --rooms al14 --also 4FF,5E9
+sp-al106 | tests/scripts/lane-j/j_probe.txt | 6500 | 4400,4600,4800,5000,5200,5290,5340,5380,5512,5526,5715,5900,6100,6300 | --jump AL_106 --rooms al14 --also 4FF,5E9
+sp-tr61 | tests/scripts/lane-j/j_probe.txt | 6500 | 4400,4600,4800,5000,5200,5290,5340,5380,5512,5526,5715,5900,6100,6300 | --jump TR_61 --rooms tr02 --also 5F5
+sp-eh72 | tests/scripts/lane-j/j_probe.txt | 6500 | 4400,4600,4800,5000,5200,5290,5340,5380,5512,5526,5715,5900,6100,6300 | --jump EH_72 --rooms eh22 --also 840
+sep-lm02 | tests/scripts/lane-j/j_sep_p1.txt | 6100 | 4700,4900,5060,5100,5340,5400,5512,5526,5712,5726,5900 | --jump1 LM_2_0 --override tools/lane-j/data/overrides.csv | --players 2 --script2 tests/scripts/lane-j/j_sep_p2.txt --patch-dir patches/lane-e-x2
+sep-wi52 | tests/scripts/lane-j/j_sep_p1.txt | 6100 | 4700,4900,5060,5100,5340,5400,5512,5526,5712,5726,5900 | --jump WI_52 | --players 2 --script2 tests/scripts/lane-j/j_sep_p2.txt --patch-dir patches/lane-e-x2
+look-al08 | tests/scripts/lane-j/j_probe.txt | 5600 | 4400,4600,4800,5000,5200,5400 | --jump1 AL_8_0 --no-twin | --timeout 150
+look-po10 | tests/scripts/lane-j/j_probe.txt | 5600 | 4400,4600,4800,5000,5200,5400 | --jump1 PO_10_0 --no-twin | --timeout 150

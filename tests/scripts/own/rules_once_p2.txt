@@ -1,0 +1,3 @@
+# player 2 closes the rules screen with one Circle (4800), then nothing
+4800 4 O
+999999 1 

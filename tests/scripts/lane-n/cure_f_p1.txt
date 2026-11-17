@@ -1,0 +1,11 @@
+# fight disc + kit: New Game; player 1 casts Cure (L1 + Cross) at 4800
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4780 20 L1
+4800 4 L1 X
+4804 36 L1
+9000 1 

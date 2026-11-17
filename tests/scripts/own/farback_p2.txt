@@ -1,0 +1,6 @@
+# quiet room: player 2 runs away (up 400 frames, left 300), stands, then comes back from 7000 (right 300, down 400)
+4800 400 LY=0
+5300 300 LX=0
+7000 300 LX=255
+7400 420 LY=255
+999999 1 

@@ -1,0 +1,2 @@
+launch: site 0x002C5F08 -> routine 0x000F5000, route 0 after 1 calls; counter 0x000F5F40 latch 0x000F5F44
+ovl ship2: hook 0x01F21CD4 (was jal 0x01F20DD8) -> 0x000F5100; ship 1 ptr at 0x000F5F80, ship 2 ptr at 0x000F5F84; keepglobal=1

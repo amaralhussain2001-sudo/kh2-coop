@@ -1,0 +1,10 @@
+# roam3, P1 goes to the west door alone and stays (camera start: up = +z, left = -x)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4600 30 LY=0
+4660 120 LX=0
+5600 1 

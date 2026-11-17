@@ -1,0 +1,9 @@
+# Light Cycle: player 2 alone presses: Circle 5400 5460 5520, Square 5700 (30 frames), Triangle 5900, Circle 6050 6110
+5400 8 O
+5460 8 O
+5520 8 O
+5700 30 SQ
+5900 8 TRI
+6050 8 O
+6110 8 O
+9000 1 

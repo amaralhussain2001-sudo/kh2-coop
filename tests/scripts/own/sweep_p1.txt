@@ -1,0 +1,27 @@
+# mission sweep: New Game, then Circle every 240 frames from 4600 (boxes, rules screens, attacks)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4600 4 O
+4840 4 O
+5080 4 O
+5320 4 O
+5560 4 O
+5800 4 O
+6040 4 O
+6280 4 O
+6520 4 O
+6760 4 O
+7000 4 O
+7240 4 O
+7480 4 O
+7720 4 O
+7960 4 O
+8200 4 O
+8440 4 O
+8680 4 O
+8920 4 O
+999999 1 

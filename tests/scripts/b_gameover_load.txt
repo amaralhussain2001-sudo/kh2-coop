@@ -1,0 +1,10 @@
+# New Game, no buttons until Game Over, then Down + Circle = Load Game
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+8400 4 DOWN
+8440 4 O
+12000 1 

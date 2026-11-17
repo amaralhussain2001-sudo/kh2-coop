@@ -1,0 +1,23 @@
+; Kingdom Hearts II Final Mix (SLPM-66675, CRC F266B00B): what each PC shows when the game draws one view per player.
+; Read by the PS2-ONLINE emulator build of lane V3 (own-screen view). Display only: nothing here changes the game,
+; and this file is not part of the patch check between the PCs. It belongs next to the game's .pnach file.
+; Values come from lane V1's patch (docs\lanes\V1-two-views.md and the listing of patches\lane-v1-c).
+
+LayoutAddress = 000F6F00     ; lane V1's layout byte: 0 one view, 1 side by side, 2 two full-size pictures
+
+; layout 1: one picture, LEFT half = player 2's view, RIGHT half = player 1's view
+SideValue = 1
+Player1 = 0.5 0 1 1          ; left top right bottom, as fractions of the picture
+Player2 = 0 0 0.5 1
+
+; layout 2: two full-size pictures per step. The game copies player 2's finished picture to the display, sends the
+; marker (LABEL register, id 56310002), then copies player 1's finished picture over it.
+MarkerValue = 2
+MarkerId = 56310002
+MarkerPlayer = 2             ; the player whose picture is on the display when the marker comes
+MarkerBuffer = display       ; copy the frame buffer that is on display (not the one named by FRAME)
+MarkerHold = 0               ; keep showing the copy until the next marker (every two-view step has one)
+
+; layout 3 (pictures on alternating video frames) is not used by the game patch yet:
+; AlternateValue = 3
+; OwnerAddress = 000F6Fxx    ; a byte: 0 = the picture on display is player 1's, 1 = player 2's, other = everybody's

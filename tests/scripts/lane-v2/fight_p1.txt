@@ -1,0 +1,12 @@
+# P1 (fight disc): New Game, lock on with R1, attack a few times
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4800 4 R1
+5100 4 O
+5140 4 O
+5180 4 O
+7200 1 

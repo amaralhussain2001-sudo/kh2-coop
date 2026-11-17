@@ -1,0 +1,5 @@
+# fight disc: pad 2 casts Cure (L1 + Cross) at 4800
+4780 20 L1
+4800 4 L1 X
+4804 36 L1
+9000 1 

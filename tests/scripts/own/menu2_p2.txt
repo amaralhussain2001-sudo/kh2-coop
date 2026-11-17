@@ -1,0 +1,4 @@
+# P2 opens his pause menu (START) at 5600 and closes it (START) at 6100
+5600 4 START
+6100 4 START
+6800 1

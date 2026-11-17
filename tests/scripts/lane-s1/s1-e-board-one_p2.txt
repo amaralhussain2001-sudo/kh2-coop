@@ -1,0 +1,5 @@
+# made by tools/lane-s1/run_s1.py from: press:TRI:4835;press:TRI:4900;press:TRI:4960;end:forever
+4835 4 TRI
+4900 4 TRI
+4960 4 TRI
+999999 1 

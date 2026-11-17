@@ -1,0 +1,3 @@
+# P2: move left and stay there, no fire
+8300 120 LX=0
+13000 1 

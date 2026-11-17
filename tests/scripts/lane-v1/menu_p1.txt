@@ -1,0 +1,13 @@
+# roam disc: New Game; START menu open/close; save menu open/close; both while two views are on
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 4 START
+4900 4 START
+5000 4 TRI
+5200 4 X
+5300 4 X
+5600 1 

@@ -1,0 +1,5 @@
+# roam disc: P2 walks into the door volume at 4500 and stays; is down from 4950; walks into the door again at 5450
+4500 36 LY=0
+4560 60 LX=0
+5450 40 LX=0
+6200 1 

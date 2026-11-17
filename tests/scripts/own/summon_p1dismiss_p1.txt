@@ -1,0 +1,11 @@
+# New Game (Circle x6); the bot takes over after 3700
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+3700 1 
+5300 4 LEFT
+5340 4 DOWN
+5400 4 O

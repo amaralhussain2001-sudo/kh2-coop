@@ -1,0 +1,11 @@
+title: seventh round - the Ridge (mu08) free roam with the three F_MU070 objects and no Heartless (tests only)
+game: kh2
+assets:
+  - name: ard/mu08.ard
+    method: binarc
+    source:
+      - name: btl
+        type: AreaDataScript
+        method: areadatascript
+        source:
+          - name: mu08_btl.txt

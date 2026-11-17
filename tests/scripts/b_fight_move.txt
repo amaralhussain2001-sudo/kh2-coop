@@ -1,0 +1,18 @@
+# New Game, then keep moving and attacking in the fight
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4600 300 LY=0
+4700 4 O
+4760 4 O
+4900 400 LX=255
+5000 4 O
+5100 4 O
+5300 400 LY=255
+5400 4 O
+5500 4 X
+5550 200 LX=0
+9000 1 

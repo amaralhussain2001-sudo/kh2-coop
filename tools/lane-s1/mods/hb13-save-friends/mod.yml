@@ -1,0 +1,24 @@
+title: seventh round - start on the save point in Merlin's house WITH Donald and Goofy (tests only)
+game: kh2
+assets:
+  - name: ard/hb13.ard
+    method: binarc
+    source:
+      - name: map
+        type: AreaDataScript
+        method: areadatascript
+        source:
+          - name: hb13_map.txt
+      - name: evt
+        type: AreaDataScript
+        method: areadatascript
+        source:
+          - name: hb13_evt.txt
+  - name: ard/hb09.ard
+    method: binarc
+    source:
+      - name: evt
+        type: AreaDataScript
+        method: areadatascript
+        source:
+          - name: hb09_evt.txt

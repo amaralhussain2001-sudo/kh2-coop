@@ -1,0 +1,8 @@
+# Marketplace disc with the Moogle, P2 held beside the Moogle: turn (LY=255) and Triangle, twice
+5030 30 LY=255
+5100 4 TRI
+5200 30 LX=0
+5260 4 TRI
+5360 30 LX=255
+5420 4 TRI
+6300 1 

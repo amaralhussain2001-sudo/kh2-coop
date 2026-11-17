@@ -1,0 +1,8 @@
+# fight disc: New Game (Circle x6), then nothing
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+9000 1 

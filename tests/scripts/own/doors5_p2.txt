@@ -1,0 +1,17 @@
+# TEST (tenth round, glue 75, SEVERAL DOORS IN A ROW): disc test-s1-hb13s. Player 2 in Final Form (as finaldoor4_p2) through the west door, then with player 1: down 40 at 6200, left 60 at 7200, down 40 at 8200, left 60 at 9200.
+4700 36 LY=0
+4800 4 DOWN
+4830 4 DOWN
+4860 4 DOWN
+4900 4 O
+4930 4 DOWN
+4945 4 DOWN
+4960 4 DOWN
+4975 4 DOWN
+5000 4 O
+5400 80 LX=0
+6200 40 LY=255
+7200 60 LX=0
+8200 40 LY=255
+9200 60 LX=0
+999999 1

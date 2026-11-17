@@ -1,0 +1,7 @@
+# made by tools/own/make_mash.py C:\Users\PCFORC~1\AppData\Local\Temp/claude/cdca3cd92bc74bb0/705cfe9b-5e0b-4019-ba3d-c363d52fa75f/scratchpad/sl.txt SQ 5350 5351 6
+4800 20 LX=91 LY=6
+4960 4 TRI
+5000 4 TRI
+5040 4 TRI
+5350 4 SQ
+999999 1 

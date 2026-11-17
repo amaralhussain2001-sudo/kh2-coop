@@ -1,0 +1,5 @@
+# roam disc: P2 to the door at 5800, step toward the Heartless, then nothing (the load menu is player 1s)
+5800 36 LY=0
+5860 60 LX=0
+6700 50 LY=0
+14000 1 

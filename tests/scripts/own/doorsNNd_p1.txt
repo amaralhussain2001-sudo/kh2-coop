@@ -1,0 +1,25 @@
+# TEST (tenth round, one-hero control d): as doorsNNc_p1 (into the west door's jump volume at 5800), then LEFT 30 at 6000 (push into the door), Final Form in the Borough at 6700, then down 40 at 7400, 8400, 9400, 10400.
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5300 36 LY=0
+5400 60 LX=0
+5800 25 LY=0
+6000 30 LX=0
+6700 4 DOWN
+6730 4 DOWN
+6760 4 DOWN
+6800 4 O
+6830 4 DOWN
+6845 4 DOWN
+6860 4 DOWN
+6875 4 DOWN
+6900 4 O
+7400 40 LY=255
+8400 40 LY=255
+9400 40 LY=255
+10400 40 LY=255
+999999 1

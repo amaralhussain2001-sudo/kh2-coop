@@ -1,0 +1,7 @@
+# Agrabah free-roam disc: player 2 runs on for 24 frames (4800), Triangle at 4880 / 4940 (Hop On), rides on (5100), Heelflip (5300)
+4800 16 LY=0
+4880 4 TRI
+4940 4 TRI
+5100 60 LY=0
+5300 4 O
+999999 1 

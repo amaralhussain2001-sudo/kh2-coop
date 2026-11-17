@@ -1,0 +1,4 @@
+# TEST (tenth round, the shop girl, take 4): player 2 walks to the friends with player 1 (up 200 at 6300), then up 115 at 9300 to the accessory shop with him, then nothing.
+6300 200 LY=0
+9300 115 LY=0
+14000 1 

@@ -1,0 +1,5 @@
+PCSX2 base commit: cf3c372043ae4fe0f2561de80d223755b5d7bf94
+upstream: https://github.com/PCSX2/pcsx2.git
+Patch: pcsx2-working-tree-2026-11-17.patch = every uncommitted change in emulator-src/pcsx2 on 2026-11-17
+(14 changed files incl. PS2Net netplay + own-screen view, plus new file pcsx2/GS/GSPresentView.h).
+Restore: git clone https://github.com/PCSX2/pcsx2.git && cd pcsx2 && git checkout cf3c372043ae4fe0f2561de80d223755b5d7bf94 && git apply ../pcsx2-working-tree-2026-11-17.patch

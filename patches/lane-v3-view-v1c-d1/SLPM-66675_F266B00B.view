@@ -1,0 +1,15 @@
+; Kingdom Hearts II Final Mix (SLPM-66675): what each PC shows when the game draws one view per player.
+; Display only. Read by the PS2-ONLINE emulator build of lane V3; values come from lane V1's patch.
+LayoutAddress = 000F6F00     ; lane V1's layout byte: 0 one view, 1 side by side, 2 two full pictures
+; layout 1: side by side, LEFT half = player 2, RIGHT half = player 1
+SideValue = 1
+Player1 = 0.5 0 1 1
+Player2 = 0 0 0.5 1
+; layout 2: two full-size pictures per step; player 2's is on the display when the marker comes,
+; then player 1's is copied over it
+MarkerValue = 2
+MarkerId = 56310002
+MarkerPlayer = 2
+MarkerBuffer = display
+MarkerHold = 0
+LayoutDelay = 1            ; the game writes the layout byte one video frame before that picture is on display

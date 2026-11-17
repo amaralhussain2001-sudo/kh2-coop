@@ -1,0 +1,28 @@
+# free-roam disc with twin: New Game, walk out the west door, stand still; from 9000 press Circle every 400 frames (Continue on Game Over)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4500 30 LY=0
+4560 90 LX=0
+5100 40 LY=0
+9000 4 O
+9400 4 O
+9800 4 O
+10200 4 O
+10600 4 O
+11000 4 O
+11400 4 O
+11800 4 O
+12200 4 O
+12600 4 O
+13000 4 O
+13400 4 O
+13800 4 O
+14200 4 O
+14600 4 O
+15000 4 O
+15400 4 O
+15700 1 

@@ -1,0 +1,11 @@
+# control runs: New Game, Circle at 4600 / 4840 / 5080 only (so a Game Over menu is never answered)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4600 4 O
+4840 4 O
+5080 4 O
+9000 1 

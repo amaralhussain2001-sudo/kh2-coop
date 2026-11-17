@@ -1,0 +1,4 @@
+# P2: turn camera 2 the other way (right stick right, 40 frames), then push the left stick up 24 frames
+4700 40 RX=255
+4800 24 LY=0
+5600 1 

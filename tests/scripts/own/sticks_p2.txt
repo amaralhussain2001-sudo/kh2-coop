@@ -1,0 +1,6 @@
+# player 2: stick only (no buttons): left 5800-6200, right 6700-7100, forward 7700-8100, back 8300-8600
+5800 400 LX=0
+6700 400 LX=255
+7700 400 LY=0
+8300 300 LY=255
+9000 1 

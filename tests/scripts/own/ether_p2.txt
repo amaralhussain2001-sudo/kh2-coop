@@ -1,0 +1,45 @@
+# TEST (eighth round, register G5): player 2 uses Ether / Elixir / Megalixir by shortcut. Kit -snapB-eth:
+# shortcuts L1 + Circle = Fire, + Triangle = Ether, + Square = Elixir, + Cross = Megalixir.
+4700 14 L1
+4714 4 L1 O
+4718 32 L1
+4780 14 L1
+4794 4 L1 O
+4798 32 L1
+4860 14 L1
+4874 4 L1 O
+4878 32 L1
+4940 14 L1
+4954 4 L1 O
+4958 32 L1
+5020 14 L1
+5034 4 L1 O
+5038 32 L1
+5300 14 L1
+5314 4 L1 TRI
+5318 32 L1
+5600 14 L1
+5614 4 L1 O
+5618 32 L1
+5680 14 L1
+5694 4 L1 O
+5698 32 L1
+5760 14 L1
+5774 4 L1 O
+5778 32 L1
+6000 14 L1
+6014 4 L1 SQ
+6018 32 L1
+6300 14 L1
+6314 4 L1 O
+6318 32 L1
+6380 14 L1
+6394 4 L1 O
+6398 32 L1
+6460 14 L1
+6474 4 L1 O
+6478 32 L1
+6700 14 L1
+6714 4 L1 X
+6718 32 L1
+999999 1

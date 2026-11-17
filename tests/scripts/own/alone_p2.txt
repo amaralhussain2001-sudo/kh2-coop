@@ -1,0 +1,34 @@
+# player 2 does everything alone: New Game (six Circles), then Circle every 120 frames; stick: left 5800-6200, right 6700-7100, forward 7700-8100, back 8300-8600
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 4 O
+4820 4 O
+4940 4 O
+5060 4 O
+5180 4 O
+5300 4 O
+5420 4 O
+5540 4 O
+5660 4 O
+5780 4 O
+5800 400 LX=0
+6380 4 O
+6500 4 O
+6620 4 O
+6700 400 LX=255
+7220 4 O
+7340 4 O
+7460 4 O
+7580 4 O
+7700 400 LY=0
+8300 4 O
+8300 300 LY=255
+8420 4 O
+8540 4 O
+8660 4 O
+8780 4 O
+9000 1 

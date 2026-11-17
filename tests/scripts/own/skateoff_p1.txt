@@ -1,0 +1,12 @@
+# made by tools/own/make_mash.py C:/Users/PC FORCE/Desktop/New folder (3)/tests/scripts/lane-s1/s1-skate-s2_p1.txt SQ 5700 5701 6
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4800 20 LX=4 LY=99
+4840 4 TRI
+4980 90 LY=0
+5700 4 SQ
+999999 1 

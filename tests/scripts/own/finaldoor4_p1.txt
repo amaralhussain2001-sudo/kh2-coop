@@ -1,0 +1,13 @@
+# TEST (tenth round, glue 75): disc test-s1-hb13s. As finaldoor3_p1, then back and forth through the same door: right 120 frames at 6300, left 120 at 7100, right 120 at 7900.
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5300 36 LY=0
+5400 60 LX=0
+6300 120 LX=255
+7100 120 LX=0
+7900 120 LX=255
+999999 1

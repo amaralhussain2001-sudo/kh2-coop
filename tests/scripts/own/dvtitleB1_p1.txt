@@ -1,0 +1,9 @@
+# TEST (tenth round, title Load Game, run B variant 1): at the title Down + Circle (Load Game), then Circle every 240 frames (card, file 01, yes), then stand.
+3000 4 DOWN
+3060 4 O
+3300 4 O
+3540 4 O
+3780 4 O
+4020 4 O
+4260 4 O
+9000 1 

@@ -1,0 +1,11 @@
+# made by tools/lane-s1/run_s1.py from: ng;hold:LX=4 LY=99:4800:20;press:TRI:4850;hold:LY=0:5200:60;end:forever
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4800 20 LX=4 LY=99
+4850 4 TRI
+5200 60 LY=0
+999999 1 

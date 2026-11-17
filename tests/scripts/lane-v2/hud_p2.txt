@@ -1,0 +1,6 @@
+# P2: walk away a little, then move the command menu cursor down twice, later up once
+4500 30 LY=0
+4800 4 DOWN
+4900 4 DOWN
+5300 4 UP
+7200 1 

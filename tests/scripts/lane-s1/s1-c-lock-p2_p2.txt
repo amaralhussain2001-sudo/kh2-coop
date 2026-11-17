@@ -1,0 +1,4 @@
+# made by tools/lane-s1/run_s1.py from: hold:R1:5600:30;hold:R1:6200:30;end:forever
+5600 30 R1
+6200 30 R1
+999999 1 

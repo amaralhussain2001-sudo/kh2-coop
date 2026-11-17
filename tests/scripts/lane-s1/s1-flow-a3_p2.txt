@@ -1,0 +1,3 @@
+# made by tools/lane-s1/run_s1.py from: hold:LX=85 LY=8:6800:240;end:forever
+6800 240 LX=85 LY=8
+999999 1 

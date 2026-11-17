@@ -1,0 +1,972 @@
+Lane V1 patch (merged v2 + two views) for CRC F266B00B. Every word the patch file writes, with its meaning.
+Options: none
+
+====================================================================================================
+SECTION identity: lane E identity: the placeholder hero is the engine's player on controller 1, the other is the twin
+  cave 0x000F0300-0x000F040B (67 words)
+e_mark:    # hook 0x0016F0B0 (placeholder path of the object creator)
+  000F0300  3C0F000F  lui t7,0xF                        
+  000F0304  240E0001  addiu t6,zero,1                   
+  000F0308  0807450E  j 0x001D1438                      # continue into the routine the game wanted
+  000F030C  ADEE05C0  sw t6,1472(t7)                    # remember: the next player object comes from the PLAYER placeholder
+e_getpad:    # reached from m_getpad (hook 0x0017A000: the factory asks for the controller)
+  000F0310  3C0F000F  lui t7,0xF                        
+  000F0314  8DEE05C0  lw t6,1472(t7)                    
+  000F0318  ADE005C0  sw zero,1472(t7)                  
+  000F031C  3C0D0035  lui t5,0x35                       
+  000F0320  8DADE948  lw t5,-5816(t5)                   
+  000F0324  ADED05C8  sw t5,1480(t7)                    # the engine's player before this build
+  000F0328  2DAC0001  sltiu t4,t5,1                     
+  000F032C  01CC7025  or t6,t6,t4                       # player 1's hero if placeholder-made or no player exists yet
+  000F0330  ADEE05C4  sw t6,1476(t7)                    
+  000F0334  08059FC6  j 0x00167F18                      
+  000F0338  39C40001  xori a0,t6,0x1                    # controller index 0 for player 1's hero, 1 for the twin
+e_wrap:    # reached from m_wrap (hook 0x0016F0F4: the only call of the player factory)
+  000F033C  27BDFFE0  addiu sp,sp,-32                   
+  000F0340  FFBF0000  sd ra,0(sp)                       
+  000F0344  0C05E7F4  jal 0x00179FD0                    
+  000F0348  00000000  nop                               
+  000F034C  FFA20008  sd v0,8(sp)                       
+  000F0350  3C0F000F  lui t7,0xF                        
+  000F0354  8DEE05C4  lw t6,1476(t7)                    
+  000F0358  8DED05C8  lw t5,1480(t7)                    
+  000F035C  15C0000E  bne t6,zero,0x000F0398            
+  000F0360  00000000  nop                               
+  000F0364  ADE205CC  sw v0,1484(t7)                    # a twin was built: hand the "player" role back to the hero
+  000F0368  3C0C0035  lui t4,0x35                       
+  000F036C  AD8DE948  sw t5,-5816(t4)                   
+  000F0370  3C0C0035  lui t4,0x35                       
+  000F0374  AD8D2400  sw t5,9216(t4)                    
+  000F0378  8DAB048C  lw t3,1164(t5)                    
+  000F037C  11600002  beq t3,zero,0x000F0388            
+  000F0380  00000000  nop                               
+  000F0384  AD6D025C  sw t5,604(t3)                     # the hero's unit slot points back at the hero
+e_noslot:
+  000F0388  0C05E06A  jal 0x001781A8                    # game's own attach: camera target, trigger owner, party slot 0, S
+  000F038C  01A0202D  daddu a0,t5,zero                  
+  000F0390  10000009  beq zero,zero,0x000F03B8          
+  000F0394  00000000  nop                               
+e_p1:
+  000F0398  11A00007  beq t5,zero,0x000F03B8            
+  000F039C  00000000  nop                               
+  000F03A0  11A20005  beq t5,v0,0x000F03B8              
+  000F03A4  00000000  nop                               
+  000F03A8  ADED05CC  sw t5,1484(t7)                    # an earlier player object becomes the twin ...
+  000F03AC  3C0C0035  lui t4,0x35                       
+  000F03B0  258CD720  addiu t4,t4,-10464                
+  000F03B4  ADAC0B38  sw t4,2872(t5)                    # ... and moves to controller 2
+e_done:
+  000F03B8  DFA20008  ld v0,8(sp)                       
+  000F03BC  DFBF0000  ld ra,0(sp)                       
+  000F03C0  03E00008  jr ra                             
+  000F03C4  27BD0020  addiu sp,sp,32                    
+e_dtor:    # hook 0x00178294 (base destructor of player objects), a0 = dying object
+  000F03C8  3C0F0035  lui t7,0x35                       
+  000F03CC  8DEEE948  lw t6,-5816(t7)                   
+  000F03D0  3C0D000F  lui t5,0xF                        
+  000F03D4  8DAC05CC  lw t4,1484(t5)                    
+  000F03D8  15840002  bne t4,a0,0x000F03E4              
+  000F03DC  00000000  nop                               
+  000F03E0  ADA005CC  sw zero,1484(t5)                  # the twin dies: forget it
+e_d1:
+  000F03E4  11C40007  beq t6,a0,0x000F0404              
+  000F03E8  00000000  nop                               
+  000F03EC  11C00005  beq t6,zero,0x000F0404            
+  000F03F0  00000000  nop                               
+  000F03F4  3C0D0035  lui t5,0x35                       # another player object dies while the engine's player lives:
+  000F03F8  ADAE2400  sw t6,9216(t5)                    # keep the hero registered
+  000F03FC  03E00008  jr ra                             
+  000F0400  AC800B3C  sw zero,2876(a0)                  # only the dying object's own S pointer is cleared
+e_dnormal:
+  000F0404  0805E07A  j 0x001781E8                      # the engine's player dies: what the game did
+  000F0408  ADE0E948  sw zero,-5816(t7)                 
+
+====================================================================================================
+SECTION exits: lane E exits: room exits and event triggers need both heroes in the same volume
+  cave 0x000F0420-0x000F058B (91 words)
+e_inside:    # hook 0x0019A168 (was: jalr v0). a0 = volume, a1 = point, v0 = method, s1 = area event
+  000F0420  27BDFFE0  addiu sp,sp,-32                   
+  000F0424  FFBF0000  sd ra,0(sp)                       
+  000F0428  FFA20008  sd v0,8(sp)                       
+  000F042C  0040F809  jalr v0                           # is the walking hero inside?
+  000F0430  00000000  nop                               
+  000F0434  1040001A  beq v0,zero,0x000F04A0            
+  000F0438  00000000  nop                               
+  000F043C  3C0F000F  lui t7,0xF                        
+  000F0440  8DEC05D0  lw t4,1488(t7)                    # 1 during the second offer (twin walking)
+  000F0444  8E2B0008  lw t3,8(s1)                       
+  000F0448  916E0000  lbu t6,0(t3)                      # kind of area event
+  000F044C  25CDFFFF  addiu t5,t6,-1                    
+  000F0450  11A00007  beq t5,zero,0x000F0470            # 1 = jump to another room
+  000F0454  25CDFFFD  addiu t5,t6,-3                    
+  000F0458  11A00005  beq t5,zero,0x000F0470            # 3 = start an event
+  000F045C  00000000  nop                               
+  000F0460  1180000F  beq t4,zero,0x000F04A0            # other kinds: first offer as before ...
+  000F0464  00000000  nop                               
+  000F0468  1000000D  beq zero,zero,0x000F04A0          # ... and never on the second offer
+  000F046C  0000102D  daddu v0,zero,zero                
+e_in_both:
+  000F0470  8DE405CC  lw a0,1484(t7)                    # the other hero: the twin on the first offer ...
+  000F0474  11800002  beq t4,zero,0x000F0480            
+  000F0478  00000000  nop                               
+  000F047C  8DE405D4  lw a0,1492(t7)                    # ... player 1's hero on the second
+e_in_other:
+  000F0480  10800007  beq a0,zero,0x000F04A0            # no twin here: as before
+  000F0484  00000000  nop                               
+  000F0488  0C05B00A  jal 0x0016C028                    # game: pointer to an object's position
+  000F048C  00000000  nop                               
+  000F0490  0040282D  daddu a1,v0,zero                  
+  000F0494  DFB90008  ld t9,8(sp)                       
+  000F0498  0320F809  jalr t9                           # is the other hero inside the same volume?
+  000F049C  0200202D  daddu a0,s0,zero                  
+e_in_out:
+  000F04A0  DFBF0000  ld ra,0(sp)                       
+  000F04A4  03E00008  jr ra                             
+  000F04A8  27BD0020  addiu sp,sp,32                    
+e_offer:    # hook 0x00182D04 (was: jal 0x00182980). a0 = area event table entry, a1 = point
+  000F04AC  27BDFFD0  addiu sp,sp,-48                   
+  000F04B0  FFBF0000  sd ra,0(sp)                       
+  000F04B4  FFA40008  sd a0,8(sp)                       
+  000F04B8  0C060A60  jal 0x00182980                    # first offer: player 1's hero, as the game does
+  000F04BC  00000000  nop                               
+  000F04C0  3C0F000F  lui t7,0xF                        
+  000F04C4  8DEE05CC  lw t6,1484(t7)                    
+  000F04C8  11C0002D  beq t6,zero,0x000F0580            # no twin
+  000F04CC  00000000  nop                               
+  000F04D0  DFA40008  ld a0,8(sp)                       
+  000F04D4  8C8D0004  lw t5,4(a0)                       
+  000F04D8  31AD0001  andi t5,t5,0x1                    
+  000F04DC  15A00028  bne t5,zero,0x000F0580            # this entry is switched off
+  000F04E0  00000000  nop                               
+  000F04E4  8C880008  lw t0,8(a0)                       # the area event
+  000F04E8  11000025  beq t0,zero,0x000F0580            
+  000F04EC  00000000  nop                               
+  000F04F0  8D090008  lw t1,8(t0)                       
+  000F04F4  912A0000  lbu t2,0(t1)                      # its kind
+  000F04F8  254BFFFF  addiu t3,t2,-1                    
+  000F04FC  11600003  beq t3,zero,0x000F050C            
+  000F0500  254BFFFD  addiu t3,t2,-3                    
+  000F0504  1560001E  bne t3,zero,0x000F0580            # only exits (1) and event triggers (3) get the second offer
+  000F0508  00000000  nop                               
+e_of_go:
+  000F050C  3C0D0035  lui t5,0x35                       
+  000F0510  8DACE948  lw t4,-5816(t5)                   
+  000F0514  1180001A  beq t4,zero,0x000F0580            
+  000F0518  00000000  nop                               
+  000F051C  118E0018  beq t4,t6,0x000F0580              # the twin is the engine's player (should not happen): leave it
+  000F0520  00000000  nop                               
+  000F0524  ADEC05D4  sw t4,1492(t7)                    
+  000F0528  ADAEE948  sw t6,-5816(t5)                   # the engine's player = the twin, only during the second offer
+  000F052C  240B0001  addiu t3,zero,1                   
+  000F0530  ADEB05D0  sw t3,1488(t7)                    
+  000F0534  8D0B0004  lw t3,4(t0)                       
+  000F0538  316B0018  andi t3,t3,0x18                   # what the first offer found (inside / door-approach flags)
+  000F053C  FFAB0010  sd t3,16(sp)                      
+  000F0540  FFA80018  sd t0,24(sp)                      
+  000F0544  0C05B00A  jal 0x0016C028                    
+  000F0548  01C0202D  daddu a0,t6,zero                  
+  000F054C  0040282D  daddu a1,v0,zero                  
+  000F0550  0C060A60  jal 0x00182980                    # second offer: the twin as the walking hero
+  000F0554  DFA40008  ld a0,8(sp)                       
+  000F0558  3C0F000F  lui t7,0xF                        
+  000F055C  ADE005D0  sw zero,1488(t7)                  
+  000F0560  8DEC05D4  lw t4,1492(t7)                    
+  000F0564  3C0D0035  lui t5,0x35                       
+  000F0568  ADACE948  sw t4,-5816(t5)                   # put the engine's player back
+  000F056C  DFA80018  ld t0,24(sp)                      
+  000F0570  DFAB0010  ld t3,16(sp)                      
+  000F0574  8D0A0004  lw t2,4(t0)                       
+  000F0578  014B5025  or t2,t2,t3                       
+  000F057C  AD0A0004  sw t2,4(t0)                       # keep the first offer's flags
+e_of_done:
+  000F0580  DFBF0000  ld ra,0(sp)                       
+  000F0584  03E00008  jr ra                             
+  000F0588  27BD0030  addiu sp,sp,48                    
+
+====================================================================================================
+SECTION ownhp: lane D own HP / MP: marked slot for the twin (routines unchanged)
+  cave 0x000F015C-0x000F02BB (88 words)
+D2:    # hook 0x001A1518 (find-slot-by-id loop). s0 = slot, s1 = wanted id, t7 = slot id
+  000F015C  15F10005  bne t7,s1,0x000F0174              
+  000F0160  8E0E0250  lw t6,592(s0)                     
+  000F0164  05C00003  bltz t6,0x000F0174                # a marked slot (the twin's) is never found by a search by id
+  000F0168  00000000  nop                               
+  000F016C  08068548  j 0x001A1520                      # found
+  000F0170  00000000  nop                               
+D2_next:
+  000F0174  08068531  j 0x001A14C4                      # loop head
+  000F0178  00000000  nop                               
+R:    # hook 0x001A1238 (load stats). s0 = slot, s1 = record, t5 = max HP
+  000F017C  922F0004  lbu t7,4(s1)                      # the record's current HP (the original instruction)
+  000F0180  8E0E0250  lw t6,592(s0)                     
+  000F0184  05C10003  bgez t6,0x000F0194                
+  000F0188  3C0E0033  lui t6,0x33                       
+  000F018C  91CED98E  lbu t6,-9842(t6)                  # marked slot: the twin's own saved HP (0 = none)
+  000F0190  01CE780B  movn t7,t6,t6                     
+R_done:
+  000F0194  03E00008  jr ra                             
+  000F0198  01AF702A  slt t6,t5,t7                      # redo the compare that sat in the delay slot
+RM:    # hook 0x001A1248 (load stats). s0 = slot, s1 = record
+  000F019C  922E0006  lbu t6,6(s1)                      # the record's current MP (the original instruction)
+  000F01A0  8E0F0250  lw t7,592(s0)                     
+  000F01A4  05E10005  bgez t7,0x000F01BC                
+  000F01A8  3C0F0033  lui t7,0x33                       
+  000F01AC  91EFD98F  lbu t7,-9841(t7)                  # marked slot: the twin's own saved MP + 1 (0 = none)
+  000F01B0  11E00002  beq t7,zero,0x000F01BC            
+  000F01B4  00000000  nop                               
+  000F01B8  25EEFFFF  addiu t6,t7,-1                    
+RM_done:
+  000F01BC  03E00008  jr ra                             
+  000F01C0  00000000  nop                               
+W1:    # hook 0x001A1854 (write back). a0 = slot, t6 = record, t7 = HP byte
+  000F01C4  8C8D0250  lw t5,592(a0)                     
+  000F01C8  05A00003  bltz t5,0x000F01D8                
+  000F01CC  00000000  nop                               
+  000F01D0  08068617  j 0x001A185C                      
+  000F01D4  A1CF0004  sb t7,4(t6)                       # normal slot: into its record (the original instruction)
+W1_second:
+  000F01D8  3C0D0033  lui t5,0x33                       
+  000F01DC  08068617  j 0x001A185C                      
+  000F01E0  A1AFD98E  sb t7,-9842(t5)                   # marked slot: into the twin's own save byte
+W2:    # hook 0x001A1870 (write back). a0 = slot, t5 = record, t7 = MP byte
+  000F01E4  8C8C0250  lw t4,592(a0)                     
+  000F01E8  05800003  bltz t4,0x000F01F8                
+  000F01EC  00000000  nop                               
+  000F01F0  0806861E  j 0x001A1878                      
+  000F01F4  A1AF0006  sb t7,6(t5)                       # normal slot (the original instruction)
+W2_second:
+  000F01F8  3C0C0033  lui t4,0x33                       
+  000F01FC  918BD98E  lbu t3,-9842(t4)                  # the HP just stored
+  000F0200  25EF0001  addiu t7,t7,1                     
+  000F0204  000B780A  movz t7,zero,t3                   # HP 0: store "none", the hero restarts from player 1's values
+  000F0208  0806861E  j 0x001A1878                      
+  000F020C  A18FD98F  sb t7,-9841(t4)                   
+D6:    # hook 0x001A1438 (end of LOAD_STATS). a0 = slot + 0x1CC, ra = caller
+  000F0210  27BDFFE0  addiu sp,sp,-32                   
+  000F0214  FFBF0000  sd ra,0(sp)                       
+  000F0218  FFB00008  sd s0,8(sp)                       
+  000F021C  FFB10010  sd s1,16(sp)                      
+  000F0220  2490FE34  addiu s0,a0,-460                  
+  000F0224  0C070C18  jal 0x001C3060                    # the original tail call
+  000F0228  00000000  nop                               
+  000F022C  3C0F000F  lui t7,0xF                        
+  000F0230  8DEE02F0  lw t6,752(t7)                     
+  000F0234  15C0001C  bne t6,zero,0x000F02A8            # already inside this routine
+  000F0238  8E0D0254  lw t5,596(s0)                     
+  000F023C  240E0001  addiu t6,zero,1                   
+  000F0240  11AE0003  beq t5,t6,0x000F0250              # status id 1 = Sora
+  000F0244  240E000E  addiu t6,zero,14                  
+  000F0248  15AE0017  bne t5,t6,0x000F02A8              # status id 14 = Roxas
+  000F024C  00000000  nop                               
+D6_hero:
+  000F0250  ADEE02F0  sw t6,752(t7)                     
+  000F0254  0000882D  daddu s1,zero,zero                
+D6_loop:
+  000F0258  3C0401C6  lui a0,0x1C6                      
+  000F025C  24842FB8  addiu a0,a0,12216                 
+  000F0260  0C0C7C5A  jal 0x0031F168                    # next slot in use
+  000F0264  0220282D  daddu a1,s1,zero                  
+  000F0268  1040000D  beq v0,zero,0x000F02A0            
+  000F026C  0040882D  daddu s1,v0,zero                  
+  000F0270  1230FFF9  beq s1,s0,0x000F0258              
+  000F0274  8E2E0254  lw t6,596(s1)                     
+  000F0278  8E0D0254  lw t5,596(s0)                     
+  000F027C  15CDFFF6  bne t6,t5,0x000F0258              # only the other hero's slot (same status id)
+  000F0280  00000000  nop                               
+  000F0284  0C068610  jal 0x001A1840                    # save its current HP / MP ...
+  000F0288  0220202D  daddu a0,s1,zero                  
+  000F028C  0220202D  daddu a0,s1,zero                  
+  000F0290  0C068478  jal 0x001A11E0                    # ... and reload its stats from the shared record
+  000F0294  0000282D  daddu a1,zero,zero                
+  000F0298  1000FFEF  beq zero,zero,0x000F0258          
+  000F029C  00000000  nop                               
+D6_end:
+  000F02A0  3C0F000F  lui t7,0xF                        
+  000F02A4  ADE002F0  sw zero,752(t7)                   
+D6_out:
+  000F02A8  DFBF0000  ld ra,0(sp)                       
+  000F02AC  DFB00008  ld s0,8(sp)                       
+  000F02B0  DFB10010  ld s1,16(sp)                      
+  000F02B4  03E00008  jr ra                             
+  000F02B8  27BD0020  addiu sp,sp,32                    
+
+====================================================================================================
+SECTION commands: lane G commands: second control object S2 for the hero on controller 2 (routines unchanged)
+  cave 0x000F0800-0x000F0AD3 (181 words)
+ensure:
+  000F0800  3C0F000F  lui t7,0xF                        # t7 = S2
+  000F0804  35EF1000  ori t7,t7,0x1000                  
+  000F0808  8DEE0000  lw t6,0(t7)                       
+  000F080C  15C0001A  bne t6,zero,0x000F0878            # already built
+  000F0810  00000000  nop                               
+  000F0814  27BDFFE0  addiu sp,sp,-32                   
+  000F0818  FFBF0000  sd ra,0(sp)                       
+  000F081C  FFB10008  sd s1,8(sp)                       
+  000F0820  01E0882D  daddu s1,t7,zero                  
+  000F0824  0C06F3E0  jal 0x001BCF80                    # base constructor(S2)
+  000F0828  0220202D  daddu a0,s1,zero                  
+  000F082C  3C0F0035  lui t7,0x35                       
+  000F0830  25EF1260  addiu t7,t7,4704                  
+  000F0834  AE2F0000  sw t7,0(s1)                       # S2 class table = 0x00351260
+  000F0838  0C06404A  jal 0x00190128                    # list init(S2+0xA68)
+  000F083C  26240A68  addiu a0,s1,2664                  
+  000F0840  0C06404A  jal 0x00190128                    # list init(S2+0xA7C)
+  000F0844  26240A7C  addiu a0,s1,2684                  
+  000F0848  0C06404A  jal 0x00190128                    # list init(S2+0xA90)
+  000F084C  26240A90  addiu a0,s1,2704                  
+  000F0850  0C067248  jal 0x0019C920                    # lock-on manager constructor(S2+0xAC0)
+  000F0854  26240AC0  addiu a0,s1,2752                  
+  000F0858  AE200AF0  sw zero,2800(s1)                  
+  000F085C  0C06F7A2  jal 0x001BDE88                    # start-up reset(S2)
+  000F0860  0220202D  daddu a0,s1,zero                  
+  000F0864  0C075A3E  jal 0x001D68F8                    # room reset(S2)
+  000F0868  0220202D  daddu a0,s1,zero                  
+  000F086C  DFBF0000  ld ra,0(sp)                       
+  000F0870  DFB10008  ld s1,8(sp)                       
+  000F0874  27BD0020  addiu sp,sp,32                    
+ensure_done:
+  000F0878  03E00008  jr ra                             
+  000F087C  00000000  nop                               
+fixcur:
+  000F0880  3C0E01C6  lui t6,0x1C6                      
+  000F0884  25CEF530  addiu t6,t6,-2768                 # t6 = S
+  000F0888  8DCD0AF4  lw t5,2804(t6)                    # S->attached player
+  000F088C  3C0F0035  lui t7,0x35                       
+  000F0890  11A00003  beq t5,zero,0x000F08A0            
+  000F0894  00000000  nop                               
+  000F0898  03E00008  jr ra                             
+  000F089C  ADEE27E0  sw t6,10208(t7)                   
+fixcur_zero:
+  000F08A0  03E00008  jr ra                             
+  000F08A4  ADE027E0  sw zero,10208(t7)                 
+attach:
+  000F08A8  8E0E0B38  lw t6,2872(s0)                    # this object's controller
+  000F08AC  3C0F0034  lui t7,0x34                       
+  000F08B0  35EFD720  ori t7,t7,0xD720                  
+  000F08B4  15CF0011  bne t6,t7,0x000F08FC              # controller 1 -> normal path
+  000F08B8  00000000  nop                               
+  000F08BC  0C03C200  jal 0x000F0800                    
+  000F08C0  00000000  nop                               
+  000F08C4  3C04000F  lui a0,0xF                        
+  000F08C8  34841000  ori a0,a0,0x1000                  
+  000F08CC  AE040B3C  sw a0,2876(s0)                    # object->control = S2
+  000F08D0  AE040B44  sw a0,2884(s0)                    
+  000F08D4  248E0AC0  addiu t6,a0,2752                  
+  000F08D8  AE0E0B40  sw t6,2880(s0)                    # object->lock-on manager = S2+0xAC0
+  000F08DC  0C075A4E  jal 0x001D6938                    # attach(S2, object)
+  000F08E0  0200282D  daddu a1,s0,zero                  
+  000F08E4  0C03C220  jal 0x000F0880                    # the game's current-control pointer stays on S
+  000F08E8  00000000  nop                               
+  000F08EC  DFBF0008  ld ra,8(sp)                       
+  000F08F0  DFB00000  ld s0,0(sp)                       
+  000F08F4  03E00008  jr ra                             
+  000F08F8  27BD0010  addiu sp,sp,16                    
+attach_primary:
+  000F08FC  3C0401C6  lui a0,0x1C6                      
+  000F0900  2484F530  addiu a0,a0,-2768                 
+  000F0904  0200282D  daddu a1,s0,zero                  
+  000F0908  AE040B3C  sw a0,2876(s0)                    
+  000F090C  DFBF0008  ld ra,8(sp)                       
+  000F0910  DFB00000  ld s0,0(sp)                       
+  000F0914  08075A4E  j 0x001D6938                      # attach(S, object) as the game did
+  000F0918  27BD0010  addiu sp,sp,16                    
+detach_tail:
+  000F091C  3C0E01C6  lui t6,0x1C6                      
+  000F0920  25CEF530  addiu t6,t6,-2768                 
+  000F0924  8DCD0AF4  lw t5,2804(t6)                    
+  000F0928  3C0F0035  lui t7,0x35                       
+  000F092C  11A00005  beq t5,zero,0x000F0944            
+  000F0930  00000000  nop                               
+  000F0934  ADEE27E0  sw t6,10208(t7)                   
+  000F0938  DFB00000  ld s0,0(sp)                       
+  000F093C  03E00008  jr ra                             
+  000F0940  27BD0010  addiu sp,sp,16                    
+dt_zero:
+  000F0944  ADE027E0  sw zero,10208(t7)                 
+  000F0948  DFB00000  ld s0,0(sp)                       
+  000F094C  03E00008  jr ra                             
+  000F0950  27BD0010  addiu sp,sp,16                    
+reset:
+  000F0954  27BDFFF0  addiu sp,sp,-16                   
+  000F0958  FFBF0000  sd ra,0(sp)                       
+  000F095C  0C075A3E  jal 0x001D68F8                    # room reset(S), a0 = S from the caller
+  000F0960  00000000  nop                               
+  000F0964  3C04000F  lui a0,0xF                        
+  000F0968  34841000  ori a0,a0,0x1000                  
+  000F096C  8C8E0000  lw t6,0(a0)                       
+  000F0970  11C00003  beq t6,zero,0x000F0980            # S2 never built
+  000F0974  00000000  nop                               
+  000F0978  0C075A3E  jal 0x001D68F8                    # room reset(S2)
+  000F097C  00000000  nop                               
+reset_out:
+  000F0980  DFBF0000  ld ra,0(sp)                       
+  000F0984  03E00008  jr ra                             
+  000F0988  27BD0010  addiu sp,sp,16                    
+ginit:
+  000F098C  27BDFFF0  addiu sp,sp,-16                   
+  000F0990  FFBF0000  sd ra,0(sp)                       
+  000F0994  0C075A38  jal 0x001D68E0                    # start-up reset(S), a0 = S from the caller
+  000F0998  00000000  nop                               
+  000F099C  3C04000F  lui a0,0xF                        
+  000F09A0  34841000  ori a0,a0,0x1000                  
+  000F09A4  8C8E0000  lw t6,0(a0)                       
+  000F09A8  11C00003  beq t6,zero,0x000F09B8            # S2 never built
+  000F09AC  00000000  nop                               
+  000F09B0  0C075A38  jal 0x001D68E0                    # start-up reset(S2)
+  000F09B4  00000000  nop                               
+ginit_out:
+  000F09B8  DFBF0000  ld ra,0(sp)                       
+  000F09BC  03E00008  jr ra                             
+  000F09C0  27BD0010  addiu sp,sp,16                    
+disable:
+  000F09C4  27BDFFF0  addiu sp,sp,-16                   
+  000F09C8  FFBF0000  sd ra,0(sp)                       
+  000F09CC  3C0F0035  lui t7,0x35                       
+  000F09D0  8DE427E0  lw a0,10208(t7)                   
+  000F09D4  10800003  beq a0,zero,0x000F09E4            
+  000F09D8  00000000  nop                               
+  000F09DC  0C075AA0  jal 0x001D6A80                    # disable(current control object)
+  000F09E0  00000000  nop                               
+disable_1:
+  000F09E4  3C04000F  lui a0,0xF                        
+  000F09E8  34841000  ori a0,a0,0x1000                  
+  000F09EC  8C8E0AF4  lw t6,2804(a0)                    # S2 has a player? (0 while S2 is unused)
+  000F09F0  11C00003  beq t6,zero,0x000F0A00            
+  000F09F4  00000000  nop                               
+  000F09F8  0C075AA0  jal 0x001D6A80                    # disable(S2)
+  000F09FC  00000000  nop                               
+disable_2:
+  000F0A00  DFBF0000  ld ra,0(sp)                       
+  000F0A04  03E00008  jr ra                             
+  000F0A08  27BD0010  addiu sp,sp,16                    
+enable:
+  000F0A0C  27BDFFF0  addiu sp,sp,-16                   
+  000F0A10  FFBF0000  sd ra,0(sp)                       
+  000F0A14  3C0F0035  lui t7,0x35                       
+  000F0A18  8DE427E0  lw a0,10208(t7)                   
+  000F0A1C  10800003  beq a0,zero,0x000F0A2C            
+  000F0A20  00000000  nop                               
+  000F0A24  0C075AAC  jal 0x001D6AB0                    # enable(current control object)
+  000F0A28  00000000  nop                               
+enable_1:
+  000F0A2C  3C04000F  lui a0,0xF                        
+  000F0A30  34841000  ori a0,a0,0x1000                  
+  000F0A34  8C8E0AF4  lw t6,2804(a0)                    # S2 has a player? (0 while S2 is unused)
+  000F0A38  11C00003  beq t6,zero,0x000F0A48            
+  000F0A3C  00000000  nop                               
+  000F0A40  0C075AAC  jal 0x001D6AB0                    # enable(S2)
+  000F0A44  00000000  nop                               
+enable_2:
+  000F0A48  DFBF0000  ld ra,0(sp)                       
+  000F0A4C  03E00008  jr ra                             
+  000F0A50  27BD0010  addiu sp,sp,16                    
+setdisp:
+  000F0A54  3C0F000F  lui t7,0xF                        
+  000F0A58  35EF1000  ori t7,t7,0x1000                  
+  000F0A5C  14AF0003  bne a1,t7,0x000F0A6C              
+  000F0A60  00000000  nop                               
+  000F0A64  3C0501C6  lui a1,0x1C6                      
+  000F0A68  24A5F530  addiu a1,a1,-2768                 # S2 asked: show S instead
+setdisp_store:
+  000F0A6C  03E00008  jr ra                             
+  000F0A70  AC85029C  sw a1,668(a0)                     
+hudshow:
+  000F0A74  3C0F000F  lui t7,0xF                        
+  000F0A78  35EF1000  ori t7,t7,0x1000                  
+  000F0A7C  120F0003  beq s0,t7,0x000F0A8C              # S2 does not touch the on-screen menu
+  000F0A80  00000000  nop                               
+  000F0A84  0804ECBE  j 0x0013B2F8                      # S: the game's routine as before
+  000F0A88  00000000  nop                               
+hudshow_skip:
+  000F0A8C  03E00008  jr ra                             
+  000F0A90  00000000  nop                               
+hudhide:
+  000F0A94  3C0F000F  lui t7,0xF                        
+  000F0A98  35EF1000  ori t7,t7,0x1000                  
+  000F0A9C  120F0003  beq s0,t7,0x000F0AAC              # S2 does not touch the on-screen menu
+  000F0AA0  00000000  nop                               
+  000F0AA4  0804ECC8  j 0x0013B320                      # S: the game's routine as before
+  000F0AA8  00000000  nop                               
+hudhide_skip:
+  000F0AAC  03E00008  jr ra                             
+  000F0AB0  00000000  nop                               
+hudfade:
+  000F0AB4  3C0F000F  lui t7,0xF                        
+  000F0AB8  35EF1000  ori t7,t7,0x1000                  
+  000F0ABC  122F0003  beq s1,t7,0x000F0ACC              # S2 does not touch the on-screen menu
+  000F0AC0  00000000  nop                               
+  000F0AC4  0804ECAE  j 0x0013B2B8                      # S: the game's routine as before
+  000F0AC8  00000000  nop                               
+hudfade_skip:
+  000F0ACC  03E00008  jr ra                             
+  000F0AD0  00000000  nop                               
+
+====================================================================================================
+SECTION glue: merge glue: the fresh marked slot goes to the TWIN by lane E's roles, not by build order; a twin built first is moved onto S2; S2 is released when a twin goes away
+  cave 0x000F0C00-0x000F0DA7 (106 words)
+m_getpad:    # hook 0x0017A000 (was: jal 0x00167F18; lanes A and E hooked the same word)
+  000F0C00  3C0F000F  lui t7,0xF                        
+  000F0C04  240E0001  addiu t6,zero,1                   
+  000F0C08  0803C0C4  j 0x000F0310                      # lane E's rule decides the role and the controller
+  000F0C0C  ADEE0DF0  sw t6,3568(t7)                    # the player factory is running
+m_wrap:    # hook 0x0016F0F4 (was: jal 0x00179FD0; lane E hooked the same word)
+  000F0C10  27BDFFE0  addiu sp,sp,-32                   
+  000F0C14  FFBF0000  sd ra,0(sp)                       
+  000F0C18  0C03C0CF  jal 0x000F033C                    # lane E: call the factory, then apply the identity rule
+  000F0C1C  00000000  nop                               
+  000F0C20  3C0F000F  lui t7,0xF                        
+  000F0C24  ADE00DF0  sw zero,3568(t7)                  # the factory is done
+  000F0C28  3C0D000F  lui t5,0xF                        
+  000F0C2C  8DAE05C4  lw t6,1476(t5)                    
+  000F0C30  11C0000B  beq t6,zero,0x000F0C60            # a twin was built after the hero: lane E already attached the hero again
+  000F0C34  8DAC05C8  lw t4,1480(t5)                    
+  000F0C38  11800009  beq t4,zero,0x000F0C60            # the hero is the first player object of the room
+  000F0C3C  00000000  nop                               
+  000F0C40  11820007  beq t4,v0,0x000F0C60              
+  000F0C44  00000000  nop                               
+  000F0C48  FFA20008  sd v0,8(sp)                       # v0 = player 1's hero, t4 = the earlier object, now the twin on controller 2
+  000F0C4C  0C05E06A  jal 0x001781A8                    # attach the twin again: lane G's attach gives it S2
+  000F0C50  0180202D  daddu a0,t4,zero                  
+  000F0C54  0C05E06A  jal 0x001781A8                    # then the hero again: camera target, trigger owner, HUD owner and S are its
+  000F0C58  DFA40008  ld a0,8(sp)                       
+  000F0C5C  DFA20008  ld v0,8(sp)                       
+m_w_out:
+  000F0C60  DFBF0000  ld ra,0(sp)                       
+  000F0C64  03E00008  jr ra                             
+  000F0C68  27BD0020  addiu sp,sp,32                    
+m_slot:    # hook 0x00177E74 (was: jal 0x001A15D0). a0 = status id, a1 = form argument
+  000F0C6C  3C0F000F  lui t7,0xF                        
+  000F0C70  8DEE0DF0  lw t6,3568(t7)                    
+  000F0C74  11C0001C  beq t6,zero,0x000F0CE8            # not built by the factory: the game's behaviour
+  000F0C78  3C0D000F  lui t5,0xF                        
+  000F0C7C  8DAE05C4  lw t6,1476(t5)                    
+  000F0C80  11C0001B  beq t6,zero,0x000F0CF0            # role 0: a twin (built after the hero)
+  000F0C84  8DAC05C8  lw t4,1480(t5)                    # the engine's player before this build
+  000F0C88  11800017  beq t4,zero,0x000F0CE8            # player 1's hero and nobody before it: the game's behaviour
+  000F0C8C  00000000  nop                               
+  000F0C90  8D8B048C  lw t3,1164(t4)                    # the earlier object's unit slot
+  000F0C94  11600014  beq t3,zero,0x000F0CE8            
+  000F0C98  00000000  nop                               
+  000F0C9C  8D6A0254  lw t2,596(t3)                     
+  000F0CA0  15440011  bne t2,a0,0x000F0CE8              # not the same kind of character: leave it alone
+  000F0CA4  00000000  nop                               
+  000F0CA8  8D6A0250  lw t2,592(t3)                     
+  000F0CAC  0540000E  bltz t2,0x000F0CE8                # already marked
+  000F0CB0  3C098000  lui t1,0x8000                     
+  000F0CB4  01495025  or t2,t2,t1                       
+  000F0CB8  AD6A0250  sw t2,592(t3)                     # the earlier object is the twin: its slot becomes the marked one
+  000F0CBC  27BDFFE0  addiu sp,sp,-32                   
+  000F0CC0  FFBF0000  sd ra,0(sp)                       
+  000F0CC4  FFA40008  sd a0,8(sp)                       
+  000F0CC8  FFA50010  sd a1,16(sp)                      
+  000F0CCC  0160202D  daddu a0,t3,zero                  
+  000F0CD0  0C068478  jal 0x001A11E0                    # load it once more, now as a marked slot (own HP / MP bytes)
+  000F0CD4  0000282D  daddu a1,zero,zero                
+  000F0CD8  DFA40008  ld a0,8(sp)                       
+  000F0CDC  DFA50010  ld a1,16(sp)                      
+  000F0CE0  DFBF0000  ld ra,0(sp)                       
+  000F0CE4  27BD0020  addiu sp,sp,32                    
+m_plain:
+  000F0CE8  08068574  j 0x001A15D0                      # the game's own request (a new unmarked slot if the only other one is marked)
+  000F0CEC  00000000  nop                               
+m_twin:
+  000F0CF0  27BDFFF0  addiu sp,sp,-16                   
+  000F0CF4  FFBF0000  sd ra,0(sp)                       
+  000F0CF8  0C0685CA  jal 0x001A1728                    # the twin: a slot of its own
+  000F0CFC  00000000  nop                               
+  000F0D00  10400009  beq v0,zero,0x000F0D28            
+  000F0D04  3C0E8000  lui t6,0x8000                     
+  000F0D08  8C4F0250  lw t7,592(v0)                     
+  000F0D0C  01EE7825  or t7,t7,t6                       
+  000F0D10  AC4F0250  sw t7,592(v0)                     # mark it
+  000F0D14  FFA20008  sd v0,8(sp)                       
+  000F0D18  0040202D  daddu a0,v0,zero                  
+  000F0D1C  0C068478  jal 0x001A11E0                    # load once more, now as a marked slot
+  000F0D20  0000282D  daddu a1,zero,zero                
+  000F0D24  DFA20008  ld v0,8(sp)                       
+m_out:
+  000F0D28  DFBF0000  ld ra,0(sp)                       
+  000F0D2C  03E00008  jr ra                             
+  000F0D30  27BD0010  addiu sp,sp,16                    
+m_dtor:    # hook 0x00178294 (was: jal 0x001781E8; lane E hooked the same word). a0 = dying object
+  000F0D34  3C0D000F  lui t5,0xF                        
+  000F0D38  8DAC05CC  lw t4,1484(t5)                    
+  000F0D3C  15840018  bne t4,a0,0x000F0DA0              # not the twin: lane E's routine decides
+  000F0D40  3C0F0035  lui t7,0x35                       
+  000F0D44  8DEEE948  lw t6,-5816(t7)                   
+  000F0D48  11C00015  beq t6,zero,0x000F0DA0            # no engine player left: lane E does the game's full detach (releases S2 too)
+  000F0D4C  00000000  nop                               
+  000F0D50  11C40013  beq t6,a0,0x000F0DA0              
+  000F0D54  00000000  nop                               
+  000F0D58  8C8B0B3C  lw t3,2876(a0)                    # the twin's control object
+  000F0D5C  11600010  beq t3,zero,0x000F0DA0            
+  000F0D60  3C0A01C6  lui t2,0x1C6                      
+  000F0D64  254AF530  addiu t2,t2,-2768                 # S
+  000F0D68  116A000D  beq t3,t2,0x000F0DA0              # the twin still uses S: nothing of its own to release
+  000F0D6C  00000000  nop                               
+  000F0D70  27BDFFE0  addiu sp,sp,-32                   
+  000F0D74  FFBF0000  sd ra,0(sp)                       
+  000F0D78  FFA40008  sd a0,8(sp)                       
+  000F0D7C  FFAE0010  sd t6,16(sp)                      
+  000F0D80  0C075A74  jal 0x001D69D0                    # release the twin's own control object, as the game does for S
+  000F0D84  0160202D  daddu a0,t3,zero                  
+  000F0D88  DFA50010  ld a1,16(sp)                      
+  000F0D8C  0C04F770  jal 0x0013DDC0                    # party slot 0 (HUD owner) back to player 1's hero
+  000F0D90  0000202D  daddu a0,zero,zero                
+  000F0D94  DFA40008  ld a0,8(sp)                       
+  000F0D98  DFBF0000  ld ra,0(sp)                       
+  000F0D9C  27BD0020  addiu sp,sp,32                    
+m_dt_go:
+  000F0DA0  0803C0F2  j 0x000F03C8                      # lane E's rule (keeps the hero registered, clears the twin's pointers)
+  000F0DA4  00000000  nop                               
+
+====================================================================================================
+SECTION views: lane V1 two views: a camera and a view picture for each hero; one view when it makes no sense
+  cave 0x000F6000-0x000F644B (275 words)
+v_camtask:    # replaces the body of the camera task 0x00140CC8 (priority 26000, every step)
+  000F6000  27BDFFE0  addiu sp,sp,-32                   
+  000F6004  FFBF0000  sd ra,0(sp)                       
+  000F6008  FFB00008  sd s0,8(sp)                       
+  000F600C  3C040035  lui a0,0x35                       
+  000F6010  24848710  addiu a0,a0,-30960                
+  000F6014  0C0502DA  jal 0x00140B68                    # camera 1 exactly as the game does it (writes view 0)
+  000F6018  0000282D  daddu a1,zero,zero                
+  000F601C  3C10000F  lui s0,0xF                        
+  000F6020  8E086F04  lw t0,28420(s0)                   
+  000F6024  11000009  beq t0,zero,0x000F604C            
+  000F6028  8E0905CC  lw t1,1484(s0)                    
+  000F602C  AE096E44  sw t1,28228(s0)                   # two views are on: camera 2 follows the twin (target 0 = no update)
+  000F6030  0C041A7E  jal 0x001069F8                    # view index 1 while camera 2 updates (v_pad reads it as the controller index)
+  000F6034  24040001  addiu a0,zero,1                   
+  000F6038  26046E00  addiu a0,s0,28160                 
+  000F603C  0C0502DA  jal 0x00140B68                    # camera 2 through the game's own update (writes view 1)
+  000F6040  0000282D  daddu a1,zero,zero                
+  000F6044  0C041A7E  jal 0x001069F8                    
+  000F6048  0000202D  daddu a0,zero,zero                
+v_c_want:    # do we want two views in the next step?
+  000F604C  8E0905CC  lw t1,1484(s0)                    
+  000F6050  11200009  beq t1,zero,0x000F6078            # no twin in this room
+  000F6054  3C0A0034  lui t2,0x34                       
+  000F6058  8D4BCC38  lw t3,-13256(t2)                  
+  000F605C  15600006  bne t3,zero,0x000F6078            # an event holds the camera: one full view
+  000F6060  00000000  nop                               
+  000F6064  8E086F04  lw t0,28420(s0)                   
+  000F6068  1500000F  bne t0,zero,0x000F60A8            # already on
+  000F606C  240C0001  addiu t4,zero,1                   
+  000F6070  10000004  beq zero,zero,0x000F6084          # ask for the switch to two views
+  000F6074  00000000  nop                               
+v_c_no:
+  000F6078  8E086F04  lw t0,28420(s0)                   
+  000F607C  1100000A  beq t0,zero,0x000F60A8            # already off
+  000F6080  240C0002  addiu t4,zero,2                   # ask for the switch back to one view
+v_c_req:
+  000F6084  8E0D6F08  lw t5,28424(s0)                   
+  000F6088  15A00007  bne t5,zero,0x000F60A8            # a switch is already waiting
+  000F608C  3C06000F  lui a2,0xF                        
+  000F6090  AE0C6F08  sw t4,28424(s0)                   
+  000F6094  24C660B8  addiu a2,a2,24760                 
+  000F6098  3C050001  lui a1,0x1                        
+  000F609C  34A586A1  ori a1,a1,0x86A1                  # priority 100001: after every draw task, just after the game's own fade starter
+  000F60A0  0C040B06  jal 0x00102C18                    # one-shot task: the switch happens at the end of this step, like the game's own
+  000F60A4  24040001  addiu a0,zero,1                   
+v_c_done:
+  000F60A8  DFBF0000  ld ra,0(sp)                       
+  000F60AC  DFB00008  ld s0,8(sp)                       
+  000F60B0  03E00008  jr ra                             
+  000F60B4  27BD0020  addiu sp,sp,32                    
+v_switch:    # one-shot task at the end of a step. a0 = this task
+  000F60B8  27BDFFE0  addiu sp,sp,-32                   
+  000F60BC  FFBF0000  sd ra,0(sp)                       
+  000F60C0  FFB00008  sd s0,8(sp)                       
+  000F60C4  FFA40010  sd a0,16(sp)                      
+  000F60C8  3C10000F  lui s0,0xF                        
+  000F60CC  8E0C6F08  lw t4,28424(s0)                   
+  000F60D0  AE006F08  sw zero,28424(s0)                 
+  000F60D4  240D0001  addiu t5,zero,1                   
+  000F60D8  158D001D  bne t4,t5,0x000F6150              
+  000F60DC  8E086F04  lw t0,28420(s0)                   
+  000F60E0  15000020  bne t0,zero,0x000F6164            # already ours
+  000F60E4  3C090034  lui t1,0x34                       
+  000F60E8  912ACC44  lbu t2,-13244(t1)                 
+  000F60EC  1540001D  bne t2,zero,0x000F6164            # the game's own two-view cross-fade is running: hands off
+  000F60F0  8E0B05CC  lw t3,1484(s0)                    
+  000F60F4  1160001B  beq t3,zero,0x000F6164            # the twin went away meanwhile
+  000F60F8  00000000  nop                               
+  000F60FC  0C05867A  jal 0x001619E8                    # remove the one-view draw tasks
+  000F6100  00000000  nop                               
+  000F6104  0C05882A  jal 0x001620A8                    # install the game's two-view draw tasks
+  000F6108  00000000  nop                               
+  000F610C  24080001  addiu t0,zero,1                   
+  000F6110  AE086F04  sw t0,28420(s0)                   
+  000F6114  3C0B0035  lui t3,0x35                       
+  000F6118  256B8710  addiu t3,t3,-30960                
+  000F611C  260C6E00  addiu t4,s0,28160                 
+  000F6120  256D00F0  addiu t5,t3,240                   
+v_s_copy:    # camera 2 starts as a copy of camera 1 ...
+  000F6124  8D6E0000  lw t6,0(t3)                       
+  000F6128  256B0004  addiu t3,t3,4                     
+  000F612C  AD8E0000  sw t6,0(t4)                       
+  000F6130  156DFFFC  bne t3,t5,0x000F6124              
+  000F6134  258C0004  addiu t4,t4,4                     
+  000F6138  8E0805CC  lw t0,1484(s0)                    
+  000F613C  AE086E44  sw t0,28228(s0)                   # ... with the twin as its target ...
+  000F6140  0C04FD56  jal 0x0013F558                    # ... and is reset behind the twin by the game's own routine
+  000F6144  26046E00  addiu a0,s0,28160                 
+  000F6148  10000006  beq zero,zero,0x000F6164          
+  000F614C  00000000  nop                               
+v_s_off:
+  000F6150  8E086F04  lw t0,28420(s0)                   
+  000F6154  11000003  beq t0,zero,0x000F6164            
+  000F6158  00000000  nop                               
+  000F615C  0C0588EC  jal 0x001623B0                    # hooked (v_dualoff): removes our two-view tasks and puts the one-view tasks back
+  000F6160  00000000  nop                               
+v_s_end:
+  000F6164  DFA40010  ld a0,16(sp)                      
+  000F6168  DFBF0000  ld ra,0(sp)                       
+  000F616C  DFB00008  ld s0,8(sp)                       
+  000F6170  0804092A  j 0x001024A8                      # the task removes itself
+  000F6174  27BD0020  addiu sp,sp,32                    
+v_dualoff:    # hook 0x001623B0 (entry of "remove the two-view render tasks")
+  000F6178  3C0F000F  lui t7,0xF                        
+  000F617C  8DEE6F04  lw t6,28420(t7)                   
+  000F6180  11C00014  beq t6,zero,0x000F61D4            # not ours: the game's own behaviour
+  000F6184  3C0D004F  lui t5,0x4F                       
+  000F6188  ADE06F04  sw zero,28420(t7)                 
+  000F618C  A5A03E78  sh zero,15992(t5)                 # view picture B back to x = 0 for the game's own cross-fades
+  000F6190  3C0C0034  lui t4,0x34                       
+  000F6194  918BCC44  lbu t3,-13244(t4)                 
+  000F6198  1160000E  beq t3,zero,0x000F61D4            # the caller has already put the one-view tasks back (event end)
+  000F619C  00000000  nop                               
+  000F61A0  27BDFFF0  addiu sp,sp,-16                   # ours is taken down with no one-view tasks installed: remove, then install them
+  000F61A4  FFBF0000  sd ra,0(sp)                       
+  000F61A8  0C040B20  jal 0x00102C80                    
+  000F61AC  00000000  nop                               
+  000F61B0  8C440004  lw a0,4(v0)                       
+  000F61B4  24050005  addiu a1,zero,5                   
+  000F61B8  0C0409A2  jal 0x00102688                    
+  000F61BC  24060005  addiu a2,zero,5                   
+  000F61C0  0C05863C  jal 0x001618F0                    
+  000F61C4  00000000  nop                               
+  000F61C8  DFBF0000  ld ra,0(sp)                       
+  000F61CC  03E00008  jr ra                             
+  000F61D0  27BD0010  addiu sp,sp,16                    
+v_d_orig:
+  000F61D4  27BDFFF0  addiu sp,sp,-16                   # the two instructions that sat at 0x001623B0
+  000F61D8  080588EE  j 0x001623B8                      
+  000F61DC  FFBF0000  sd ra,0(sp)                       
+v_fade0:    # hook 0x00161E38 (was: jal 0x001619E8): the game starts its own two-view cross-fade
+  000F61E0  3C0F000F  lui t7,0xF                        
+  000F61E4  8DEE6F04  lw t6,28420(t7)                   
+  000F61E8  11C00007  beq t6,zero,0x000F6208            
+  000F61EC  00000000  nop                               
+  000F61F0  27BDFFF0  addiu sp,sp,-16                   
+  000F61F4  FFBF0000  sd ra,0(sp)                       
+  000F61F8  0C0588EC  jal 0x001623B0                    # ours is on: take it down first (this puts the one-view tasks back)
+  000F61FC  00000000  nop                               
+  000F6200  DFBF0000  ld ra,0(sp)                       
+  000F6204  27BD0010  addiu sp,sp,16                    
+v_f_plain:
+  000F6208  0805867A  j 0x001619E8                      # then what the game wanted: remove the one-view tasks (it installs two views next)
+  000F620C  00000000  nop                               
+v_pad:    # hook 0x001403D4 (follow camera asks for controller 0)
+  000F6210  3C08000F  lui t0,0xF                        
+  000F6214  8D096F04  lw t1,28420(t0)                   
+  000F6218  11200004  beq t1,zero,0x000F622C            
+  000F621C  0000202D  daddu a0,zero,zero                # one view: controller 1, as the game
+  000F6220  3C080034  lui t0,0x34                       
+  000F6224  8D04CC40  lw a0,-13248(t0)                  # two views: camera 1 (view 0) = controller 1, camera 2 (view 1) = controller 2
+  000F6228  00000000  nop                               
+v_p_go:
+  000F622C  08059FC6  j 0x00167F18                      
+  000F6230  00000000  nop                               
+v_view:    # hook 0x0017837C inside "stick -> world direction" (was: jal GET_VIEW, a0 = 1)
+  000F6234  3C08000F  lui t0,0xF                        # s1 = the stick being turned
+  000F6238  8D096F04  lw t1,28420(t0)                   
+  000F623C  1120000A  beq t1,zero,0x000F6268            # one view: everybody moves relative to camera 1
+  000F6240  3C0A000F  lui t2,0xF                        
+  000F6244  254A1A30  addiu t2,t2,6704                  
+  000F6248  122A0004  beq s1,t2,0x000F625C              # the stick copy of the twin's control object S2
+  000F624C  3C0A0035  lui t2,0x35                       
+  000F6250  254AD750  addiu t2,t2,-10416                
+  000F6254  162A0004  bne s1,t2,0x000F6268              # the stick of controller 2 itself
+  000F6258  00000000  nop                               
+v_v_one:
+  000F625C  3C02003A  lui v0,0x3A                       
+  000F6260  03E00008  jr ra                             
+  000F6264  34428000  ori v0,v0,0x8000                  # view 1's block (camera 2): 0x003A7F70 + 0x90
+v_v_cur:
+  000F6268  08041A98  j 0x00106A60                      
+  000F626C  00000000  nop                               
+v_compose:    # hook 0x00161C7C (was: j 0x00161AA8): the two-view "put on screen" task
+  000F6270  3C0F000F  lui t7,0xF                        
+  000F6274  8DEE6F04  lw t6,28420(t7)                   
+  000F6278  15C00003  bne t6,zero,0x000F6288            
+  000F627C  00000000  nop                               
+  000F6280  080586AA  j 0x00161AA8                      # the game's own cross-fade: blended, full size, as before
+  000F6284  00000000  nop                               
+v_k_ours:
+  000F6288  27BDFFE0  addiu sp,sp,-32                   
+  000F628C  FFBF0000  sd ra,0(sp)                       
+  000F6290  FFB00008  sd s0,8(sp)                       
+  000F6294  FFB10010  sd s1,16(sp)                      
+  000F6298  3C10004F  lui s0,0x4F                       
+  000F629C  26103B60  addiu s0,s0,15200                 
+  000F62A0  3C11004F  lui s1,0x4F                       
+  000F62A4  26313E70  addiu s1,s1,15984                 
+  000F62A8  3C0F004F  lui t7,0x4F                       # one-time set-up of the two sprites, as in the game's routine
+  000F62AC  81EE3B50  lb t6,15184(t7)                   
+  000F62B0  15C00009  bne t6,zero,0x000F62D8            
+  000F62B4  00000000  nop                               
+  000F62B8  0C053014  jal 0x0014C050                    
+  000F62BC  0200202D  daddu a0,s0,zero                  
+  000F62C0  3C0F004F  lui t7,0x4F                       
+  000F62C4  240E0001  addiu t6,zero,1                   
+  000F62C8  A1EE3B50  sb t6,15184(t7)                   
+  000F62CC  3C040016  lui a0,0x16                       
+  000F62D0  0C0BF462  jal 0x002FD188                    
+  000F62D4  248423D8  addiu a0,a0,9176                  
+v_k_i1:
+  000F62D8  3C0F004F  lui t7,0x4F                       
+  000F62DC  81EE3B58  lb t6,15192(t7)                   
+  000F62E0  15C00009  bne t6,zero,0x000F6308            
+  000F62E4  00000000  nop                               
+  000F62E8  0C053014  jal 0x0014C050                    
+  000F62EC  0220202D  daddu a0,s1,zero                  
+  000F62F0  3C0F004F  lui t7,0x4F                       
+  000F62F4  240E0001  addiu t6,zero,1                   
+  000F62F8  A1EE3B58  sb t6,15192(t7)                   
+  000F62FC  3C040016  lui a0,0x16                       
+  000F6300  0C0BF462  jal 0x002FD188                    
+  000F6304  248423F0  addiu a0,a0,9200                  
+v_k_i2:
+  000F6308  0200202D  daddu a0,s0,zero                  # picture A = view 1 = PLAYER 2
+  000F630C  0C052D78  jal 0x0014B5E0                    
+  000F6310  24050156  addiu a1,zero,342                 
+  000F6314  0200202D  daddu a0,s0,zero                  
+  000F6318  0C052D8C  jal 0x0014B630                    
+  000F631C  0000282D  daddu a1,zero,zero                
+  000F6320  240E0000  addiu t6,zero,0                   
+  000F6324  A60E0008  sh t6,8(s0)                       
+  000F6328  240E0000  addiu t6,zero,0                   
+  000F632C  A60E000A  sh t6,10(s0)                      
+  000F6330  0200202D  daddu a0,s0,zero                  
+  000F6334  24050100  addiu a1,zero,256                 
+  000F6338  0C052C82  jal 0x0014B208                    
+  000F633C  240601A0  addiu a2,zero,416                 
+  000F6340  3C061A08  lui a2,0x1A08                     
+  000F6344  3C050008  lui a1,0x8                        
+  000F6348  0200202D  daddu a0,s0,zero                  
+  000F634C  34C62008  ori a2,a2,0x2008                  
+  000F6350  0C052D7A  jal 0x0014B5E8                    # the whole 512 x 416 view picture
+  000F6354  34A50008  ori a1,a1,0x8                     
+  000F6358  3C0F0037  lui t7,0x37                       
+  000F635C  0200202D  daddu a0,s0,zero                  
+  000F6360  0C052D8A  jal 0x0014B628                    
+  000F6364  DDE5B478  ld a1,-19336(t7)                  # 0x0036B478: where view picture A lives
+  000F6368  24070080  addiu a3,zero,128                 
+  000F636C  24080080  addiu t0,zero,128                 # full weight (no blending)
+  000F6370  24060080  addiu a2,zero,128                 
+  000F6374  24050080  addiu a1,zero,128                 
+  000F6378  0C052C88  jal 0x0014B220                    
+  000F637C  0200202D  daddu a0,s0,zero                  
+  000F6380  0C0530D4  jal 0x0014C350                    
+  000F6384  0200202D  daddu a0,s0,zero                  
+  000F6388  0C053826  jal 0x0014E098                    
+  000F638C  24040140  addiu a0,zero,320                 
+  000F6390  0220202D  daddu a0,s1,zero                  # picture B = view 0 = PLAYER 1
+  000F6394  0C052D78  jal 0x0014B5E0                    
+  000F6398  24050156  addiu a1,zero,342                 
+  000F639C  0220202D  daddu a0,s1,zero                  
+  000F63A0  0C052D8C  jal 0x0014B630                    
+  000F63A4  0000282D  daddu a1,zero,zero                
+  000F63A8  240E0100  addiu t6,zero,256                 
+  000F63AC  A62E0008  sh t6,8(s1)                       
+  000F63B0  240E0000  addiu t6,zero,0                   
+  000F63B4  A62E000A  sh t6,10(s1)                      
+  000F63B8  0220202D  daddu a0,s1,zero                  
+  000F63BC  24050100  addiu a1,zero,256                 
+  000F63C0  0C052C82  jal 0x0014B208                    
+  000F63C4  240601A0  addiu a2,zero,416                 
+  000F63C8  3C061A08  lui a2,0x1A08                     
+  000F63CC  3C050008  lui a1,0x8                        
+  000F63D0  0220202D  daddu a0,s1,zero                  
+  000F63D4  34C62008  ori a2,a2,0x2008                  
+  000F63D8  0C052D7A  jal 0x0014B5E8                    
+  000F63DC  34A50008  ori a1,a1,0x8                     
+  000F63E0  3C0F0037  lui t7,0x37                       
+  000F63E4  0220202D  daddu a0,s1,zero                  
+  000F63E8  0C052D8A  jal 0x0014B628                    
+  000F63EC  DDE5B480  ld a1,-19328(t7)                  # 0x0036B480: where view picture B lives
+  000F63F0  24070080  addiu a3,zero,128                 
+  000F63F4  24080080  addiu t0,zero,128                 
+  000F63F8  24060080  addiu a2,zero,128                 
+  000F63FC  24050080  addiu a1,zero,128                 
+  000F6400  0C052C88  jal 0x0014B220                    
+  000F6404  0220202D  daddu a0,s1,zero                  
+  000F6408  0C0530D4  jal 0x0014C350                    
+  000F640C  0220202D  daddu a0,s1,zero                  
+  000F6410  3C0F000F  lui t7,0xF                        
+  000F6414  240E0001  addiu t6,zero,1                   
+  000F6418  A1EE6F01  sb t6,28417(t7)                   # the picture of this step is a two-view picture
+  000F641C  0C041A7E  jal 0x001069F8                    # everything drawn after this (HUD, marks) starts from view 0
+  000F6420  0000202D  daddu a0,zero,zero                
+  000F6424  DFBF0000  ld ra,0(sp)                       
+  000F6428  DFB00008  ld s0,8(sp)                       
+  000F642C  DFB10010  ld s1,16(sp)                      
+  000F6430  03E00008  jr ra                             
+  000F6434  27BD0020  addiu sp,sp,32                    
+v_send:    # hook 0x0014CFC0 (was: j 0x0014E5F0): the step's draw list goes to the graphics chip
+  000F6438  3C0F000F  lui t7,0xF                        
+  000F643C  91EE6F01  lbu t6,28417(t7)                  
+  000F6440  A1EE6F00  sb t6,28416(t7)                   # THE CONTRACT BYTE: layout of the picture that is sent now
+  000F6444  0805397C  j 0x0014E5F0                      
+  000F6448  A1E06F01  sb zero,28417(t7)                 
+
+====================================================================================================
+HOOKS (words changed inside the game program)
+  0013B258  0803C295  j 0x000F0A54               was 03E00008 jr ra                        [commands] on-screen menu 'use this control object': if S2 asks, S is shown
+  0013B25C  00000000  nop                        was AC85029C sw a1,668(a0)                [commands] delay slot (the store moved into setdisp)
+  001403D4  0C03D884  jal 0x000F6210             was 0C059FC6 jal 0x00167F18               [views] follow camera's controller: camera 2 listens to controller 2
+  00140CC8  0803D800  j 0x000F6000               was 27BDFFF0 addiu sp,sp,-16              [views] camera task: camera 1, camera 2, and the decision one view / two views
+  00140CCC  00000000  nop                        was 3C040035 lui a0,0x35                  [views] delay slot of the jump (was lui a0,0x35)
+  0014CFC0  0803D90E  j 0x000F6438               was 0805397C j 0x0014E5F0                 [views] end of step: publish the layout byte when the picture is sent
+  00161C7C  0803D89C  j 0x000F6270               was 080586AA j 0x00161AA8                 [views] two-view 'put on screen' task: ours = side by side at full weight
+  00161E38  0C03D878  jal 0x000F61E0             was 0C05867A jal 0x001619E8               [views] the game's own two-view cross-fade starts: take ours down first
+  001623B0  0803D85E  j 0x000F6178               was 27BDFFF0 addiu sp,sp,-16              [views] remove two-view tasks: if they were ours, clean up and put one view back
+  001623B4  00000000  nop                        was FFBF0000 sd ra,0(sp)                  [views] delay slot (was sd ra,0(sp); moved into v_dualoff)
+  0016F0B0  0C03C0C0  jal 0x000F0300             was 0C07450E jal 0x001D1438               [identity] object creator, placeholder path: mark 'made from the PLAYER placeholder'
+  0016F0F4  0C03C304  jal 0x000F0C10             was 0C05E7F4 jal 0x00179FD0               [glue] the only factory call: lane E's e_wrap, then 'factory done'
+  00174400  0803C283  j 0x000F0A0C               was 27BDFFF0 addiu sp,sp,-16              [commands] script command 'player commands on': applies to S and S2
+  00174404  00000000  nop                        was 3C0F0035 lui t7,0x35                  [commands] delay slot (was lui t7,0x35)
+  00177E74  0C03C31B  jal 0x000F0C6C             was 0C068574 jal 0x001A15D0               [glue] base constructor asks for its unit slot: role-based rule (replaces lane D's D1)
+  001781C4  0803C22A  j 0x000F08A8               was 3C0401C6 lui a0,0x1C6                 [commands] tail of the player's attach routine: a hero on controller 2 attaches to S2, any other to S
+  001781C8  0200282D  daddu a1,s0,zero           was DFBF0008 ld ra,8(sp)                  [commands] delay slot: a1 = player object (was ld ra,8(sp))
+  0017828C  00000000  nop                        was ADE0E948 sw zero,-5816(t7)            [identity] base destructor: 'engine player = 0' moved into e_dtor
+  00178294  0C03C34D  jal 0x000F0D34             was 0C05E07A jal 0x001781E8               [glue] base destructor: release a dying twin's control object S2, then lane E's e_dtor
+  0017837C  0C03D88D  jal 0x000F6234             was 0C041A98 jal 0x00106A60               [views] stick -> direction: the twin's stick is turned by camera 2's view
+  00179BDC  0803C263  j 0x000F098C               was 08075A38 j 0x001D68E0                 [commands] start-up reset wrapper: the same for the start-up reset
+  00179BFC  0803C255  j 0x000F0954               was 08075A3E j 0x001D68F8                 [commands] room reset wrapper: reset S, then S2 if it exists
+  0017A000  0C03C300  jal 0x000F0C00             was 0C059FC6 jal 0x00167F18               [glue] player factory asks for the controller: note 'factory running', then lane E's e_getpad
+  00182D04  0C03C12B  jal 0x000F04AC             was 0C060A60 jal 0x00182980               [exits] area-event loop: second offer with the twin as the walking hero
+  0019A168  0C03C108  jal 0x000F0420             was 0040F809 jalr v0                      [exits] volume test: the other hero must be inside too (kinds 1 and 3)
+  001A1238  0C03C05F  jal 0x000F017C             was 922F0004 lbu t7,4(s1)                 [ownhp] load stats: marked slot takes current HP from its own save byte
+  001A1248  0C03C067  jal 0x000F019C             was 922E0006 lbu t6,6(s1)                 [ownhp] load stats: marked slot takes current MP from its own save byte
+  001A1438  0803C084  j 0x000F0210               was 08070C18 j 0x001C3060                 [ownhp] end of load stats: reload the other hero's slot too
+  001A1518  0803C057  j 0x000F015C               was 15F1FFEA bne t7,s1,0x001A14C4         [ownhp] find-slot-by-id loop: skip marked slots
+  001A1854  0803C071  j 0x000F01C4               was A1CF0004 sb t7,4(t6)                  [ownhp] write back: marked slot's HP goes to its own save byte
+  001A1870  0803C079  j 0x000F01E4               was A1AF0006 sb t7,6(t5)                  [ownhp] write back: marked slot's MP goes to its own save byte
+  001BDC64  0C03C29D  jal 0x000F0A74             was 0C04ECBE jal 0x0013B2F8               [commands] control object shows the menu: skipped for S2
+  001BDCA4  0C03C2A5  jal 0x000F0A94             was 0C04ECC8 jal 0x0013B320               [commands] control object hides the menu: skipped for S2
+  001BDE30  0C03C2AD  jal 0x000F0AB4             was 0C04ECAE jal 0x0013B2B8               [commands] control object sets the menu's fade value: skipped for S2
+  001D6A10  0803C247  j 0x000F091C               was 3C0F0035 lui t7,0x35                  [commands] end of the control object's detach: 'current control object' = S if S still has a hero, else 0
+  001D6C58  0803C271  j 0x000F09C4               was 3C0F0035 lui t7,0x35                  [commands] global 'commands off': applies to S and S2
+  001D6C5C  00000000  nop                        was 27BDFFF0 addiu sp,sp,-16              [commands] delay slot (was addiu sp,sp,-16)
+  001D6C88  0803C283  j 0x000F0A0C               was 3C0F0035 lui t7,0x35                  [commands] global 'commands on': applies to S and S2
+  001D6C8C  00000000  nop                        was 27BDFFF0 addiu sp,sp,-16              [commands] delay slot (was addiu sp,sp,-16)
+
+LANE V1 DATA (not written by the patch file; relies on that memory being zero at boot)
+  000F6E00  V_CAM2
+  000F6F00  V_SHOWN
+  000F6F01  V_PENDING
+  000F6F04  V_ON
+  000F6F08  V_REQ

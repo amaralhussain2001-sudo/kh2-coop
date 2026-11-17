@@ -1,0 +1,11 @@
+# roam3 both-rule test, P1: waits, then walks to the door (up 30, left 70); after the room change runs right
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5100 30 LY=0
+5160 70 LX=0
+5900 60 LX=255
+6500 1 

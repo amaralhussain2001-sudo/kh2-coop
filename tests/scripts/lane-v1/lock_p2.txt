@@ -1,0 +1,4 @@
+# HB fight: player 2 locks on at 4750 and lets go at 5000
+4750 4 R1
+5000 4 R1
+5600 1 

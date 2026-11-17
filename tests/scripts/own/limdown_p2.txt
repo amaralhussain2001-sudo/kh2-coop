@@ -1,0 +1,29 @@
+# Borough fight disc (hb9h) + Limit kit + player 1's hero held at 1 HP: P2 opens the Limit list late (player 1's
+# hero is down by then) and picks the first Limit
+7000 4 LEFT
+7040 4 DOWN
+7070 4 DOWN
+7100 4 DOWN
+7140 4 O
+7210 4 O
+7250 4 X
+7290 4 X
+7330 4 X
+7400 4 LEFT
+7440 4 DOWN
+7470 4 DOWN
+7500 4 DOWN
+7540 4 O
+7610 4 O
+7650 4 X
+7690 4 X
+7730 4 X
+7800 4 LEFT
+7840 4 DOWN
+7870 4 DOWN
+7900 4 DOWN
+7940 4 O
+8010 4 O
+8050 4 X
+8090 4 X
+8130 4 X

@@ -1,0 +1,10 @@
+# door disc: New Game; P1 already stands in the exit zone facing the door; at 4700 walks forward 60 frames; after a room change runs right
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 60 LY=0
+6000 60 LX=255
+6600 1 

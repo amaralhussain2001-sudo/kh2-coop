@@ -1,0 +1,9 @@
+# world map: player 2 answers Yes (stick left 5600, Circle 6300); on the map: stick up 7300, down 7800, Triangle 8100 (Land), Circle 8300 / 8500
+5600 120 LX=0
+6300 4 O
+7300 150 LY=0
+7800 150 LY=255
+8100 4 TRI
+8300 4 O
+8500 4 O
+999999 1 

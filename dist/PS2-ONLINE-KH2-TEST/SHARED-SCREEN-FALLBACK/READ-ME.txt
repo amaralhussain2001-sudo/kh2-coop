@@ -1,0 +1,16 @@
+SHARED-SCREEN FALLBACK
+======================
+
+The file in this folder is the same two-player game WITHOUT own screens:
+both PCs show one picture, player 1's camera. Everything else is the same.
+
+Use it only if the own screens give trouble (wrong picture, very slow, a crash).
+
+How, on BOTH PCs (the two files must be the same on both, or joining is refused):
+1. Close the game.
+2. Copy  SLPM-66675_F266B00B.pnach  from this folder into  emulator\patches
+   and let it replace the file of the same name there.
+3. Start again with START-KH2-TEST.bat.
+
+To go back to own screens: unzip the friend kit again (friend), or ask for the package again (host).
+The save file stays usable either way.

@@ -1,0 +1,9 @@
+# free roam: player 2 waits, then walks right to the board that is left and presses Triangle
+5250 42 LX=255
+5310 4 TRI
+5330 4 TRI
+5350 4 TRI
+5370 4 TRI
+5390 4 TRI
+5500 150 LY=0
+999999 1 

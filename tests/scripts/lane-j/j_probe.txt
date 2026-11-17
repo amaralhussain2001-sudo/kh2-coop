@@ -1,0 +1,13 @@
+# lane J form probe: New Game (Circle x6), then run right, jump (Cross), attack (Circle) with pad 1
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5300 60 LX=255
+5500 4 X
+5700 4 O
+5730 4 O
+5760 4 O
+6100 1 

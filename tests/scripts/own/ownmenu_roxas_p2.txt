@@ -1,0 +1,6 @@
+# TEST (eighth round, plan row 39 stage 1a): the real disc's New Game (Roxas): newgame_p2's presses, then player 2 opens the pause menu at 9200 and closes it at 9700.
+6500 60 LX=255
+6700 4 X
+9200 4 START
+9700 4 X
+12000 1 

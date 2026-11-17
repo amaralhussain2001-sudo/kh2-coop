@@ -1,0 +1,15 @@
+# TEST (eighth round, plan row 39 stage 1a): PLAYER 2 opens the pause menu, goes to Items > Sora, down to the
+# accessory place, opens its list, goes one entry down (from "---" to the first accessory of the bag) and takes it;
+# then leaves the menu with Cross.
+5000 4 START
+5100 4 O
+5200 4 O
+5300 4 DOWN
+5360 4 DOWN
+5460 4 O
+5530 4 DOWN
+5600 4 O
+5700 4 X
+5800 4 X
+5900 4 X
+9000 1 

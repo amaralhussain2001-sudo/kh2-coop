@@ -1,0 +1,96 @@
+Project: Kingdom Hearts II Final Mix two-player mod, in C:\Users\PC FORCE\Desktop\New folder (3).
+
+Read first: docs\STATE.md, section "PICK UP HERE": its blocks "STILL OWED" and "WHAT THE USER HAS NOW", then
+"THE USER'S STANDING INSTRUCTIONS". Then "Tenth round" parts 119 to 125. Then KH2-COOP-PLAN.md (rows 9, 35,
+39, 53, 54), docs\ROW9-PAIRED-MOVES.md and docs\REQUIREMENT-full-parity.md.
+
+Current state (written 2026-11-16 11:40):
+- dist\PS2-ONLINE-KH2-TEST is TEST BUILD 22, package id 73330f051af3, built 2026-11-16 10:46. A copy for me is
+  at Desktop\PS2-ONLINE-KH2-TEST-b22 (I play it now). The disc is still "TEST v5" (not changed since build 12).
+- Build 22 = patches\merged-v16 (shared screen, SHA-1 33be411a...) and patches\merged-v16-own (own screens, 9,976
+  words) = the tested candidate v134. Whole regression clean (116 result lines, 0 flagged; local\reg-b31\), the
+  40 fights 40 of 40 in sync (2 with the 50 known lines, as build 21). THE REHEARSAL IS NOT RUN YET (it runs
+  alone; start it when I say I stopped playing).
+- New in build 22: a target choice for Potions / Hi-Potions / Ethers / Elixirs (PARTY window "Sora, Donald,
+  Goofy, Sora": the first Sora is player 1, the last player 2); player 2's own Drive gauge in the save; player 2
+  picks up the items enemies drop (both bags get them); player 2's Drive Form files kept after a door; the
+  Fortuneteller's Clear Shot fault guarded.
+- Closed with tests this round: the Data Xemnas laser dome, Drive balls for player 2, the Large Body's Full
+  Swing for player 2, the toy cannon and carpet escape started from the story's own spot (player 2 alone too).
+- Still open: the Gummi points of weapons other than cannons go to player 1 (the fix, glue 77, faulted and is
+  left out); Luxord's card game "feel" (my playthrough); proposals 2, 3 and 5 of my inspection (not chosen).
+
+MY ANSWERS AND WORDS (STATE parts 105, 109, 123, 125; I change a line only if my answer changes):
+A. Changed 2026-11-16: I test build 22 NOW, while you finish its checks. Findings from my play come below (G).
+B. OK (given 2026-11-15 evening): a move that a hero starts with his OWN green command stays that hero's alone;
+   the other player stays free and keeps fighting. CLOSED.
+C. Several hidden lanes at once are fine, up to fourteen, full speed. Tests stay on the hidden desktop. If my
+   game on this PC stutters while I play, use fewer lanes.
+D. Each player his own bag and wallet; the munny they gain goes to both; spending is each one alone. BUILT.
+E. (2026-11-15 evening) Boss holds: one press never counts twice, one player's input never moves the other's
+   menu; a single-target grab takes only the targeted player; a shared mechanic takes both. BUILT.
+F. (2026-11-16) Proposals 1 and 4 built (target choice; player 2's Drive in the save). Then "close everything
+   now so the next patch should contain everything": done as far as tests allowed (build 22).
+G. [ my findings from playing build 22: what happened, where, which player; or NONE ]
+
+JOBS, in this order. Do not stop between them.
+1. If I wrote findings in G or send logs: read them first. For each: find the cause, fix it (a new glue by a new
+   one-off record script), verify the fix, then the whole regression, the 40 fights, a new package (build 22b),
+   a NEW Desktop copy for me (a new folder name), the rehearsal, notes.
+2. The rehearsal of the package in dist (model tools\own\r9_chain71.sh; alone; only when I do not play).
+3. What is still open (STATE.md, block STILL OWED, "OPEN AND WHY"). Work on one only when a new way to test it is
+   found, else leave it as it is: the Gummi points of other weapons (glue 77's results, STATE part 124).
+4. After every change of the patches or the disc: the whole regression, the 40 fights, the package, the
+   rehearsal, finish_two_pcs.py, the notes. At the very end ONE report.
+
+How tests are run (details in STATE.md, block STILL OWED):
+- Hidden: start test commands WITHOUT KH2_TEST_SHOW. Fourteen sandboxes: run-m, run-v3, run-v3b, run-v3c,
+  run-x1 .. run-x10 (run-x7 .. x10: ports 31950 / 32150 / 32350 / 32550, PINE 28070 .. 28073). Parallel agents
+  for read-only research when they help.
+- A test worker skips a room that is already in its log: give a re-run a NEW worker name.
+- The whole regression on eight sandboxes, about 35 minutes:
+  bash tools/own/reg_par8.sh <own> <shared> <prefix> <countName>   (kits first: make_kits.sh <own>; the control
+  <shared>-nn by merge_v7.py ... --base-nn). A NEW prefix each time: the next is b32 / w32. Never two
+  regressions at once. Read it with:
+  python -I tools/own/reg_compare.py b32 w32 local/reg-b31 b31 w31 --save local/reg-b32
+- The 40 fights on the six other lanes at the same time: tools\own\r10_chain28.sh <own>-snapB-god-cap <tag>
+  (copy local\sweep\r9\list-rs6-all.txt to list-<tag>-all.txt first); read with
+  python -I tools/own/row9_rs2.py --tags=<tag>
+- The ten boss rooms: tools\own\r9_chain46.sh <own>-snapB-god-cap <tag>. The last Xemnas's laser dome:
+  tools\own\r10_chain13.sh <own> (five cases).
+- The same button scripts do not give the same boss fight on another build. To test a cure, make the fault's
+  state on purpose (tools\own\make_orphan.py, make_once.py, make_teleport.py, make_killkit.py, make_lbkit.py,
+  make_gumweapon.py).
+- Before calling anything a fault, run the no-patch control (one hero): patches\test-stock-god is the original
+  game with HP held; the -nn build keeps the exit rule and is no control for fights.
+- Kits that write a value every frame fight with a menu swap: write the value once.
+- A Game Over in a jump start needs the Continue kit (-snapB).
+- When you stop tests, stop only this project's own processes (by process number or command line).
+- Never start r8_chain82, 83, 86, 99, 109, 111, 112 nor r8_master3.
+
+How the files are changed:
+- docs\STATE.md only with tools\own\state_add.py, tools\own\state_pickup.py and tools\own\state_pickup3.py
+  (never sed, the file is CRLF). Write the text into a file with the file tools first; never through a Python
+  string with backslashes.
+- The builder tools\merge\merge_v7.py gets each new glue by a NEW one-off record script
+  (tools\merge\edit_merge_v7_<name>.py). Every edit_merge_v7_*.py, edit_make_own_*.py, edit_package_v*.py,
+  add_plan_rows_v*.py, edit_row9_*.py and edit_checklist_b*.py that exists HAS RUN: never run one again.
+- In the builder but in no build: glue 59 (--onevictim), glue 68 (--holdpads), glue 77 (--gummiall) and the test
+  options --holdwatch-test, --together-far, --ship2first, --gq-nodisp, --gq-nocount. Leave them out.
+- In a shell line, a "grep -c" that counts 0 stops an "&&" chain.
+
+An item is closed only when it is fixed and VERIFIED, or tested and it works, or proven not possible or too
+risky with the reason and the evidence written in docs\STATE.md. Something that needs a human is written down
+as UNVERIFIED, not as done.
+
+Rules:
+- Do not stop to ask A/B questions. Take your own recommended option, note it in docs\STATE.md and the plan,
+  and keep working until the list is done. Only short progress lines meanwhile.
+- Player 2 must be a full player, never a passenger or a spectator.
+- Never modify the original disc file, Desktop\PS2-ONLINE, Desktop\openkh or
+  Desktop\New folder\digimon-online. local\ is private. My Desktop\PS2-ONLINE-KH2-TEST-b22 copy is mine: make
+  a NEW folder for a new build instead of overwriting it while I may be playing it.
+- Never overwrite a patch folder or a script that a running test batch reads. Build into patches\test-* first.
+- Plain English, short sentences. Mark every claim VERIFIED or HYPOTHESIS.
+- Read every result line with its fault line count ("TLB misses N").
+- After each closed item, write it into docs\STATE.md at once, so nothing is lost if the session is summarized.

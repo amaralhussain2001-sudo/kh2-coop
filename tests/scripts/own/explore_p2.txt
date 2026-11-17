@@ -1,0 +1,4 @@
+# TEST: stick up 30 frames at 4800, stick right 30 frames at 5000 (to learn the directions)
+4800 30 LY=0
+5000 30 LX=255
+999999 1

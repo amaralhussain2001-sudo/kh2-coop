@@ -1,0 +1,22 @@
+# TEST (tenth round): New Game (player 1's script), then PLAYER 2 walks down 137 frames and right 3 (to the accessory shop girl), Triangle at 6450 and 6480, Circle every 80 frames 6560 .. 7760.
+6300 137 LY=255
+6440 3 LX=255
+6450 4 TRI
+6480 4 TRI
+6560 4 O
+6640 4 O
+6720 4 O
+6800 4 O
+6880 4 O
+6960 4 O
+7040 4 O
+7120 4 O
+7200 4 O
+7280 4 O
+7360 4 O
+7440 4 O
+7520 4 O
+7600 4 O
+7680 4 O
+7760 4 O
+9500 1 

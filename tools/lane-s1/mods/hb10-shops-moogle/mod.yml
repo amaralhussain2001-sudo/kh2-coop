@@ -1,0 +1,11 @@
+title: lane S1 free roam in the Marketplace WITH Donald, Goofy and the four shops (tests only)
+game: kh2
+assets:
+  - name: ard/hb10.ard
+    method: binarc
+    source:
+      - name: evt
+        type: AreaDataScript
+        method: areadatascript
+        source:
+          - name: hb10_evt.txt

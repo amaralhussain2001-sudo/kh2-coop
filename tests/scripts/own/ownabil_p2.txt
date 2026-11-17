@@ -1,0 +1,12 @@
+# TEST (eighth round, plan row 39 stage 1b): PLAYER 2 opens the pause menu, goes down to "Abilities", takes Sora,
+# presses Circle on the ability under the cursor (switch it), then leaves the menu with Cross.
+5000 4 START
+5100 4 DOWN
+5170 4 O
+5270 4 O
+5370 4 O
+5470 4 X
+5570 4 X
+5670 4 X
+5770 4 X
+9000 1 

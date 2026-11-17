@@ -1,0 +1,17 @@
+# fight disc: New Game, idle; the hero falls about 5090 and comes back about 5690 (10 s test timer).
+# While down: stick and attack (must do nothing). After the revive: stick, jump, attack (must work).
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5200 60 LX=255
+5300 4 O
+5340 4 X
+5760 50 LX=255
+5840 4 X
+5900 4 O
+5920 4 O
+5940 4 O
+9000 1 

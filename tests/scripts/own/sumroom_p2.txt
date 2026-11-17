@@ -1,0 +1,10 @@
+# hb9g disc + Summon kit: P2 calls the first Summon (pick at 5000), then walks back into the door with P1 at
+# 5700 and back out of the house at 6600
+4700 4 LEFT
+4740 4 DOWN
+4800 4 O
+4870 4 O
+5000 4 O
+5700 60 LY=255
+6600 60 LY=255
+7500 1

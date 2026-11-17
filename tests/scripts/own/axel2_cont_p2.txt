@@ -1,0 +1,8 @@
+# Axel II disc: player 2 presses Circle every 250 frames from 9000 (picks Continue at the Game Over menu)
+9000 4 O
+9250 4 O
+9500 4 O
+9750 4 O
+10000 4 O
+10250 4 O
+999999 1 

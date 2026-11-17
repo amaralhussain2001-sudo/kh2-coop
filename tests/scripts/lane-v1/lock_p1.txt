@@ -1,0 +1,10 @@
+# HB fight: New Game; player 1 locks on at 4900 and lets go at 5100
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4900 4 R1
+5100 4 R1
+5600 1 

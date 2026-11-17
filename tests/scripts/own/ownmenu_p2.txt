@@ -1,0 +1,4 @@
+# TEST (eighth round, plan row 39 stage 1a): PLAYER 2 opens the pause menu (START at 5000) and closes it (Cross at 5600).
+5000 4 START
+5600 4 X
+9000 1 

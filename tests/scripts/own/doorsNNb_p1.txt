@@ -1,0 +1,23 @@
+# TEST (tenth round, one-hero control b): walk into the west door WITHOUT a form (doors6_p1's walk), take Final Form in the Borough at 6200 (Down x3, Circle, Down x4, Circle), then down 40 at 6900, 7900, 8900, 9900 (back, west, back, west).
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5300 36 LY=0
+5400 60 LX=0
+6200 4 DOWN
+6230 4 DOWN
+6260 4 DOWN
+6300 4 O
+6330 4 DOWN
+6345 4 DOWN
+6360 4 DOWN
+6375 4 DOWN
+6400 4 O
+6900 40 LY=255
+7900 40 LY=255
+8900 40 LY=255
+9900 40 LY=255
+999999 1

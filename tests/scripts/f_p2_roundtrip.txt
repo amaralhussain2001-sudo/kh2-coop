@@ -1,0 +1,6 @@
+# lane F: pad 2 walks the round trip (with lane A's patch pad 2 drives the second-built hero)
+4500 30 LY=0
+4560 90 LX=0
+5300 150 LY=255
+6100 150 LY=255
+7000 1 

@@ -1,0 +1,14 @@
+# roam disc: P2 opens the main menu (START), goes down four entries (Jiminy's Journal), opens it, opens its first
+# part, moves, goes back with Cross three times
+5000 4 START
+5060 4 DOWN
+5090 4 DOWN
+5120 4 DOWN
+5150 4 DOWN
+5240 4 O
+5340 4 O
+5420 4 DOWN
+5500 4 X
+5580 4 X
+5660 4 X
+6000 1

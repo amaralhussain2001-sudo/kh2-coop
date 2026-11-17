@@ -1,0 +1,4 @@
+# roam3: P2 walks the twin into the west door and keeps pushing (camera still: up = +z, left = -x)
+4600 30 LY=0
+4660 400 LX=0
+5600 1 

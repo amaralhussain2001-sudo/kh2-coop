@@ -1,0 +1,10 @@
+# free-roam disc: New Game, then walk up and left out of the west door; bot after 4700
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4500 30 LY=0
+4560 90 LX=0
+4700 1 

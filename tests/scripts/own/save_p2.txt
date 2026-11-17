@@ -1,0 +1,6 @@
+# roam disc: P1 opened the save menu with Triangle at 5000; P2 moves down twice, then cancels with Cross twice
+5200 4 DOWN
+5260 4 DOWN
+5340 4 X
+5420 4 X
+5700 1 

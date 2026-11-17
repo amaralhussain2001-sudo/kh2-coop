@@ -1,0 +1,11 @@
+# roam disc: New Game; P1 walks to the door at 4900 (the twin is down in the door by then), pushes into it again at 5400
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4900 33 LY=0
+4960 50 LX=0
+5400 60 LX=0
+6200 1 

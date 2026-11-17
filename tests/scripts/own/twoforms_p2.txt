@@ -1,0 +1,17 @@
+# TEST (eighth round, plan row 44): player 2 opens his Drive list at 5400 and takes its FIRST row (while player 1 is
+# in Valor: Wisdom), reverts at 6400, and opens the list again at 7300 (Cross closes it).
+5400 4 DOWN
+5430 4 DOWN
+5460 4 DOWN
+5500 4 O
+5560 4 O
+6400 4 DOWN
+6430 4 DOWN
+6460 4 DOWN
+6500 4 O
+7300 4 DOWN
+7330 4 DOWN
+7360 4 DOWN
+7400 4 O
+7480 4 X
+999999 1

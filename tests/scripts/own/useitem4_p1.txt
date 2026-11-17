@@ -1,0 +1,29 @@
+# TEST (eighth round, plan row 39): New Game, then PLAYER 1 uses an item from his command menu FOUR times (5000, 5400,
+# 5800, 6200), as useitem4_p2.txt does for player 2.
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5000 4 DOWN
+5040 4 DOWN
+5080 4 O
+5160 4 O
+5240 4 O
+5400 4 DOWN
+5440 4 DOWN
+5480 4 O
+5560 4 O
+5640 4 O
+5800 4 DOWN
+5840 4 DOWN
+5880 4 O
+5960 4 O
+6040 4 O
+6200 4 DOWN
+6240 4 DOWN
+6280 4 O
+6360 4 O
+6440 4 O
+9000 1 

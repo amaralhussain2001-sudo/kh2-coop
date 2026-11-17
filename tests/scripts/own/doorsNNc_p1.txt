@@ -1,0 +1,24 @@
+# TEST (tenth round, one-hero control c): as doorsNNb_p1, plus up 25 at 5800 (into the west door's jump volume x -695..-595, z -625..-475: the one-hero game fires only there), Final Form at 6500, then down 40 at 7200, 8200, 9200, 10200.
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5300 36 LY=0
+5400 60 LX=0
+5800 25 LY=0
+6500 4 DOWN
+6530 4 DOWN
+6560 4 DOWN
+6600 4 O
+6630 4 DOWN
+6645 4 DOWN
+6660 4 DOWN
+6675 4 DOWN
+6700 4 O
+7200 40 LY=255
+8200 40 LY=255
+9200 40 LY=255
+10200 40 LY=255
+999999 1

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <OpenKhApps Condition="'$(OpenKhApps)' == ''">C:\Users\PC FORCE\Desktop\openkh\Apps</OpenKhApps>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="OpenKh.Kh2"><HintPath>$(OpenKhApps)\OpenKh.Kh2.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="OpenKh.Common"><HintPath>$(OpenKhApps)\OpenKh.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Xe.BinaryMapper"><HintPath>$(OpenKhApps)\Xe.BinaryMapper.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="YamlDotNet"><HintPath>$(OpenKhApps)\YamlDotNet.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+</Project>

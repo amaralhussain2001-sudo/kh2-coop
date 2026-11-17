@@ -1,0 +1,5 @@
+# P2: walks the twin to the door first (camera still: up = +z, left = -x); after the room change runs up
+4600 30 LY=0
+4660 60 LX=0
+6100 60 LY=0
+6500 1 

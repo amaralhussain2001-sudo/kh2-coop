@@ -1,0 +1,12 @@
+# Imperial Square disc (mu8c): player 2 runs straight on to the whirlwind at (0, -500) and presses Triangle
+4700 326 LY=0
+5040 4 TRI
+5060 4 TRI
+5080 4 TRI
+5100 4 TRI
+5120 4 TRI
+5140 4 TRI
+5160 4 TRI
+5180 4 TRI
+5200 4 TRI
+999999 1 

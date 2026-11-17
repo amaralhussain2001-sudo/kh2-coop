@@ -1,0 +1,6 @@
+# P2 runs away from the door at 4700, comes back at 5100, later both walk back twice
+4700 70 LY=0
+5100 80 LY=255
+5700 60 LY=255
+6500 60 LY=255
+7300 1 

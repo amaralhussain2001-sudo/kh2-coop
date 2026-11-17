@@ -1,0 +1,13 @@
+# Marketplace disc with the Moogle (hb10m), P2 held in front of the Moogle: turn (LX=0), Triangle, then menu buttons
+5030 50 LX=0
+5100 4 TRI
+5200 4 TRI
+5400 4 DOWN
+5480 4 O
+5580 4 DOWN
+5660 4 O
+5800 4 X
+5880 4 X
+5960 4 X
+6040 4 X
+6300 1 

@@ -1,0 +1,8 @@
+# fight disc + kit + potions: pad 2 uses the shortcut L1 + Circle (Potion) at 4800 and 5000
+4780 20 L1
+4800 4 L1 O
+4804 36 L1
+4980 20 L1
+5000 4 L1 O
+5004 36 L1
+9000 1 

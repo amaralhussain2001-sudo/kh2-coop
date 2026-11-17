@@ -1,0 +1,10 @@
+# TEST: New Game, then stick up 30 frames at 4800, stick right 30 frames at 5000
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4800 30 LY=0
+5000 30 LX=255
+999999 1

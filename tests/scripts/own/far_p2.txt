@@ -1,0 +1,4 @@
+# quiet room: player 2 runs away (up, then left) from 4800 for a long time, then stands
+4800 400 LY=0
+5300 300 LX=0
+999999 1 

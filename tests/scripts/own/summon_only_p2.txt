@@ -1,0 +1,7 @@
+# fight disc + Summon kit: P2 goes to the menu's second page (Left), down to Summon, opens it, picks the first one,
+# then presses Circle and Triangle in turn
+4700 4 LEFT
+4740 4 DOWN
+4800 4 O
+4870 4 O
+5000 4 O

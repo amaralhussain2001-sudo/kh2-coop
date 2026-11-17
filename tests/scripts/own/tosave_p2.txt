@@ -1,0 +1,3 @@
+# roam disc: P2 walks onto the save point side (right 40 frames at 4800), then both stand
+4800 40 LX=255
+999999 1 

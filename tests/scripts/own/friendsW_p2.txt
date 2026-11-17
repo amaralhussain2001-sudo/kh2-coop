@@ -1,0 +1,3 @@
+# TEST (tenth round, the shop girl, take 3): player 2 walks up 200 to the friends with player 1, then nothing (player 1 talks).
+6300 200 LY=0
+13500 1 

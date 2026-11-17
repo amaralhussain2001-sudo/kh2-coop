@@ -1,0 +1,494 @@
+PS2 ONLINE - KINGDOM HEARTS II, TWO PLAYERS - TEST BUILD 24 (OWN SCREENS)
+=========================================================================
+
+This is a TEST. It lives in its own folder (PS2-ONLINE-KH2-TEST). Your normal PS2-ONLINE folder is not changed
+and is not used. BOTH players must use this test folder, not the normal one.
+
+What it is: Kingdom Hearts II Final Mix with a second hero. Player 1 plays the game's hero (Roxas at the start,
+Sora later). Player 2 plays a second copy of the same hero with their own controller.
+EACH PC SHOWS ITS OWN PLAYER (since build 3). Your PC shows your hero, your camera, your command menu and your
+HP gauge, full size. The small round gauge is the other player. Both heroes are still in the same room.
+NEW IN BUILD 4: the lists inside the command menu (Magic and the others) show only on the screen of the player
+who opened them; each hero keeps his own Drive gauge from room to room; either player can close text boxes;
+player 2's hero can pick up the balls that enemies drop (HP, munny); either player can open the main menu
+(START) and use it.
+NEW IN BUILD 5: player 2 can use Drive Forms (his own form, his own form gauge, his own menu); the two fights
+where the enemy cannot be hurt now count player 2's hits; a small game's rules screen can be closed by either
+player; the command menu no longer stays empty after a rules screen.
+NEW IN BUILD 6: Mail Delivery for two: each player starts on his own skateboard, with his own board commands.
+NEW IN BUILD 7: things in the room now deal with the hero who is NEARER to them. So player 2 can ride the bag
+of the Seven Wonders, and a boss's green command (Triangle) goes to the player who stands nearer.
+NEW IN BUILD 8: Donald and Goofy split up with you (when the two heroes are far apart, one helper goes with
+each); every skateboard in the game has a second board beside it and the five skateboard challenges put both
+players on a board; during a boss's scripted move the other player keeps his own picture; Valor and Master
+Form were tried with player 2.
+NEW IN BUILD 9: a boss move's green follow-up command goes to the player whose hero is in the move; one player
+on a skateboard and one on foot each see their own right menu; Donald and Goofy heal player 2's hero too; a
+Limit (team attack) started by player 2 is his to play; the item shop and the journal work with player 2's
+controller; Wisdom and Final Form were tried with player 2.
+NEW IN BUILD 10: Summons work with two heroes, for either player (in build 9 the other hero sent every Summon
+away at once); the dark form was tried with player 2.
+NEW IN BUILD 11: a Summon stays right when you walk into a new room (in build 10 the OTHER player's Drive gauge
+turned into an empty SUMMON gauge after a door); "Continue" after a Game Over inside a boss fight was tested and
+works; Chicken Little and Stitch were tried; a hidden fault of builds 9 and 10 in long boss fights is closed.
+NEW IN BUILD 12: the Gummi Ship for two (player 2 flies his own ship); the Light Cycle, the Pooh flying game and
+the Magic Carpet for two; where a small game has only one hero (the carpet escape, the toy cannon, the sidecar)
+both controllers drive him; the world map, the Moogle's workshop and the end menus of the small games work with
+player 2's controller; Donald's and Goofy's items reach player 2; after a "Continue" player 2 has his own Drive
+and Summon values again; three sources of fault lines of build 11 are closed. Every mission of the game was
+started once with two heroes by a test script.
+NEW IN BUILD 13 (the disc file is the same as in build 12): BOTH heroes can be in a Drive Form at the same time;
+when both heroes fall and King Mickey comes, EACH player plays a King Mickey; a boss's clash takes the hero who
+is fighting and its green command is in that player's menu; enemy groups also wake up for player 2; changing
+the Keyblade in the menu no longer stops the game.
+NEW IN BUILD 14 (the disc file is still the same): a boss's green command (Triangle) is taken by ONE hero. If
+both players press it at the same moment, the first one gets the move and the other's press does nothing.
+This cures Xigbar's sniper part (it never ended when both pressed "Warp Snipe") and Luxord's card trick (a
+hero stayed held for the whole fight).
+NEW IN BUILD 15 (the disc file is still the same): PLAYER 2 HAS HIS OWN ARMOUR AND ACCESSORIES. He chooses
+them in the pause menu when HE opened it (START on his controller), under Items, then Sora. (Since build 21
+each player also has his own bag.)
+IN A SAVE FROM AN OLDER BUILD PLAYER 2 STARTS WITH NOTHING ON: read "PLAYER 2'S OWN GEAR" further down.
+NEW IN BUILD 16 (the disc file is still the same), three things:
+(1) BOTH HEROES IN SHAN-YU'S CLASH. When Shan-Yu locks blades with one hero at the palace gate and the other hero
+    stands near, the other hero joins the clash: he stands beside his friend, "Press" is in HIS menu too, and
+    his own Triangle pushes. Read "SHAN-YU'S CLASH" further down.
+(2) PLAYER 2'S GUMMI SHIP CAN BE HIT and has its own hull. The mission is over when EITHER ship falls. The one
+    hull gauge shows the weaker ship. A repair mends both ships. Read "THE GUMMI SHIP" further down.
+(3) A MAGIC CARPET FOR EACH HERO: on the carpet rides player 2's hero now has his own carpet under him.
+NEW IN BUILD 19 (the disc file is still the same), four things:
+(1) THE THREE SMALL GAMES THAT HAD ONE HERO FOR BOTH PLAYERS NOW HAVE ONE FOR EACH: in the carpet escape from
+    the ruins player 2 flies his own hero on his own carpet; on the sidecar near the end player 2 has his own
+    machine; at the toy cannon (Gift Wrapping) player 2 has his own cannon. Read "THE THREE SMALL GAMES".
+(2) PLAYER 2 SWITCHES HIS OWN ABILITIES ON AND OFF, in the pause menu when HE opened it, under "Abilities",
+    then "Sora". Read "PLAYER 2'S OWN GEAR" further down.
+(3) NO HERO STAYS HELD FOR EVER. At the Groundshaker a hero could stay frozen for the rest of the fight
+    (builds 12 to 16); now he is let go after a minute. Read "BOSSES THAT HOLD A HERO" further down.
+(4) PLAYER 2'S "ITEMS" LIST IS RIGHT AGAIN. In builds 15 and 16 his list could still show an item that had
+    already been used, and let him take it. Read "PLAYER 2'S OWN GEAR" further down.
+NEW IN BUILD 20 (the disc file is still the same), six things:
+(1) PLAYER 2 HAS HIS OWN KEYBLADE, HIS OWN ITEM PLACES, HIS OWN FIGHT ITEMS AND HIS OWN SHORTCUTS, each chosen in
+    his own menu; and whatever the game gives is there for each player. Read "PLAYER 2'S OWN GEAR".
+(2) A BOSS'S OWN GRAB, RIDE OR THROW TOOK BOTH HEROES (changed again in build 21: read "BOSSES THAT HOLD A
+    HERO" further down).
+(3) THE GROUNDSHAKER'S FROZEN HERO IS CURED AT ITS CAUSE (the same paragraph).
+(4) THE TOY CANNON: EACH PLAYER HAS HIS OWN VIEW. Read "THE THREE SMALL GAMES".
+(5) THE GUMMI SHIP: A SCORE FOR EACH PLAYER, and a digit at the hull gauge that says whose ship it shows. Read
+    "THE GUMMI SHIP" further down.
+(6) LUXORD'S TRICKS LET THE LOSER GO IN TIME (he could stand still for a minute). The same paragraph as (2).
+NEW IN BUILD 24 (the disc file is still the same), one change:
+(1) THE GUMMI SHIP: the points of weapons OTHER THAN THE CANNONS now go to the ship that fired them (before, they always
+    counted for player 1). Tested: two other weapon kinds, each fired by player 1 only, by player 2 only and by both: each
+    ship's points to its own player; the cannons exactly as in build 23; no fault. Still player 1's, as before: points
+    from ramming and from a few special shots.
+    ALSO TESTED NOW, NOTHING TO CHANGE: doors in a Drive Form keep a copy of the Keyblade per door in the ORIGINAL game
+    too (tested with one hero), and 16 doors in a row with forms never ran out of memory; the boss helpers that no test
+    could reach before (Luxord's, the Twin Lords', Zexion's and two others) were met with two heroes, no fault; Luxord's
+    and the two others grabbed player 2 as well as player 1.
+NEW IN BUILD 23 (the disc file is still the same), one fix:
+(1) THE GUMMI SHIP: the note "which ship fired this shot" (it splits the points between the two ships) was kept in
+    the same memory as four of build 22's new parts (the Drive save, the Potion target choice, picking up drops,
+    the form after a door). A cannon shot could change one byte of them for a moment. The note has its own place
+    now. Tested: the Gummi flight with only player 1 firing, only player 2, both: the same points as build 22,
+    each ship's points to its own player, no fault. Nothing else changed.
+    ALSO TESTED NOW: Load Game FROM THE TITLE SCREEN gives player 2 his own saved Drive gauge (build 22 too). Doors in a
+    Drive Form: five doors in a row with one hero in a form (player 1's or player 2's), and four with both heroes in a
+    form, ran without a fault (build 22 too).
+NEW IN BUILD 22 (the disc file is still the same), five things:
+(1) A TARGET CHOICE FOR POTIONS, HI-POTIONS, ETHERS AND ELIXIRS. When you use one from the command menu, the
+    window "PARTY" now shows BOTH heroes: "Sora, Donald, Goofy, Sora" (or "Sora, Sora" when Donald and Goofy
+    are not there). ON BOTH SCREENS THE FIRST "SORA" IS PLAYER 1'S HERO AND THE LAST "SORA" IS PLAYER 2'S HERO.
+    So you can heal your partner while he stands. One rule: if you pick YOURSELF while your partner is DOWN, the
+    item goes to your partner (as before). A shortcut item (L1) works as before: to your partner if he is down,
+    else to you.
+(2) PLAYER 2'S OWN DRIVE GAUGE IS KEPT IN THE SAVE. After Load Game each hero has his own Drive gauge again
+    (before, both started with player 1's). A save from build 21 or older still gives both player 1's gauge.
+(3) PLAYER 2 PICKS UP WHAT ENEMIES DROP. An item an enemy drops (a material, a fight item) could only be picked
+    up by player 1's hero; now player 2's hero picks it up too. What either player picks up goes into BOTH bags,
+    as from a chest.
+(4) PLAYER 2'S DRIVE FORM AFTER A DOOR: his form's files are kept like player 1's (before, in a full room the
+    game could have thrown them out while his form still used them; never seen, now prevented).
+(5) THE FORTUNETELLER'S "CLEAR SHOT" (Agrabah): a small fault after it is guarded (the game wrote to an effect
+    that had already ended).
+    TESTED NOW, NOTHING TO CHANGE: the Data Xemnas fight's laser part (both heroes in it, each player's own
+    Reflect, each press counts once); the toy cannon started at the elf by player 2 alone; the carpet escape
+    entered with player 2 there first; the Large Body's "Full Swing" by player 2 (it is offered after a combo's
+    last hit knocks a Large Body back: then stand at its front or back and press Triangle).
+NEW IN BUILD 21 (the disc file is still the same), four things:
+(1) EACH PLAYER HAS HIS OWN WALLET AND HIS OWN BAG. Munny the game gives (enemies' munny balls, chests, rewards)
+    goes into BOTH wallets in full; what a player buys he pays alone, from his own wallet, and it goes into his
+    own bag. What the game gives (a Keyblade, an armour, an accessory, a material) goes into both bags. Read
+    "PLAYER 2'S OWN GEAR" further down.
+(2) PLAYER 2 CAN BUY IN A SHOP. Up to build 20 his buttons did nothing in "Buy how many?", so he could not
+    finish a purchase. Now either player's buttons work there.
+(3) THE GUMMI FLIGHT IS THE GAME'S AGAIN. Build 20's second score row made some routes fly a little
+    differently (enemies came at other moments); found and cured, both scores stay.
+(4) AN ENEMY'S GRAB TAKES ONLY THE HERO IT IS AIMED AT AGAIN; the other player keeps fighting. Shared moves
+    take both heroes: the last Xemnas's laser part (there each player has his own "Reflect"), and, as before, the
+    moves of a thing THAT IS NO ENEMY (the whirlwinds in the Storm Rider fight, moving parts of The World That
+    Never Was, the skateboards). Each player keeps his own controller in a hold. Read "BOSSES THAT HOLD A HERO"
+    further down.
+TWO PCs IN THE SAME HOUSE: read "START-HERE (TWO PCs AT HOME).txt" first. It is shorter.
+!! THE DISC FILE CHANGED IN BUILD 12: it is "TEST v5" now. Replace the whole test folder with this one (both
+   players) and delete the older disc files ("TEST v2" / "TEST v3" / "TEST v4"). Two PCs at home: the folder
+   already holds the new disc file. Friends: make it with STEP 1.
+The text is English. The buttons are the ones of the Japanese disc.
+
+!! BOTH PLAYERS MUST CHOOSE THE SAME "PICTURE QUALITY" IN THE LAUNCHER. Use "4x High" (this folder starts with it).
+   Do NOT use "Auto": two different graphics cards would pick different values, and with this game the screen
+   then says "OUT OF SYNC" although nothing is wrong.
+   If one PC is too slow at 4x, both players choose the same lower value (3x or 2x).
+
+If you made a "TEST v1" to "TEST v4" disc file before: they are not used any more. Delete them from this
+folder's MY-GAMES and make the v5 file (STEP 1). Only ONE Kingdom Hearts file may sit there.
+
+!! "MY-GAMES (never share)" and "emulator\bios" hold YOUR game and YOUR PS2 BIOS. Never send them to anybody.
+
+------------------------------------------------------------------
+STEP 1: MAKE THE TWO-PLAYER DISC FILE (each player, once, about 3 minutes)
+------------------------------------------------------------------
+You need your OWN original disc file "Kingdom Hearts II - Final Mix (Japan)" (.iso, 4,330,192,896 bytes).
+1. Open the folder MAKE-KH2-DISC and double-click MAKE-KH2-DISC.bat.
+2. A window asks for your original disc file. Choose it. (Or drag the file onto MAKE-KH2-DISC.bat.)
+3. Wait for the five steps. Your original file is only read. A NEW file is written into this folder's
+   "MY-GAMES (never share)":  Kingdom Hearts II - Final Mix (2 Players TEST v5).iso
+4. At the end it must say OK and show this check number:
+       c0d652c46c603c093653d58f2506503a5089ce9c
+   Both players must get exactly this number. If it says NOT DONE, read the red text.
+Keep ONLY this one Kingdom Hearts file in this folder's MY-GAMES. Do not put the original disc file there.
+
+------------------------------------------------------------------
+STEP 2: THE SAME MEMORY CARD ON BOTH PCs
+------------------------------------------------------------------
+- At the first start neither player has a memory card in this test folder. The emulator makes a new empty one,
+  the same on both PCs. Nothing to do.
+- The first time you save, the game says "MEMORY CARD in slot 1 is not formatted. Format it?". The cursor is on
+  No: press Left, then Circle (Yes).
+- If you always play this test folder together, both cards stay the same.
+- If the game window says "Different memory card": close the game on BOTH PCs. Then either both delete the file
+  emulator\memcards\Mcd001.ps2 (the test saves are lost), or the host sends that one file to the friend
+  (it holds only the test saves) and the friend puts it into emulator\memcards.
+
+------------------------------------------------------------------
+STEP 3: START
+------------------------------------------------------------------
+1. Double-click START-KH2-TEST.bat. The window is called "PS2 Online - KH2 two-player TEST".
+   - Close your normal PS2-ONLINE first: the two cannot run at the same time (they use the same network ports).
+   - Windows may ask about the firewall again, because this is a new folder (for "pcsx2-qtx64" and
+     "ps2net-link"). Tick BOTH boxes, "Private networks" AND "Public networks", then click Allow.
+2. Game: the "2 Players TEST v5" file (new in build 12). Controllers: "2 players, no
+   multitap". Screen: "Normal 4:3" (as the game was made). "Widescreen 16:9" also worked with own screens in one
+   test; it is the host's choice.
+   Picture quality: "4x High" on BOTH PCs (see the top of this file).
+3. HOST: press "Host a game" and send the join code. FRIEND: paste the code, press "Join". Same as in the normal
+   package (reply codes, Join by IP and Radmin work the same way; see "PS2-ONLINE general help.txt").
+4. The first time, the launcher checks the game file (up to a minute). Then the box "What is happening" shows
+       Game file check: XXXX-XXXX-XXXX-XXXX
+   It must be the same on both PCs. If the friend's file is different:
+   - joining with a code says so in the launcher;
+   - joining by IP is refused in the game window with "Different patch files in the emulator's patches folder".
+     In this test folder that message also means "the two game files are not the same".
+5. Title screen: New Game with Circle. Every question: Circle. The opening movie and story scenes can be skipped
+   by either player: START, then Down, then Circle ("Skip Scene").
+
+------------------------------------------------------------------
+BUTTONS (Japanese disc layout, NOT changed)
+------------------------------------------------------------------
+  Circle   = confirm in menus; attack / use the selected command
+  Cross    = cancel in menus; jump
+  Triangle = Reaction Command (when the green command shows)
+  Square   = guard / dodge roll (after the skill is learned)
+  R1 = lock on, L1 (hold) = shortcuts, left stick = move, right stick = camera (player 1 only for now)
+  START    = main menu; in a scene: skip (either player)
+Xbox pad: B = Circle, A = Cross, Y = Triangle, X = Square. Keyboard: L = Circle, K = Cross, I = Triangle,
+J = Square, Enter = START, arrows or WASD = move, Q / E = L1 / R1.
+The English text names the right buttons for this layout ("Jump with Cross"). A few tutorial PICTURES may still
+show the US buttons.
+
+------------------------------------------------------------------
+WHAT WORKS IN THIS BUILD
+------------------------------------------------------------------
+- NEW: own screens. Each PC shows its own hero with its own camera (right stick), its own command menu and
+  cursor, its own big HP / MP gauge and its own lock-on ring. The small round gauge shows the other player.
+  When the game takes the camera (story scenes, the pause menu, the save menu, Game Over) both PCs show the
+  same full picture, and own screens come back afterwards.
+- A second hero stands beside player 1's hero in every room and in every form tried so far (Roxas, Sora, the lion,
+  the costumes).
+- Each hero is moved by its own controller: run, jump, attack and combos, guard, dodge, magic through the L1
+  shortcuts, own lock-on target. Each hero walks by its own camera.
+  Each hero's attacks go for his own target (in build 3 player 2's swings used player 1's target).
+- Each hero has its own HP, MP and Drive gauge. Each player's hits fill only his own Drive gauge.
+  Level and the abilities learned are common. Each player has his own armour and accessories (since build
+  15), switches his own abilities (since build 19), has his own Keyblade, item places, fight items and
+  shortcuts (since build 20) and his own wallet and bag (since build 21).
+- Enemies and bosses attack BOTH heroes. They go for the nearer hero; when both are near they take turns.
+- A hero whose HP reaches 0 goes DOWN and stays in the room, like Goofy. He gets up by himself after 45 seconds
+  in a fight (a few seconds outside a fight) with a quarter of his HP. The other player can bring him back sooner
+  with a Potion or with Cure (stand near him). It is Game Over only when BOTH heroes are down at the same time;
+  Continue then brings both back.
+- Room exits. Both heroes must be at the exit: one in the doorway, the other within a few steps. While one hero
+  waits there the screen says "Waiting for the other player." No exit while a hero is down.
+- Bosses have 75 % more HP than in the original game, because two heroes hit them (Pete in the Underworld cave:
+  40 % more, because of his time limit). Normal enemies are as in the original.
+- Tutorial boxes and talk text can be closed by either player (Circle).
+- Either player can open the main menu with START, move in it and close it. The save menu works with either
+  controller too. While a menu is open the game waits for both players, and both screens show the menu.
+- Both heroes pick up what enemies drop. A ball's HP, MP or Drive goes to the hero who took it and to nobody
+  else (tested for HP, MP and Drive taken by player 2: the Drive test made the HP balls give Drive); munny goes into
+  BOTH wallets (since build 21; before: the one wallet).
+- Saving works (one shared save). Since build 22 the save holds BOTH heroes' Drive gauges; after Load Game each
+  hero has his own again (before: both started with player 1's).
+- NEW: Drive Forms for both players. Each player picks Drive in his own menu. Only that player's hero changes;
+  he gets the form's gauge and the commands "Revert" and the form's own on his screen. He keeps the form through
+  a door. SINCE BUILD 13 BOTH HEROES CAN BE IN A FORM AT THE SAME TIME (tested: Valor with Wisdom, Limit Form
+  with Limit Form, Limit Form with Final). A form's row is dim for you only when the helper it needs is away
+  (the other hero's form is using Donald or Goofy: the game's own rule), or when the room has no memory left
+  for a second form (seen in the Hydra's room). When one hero leaves his form, only the helpers that no form
+  still uses come back. Tested for player 2 with Limit, Valor, Wisdom, Master and Final Form (the
+  helpers leave and come back as in the original game).
+- NEW IN BUILD 9: a Game Over while player 2 is in a form: Continue brings both heroes back, and he is still
+  in his form.
+- NEW: in the two fights where the enemy cannot be hurt (Roxas, with the Struggle bat) player 2's hits count, so
+  the story goes on whoever fights. The same rule is in six later fights of this kind.
+- NEW: the rules screen of a small game (Struggle, the jobs) can be closed by either player.
+- NEW IN BUILD 7: the nearer hero counts. A thing in the room (the moving bag, a boss, a chest) offers its green
+  Reaction Command to the hero who is nearer to it, on that player's screen. A hero who is down is skipped.
+  So either player can do the bag job, and either player can answer a boss's command.
+- NEW IN BUILD 6: skateboards. In the job Mail Delivery each player starts on his own board and has the board
+  commands (Heelflip, Jump) in his own menu. A letter handed in by player 2 counts. The whole job was played to
+  its end with both players handing in letters: "CLEAR!", the pay, and both heroes back in the street.
+- NEW IN BUILD 8: a second skateboard stands beside every skateboard of the game (all worlds), so both players
+  can ride in free roam. The five skateboard challenges (Twilight Town, Hollow Bastion, Agrabah, Halloween
+  Town, Port Royal) put each player on a board; either player's tricks and checkpoints count, and either
+  player can answer "Retry / Quit" at the end.
+- NEW IN BUILD 8: Donald and Goofy (and a world's guest) belong to the team. While the two heroes are close
+  together they follow player 1's hero as before. When the heroes are far apart (about 9 hero lengths), one
+  helper goes with each hero, the one who is nearer to him. When the heroes meet again the helpers are one
+  group again.
+- NEW IN BUILD 8: a boss's scripted move (it grabs a hero, the camera shows the move). The player whose hero is
+  in the move sees the move; the OTHER player keeps his own camera and can go on playing.
+- NEW IN BUILD 9: the move's follow-up command (green, Triangle; "Break Raid" in the first big boss fight) shows
+  in the menu of the player whose hero is in the move, and that player's Triangle starts it. (In build 8 it sat
+  in player 1's menu.)
+- NEW IN BUILD 9: skateboards in town with ONE rider. The rider has the board menu, the walker has his normal
+  menu (in build 8 the walker's menu looked broken). On a board: Square = get off.
+- NEW IN BUILD 9: Donald and Goofy heal BOTH heroes, with Cure and with items. Their order: the helper himself,
+  the hero he follows, the other hero, the other helper. (Before, player 2's hero was never healed while all
+  were together.)
+- NEW IN BUILD 9: the item shop and the pages of the main menu (Journal, Config) can be opened and used with
+  player 2's controller. Both screens show the shop or the menu while it is open.
+- NEW IN BUILD 9: Limits (menu, second page, "Limit"). Either player can start a Limit with Donald or Goofy.
+  The Limit's own commands show in the menu of the player who started it, and he plays it to the end. (In build
+  8 a Limit started by player 2 put its commands into player 1's menu and stopped after the first move.) Tried
+  with Whirli-Goof, Comet and Trinity. As in the original game the other helper leaves while a Limit runs.
+- NEW IN BUILD 9: the button-mash parts of some boss moves now listen to both controllers. Not seen in a test.
+- NEW IN BUILD 10: Summons (menu, second page, "Summon"). Either player can call one. The summoned friend comes
+  to the hero who called him and fights beside that hero. His picture, the SUMMON gauge, "Dismiss" and his own
+  commands show on the caller's screen only. Donald and Goofy leave while he is there and come back when he goes
+  (Dismiss, or the gauge runs out). While one Summon is out the other player cannot call another one (his list
+  is grey). When player 1 calls, the game shows its entrance movie on player 1's screen and both players wait
+  for it. When player 2 calls there is no movie: the friend just appears. Tried with all four (Chicken Little,
+  Genie, Stitch, Peter Pan).
+- NEW IN BUILD 11: a Summon and a door. The friend comes along into the next room and his gauge goes on, on the
+  caller's screen; the other player keeps his own Drive gauge. A Summon is not possible while the other player
+  is in a Drive Form that uses up a helper (the names in the list are grey): this is the game's own rule.
+- NEW IN BUILD 11: "Continue" after a Game Over inside a boss fight. The game goes back to the last normal room
+  it remembered, plays that room's story scene again (press START to skip it) and starts the fight again, with
+  both heroes and both views. Tested in the first big boss fight. This is how the original game does it.
+- NEW IN BUILD 11: a Game Over while a Summon is out: Continue brings both heroes back. A Summon that player 2
+  had already brought into the room leaves right after the Continue (he can call it again when his gauge is
+  full); nothing else changes.
+- NEW IN BUILD 11: a hidden fault of builds 9 and 10 is closed. In a long boss fight, after player 2 had used a
+  boss move's follow-up command, the game could run out of its green command signs and then wrote to a wrong
+  place in memory (50 fault lines in the log; in the test nothing bad followed, but it was luck). Now the game
+  can no longer run out. Player 2's green sign may be missing for a moment in such a fight; the command
+  itself is still in his menu.
+- NEW IN BUILD 12: THE GUMMI SHIP. Player 2 has his own ship: his stick flies it, his Circle fires its guns,
+  his shots count for the one score. His START opens the pause menu. The Gummi Menu, the pause menu, the
+  results and "Retry" listen to either controller. All nine routes were flown by a script with two ships.
+  THE GUMMI SHIP SINCE BUILD 16: THE ENEMIES CAN DAMAGE PLAYER 2'S SHIP, and it has its own hull. The flight is
+  lost when EITHER ship is destroyed (the same rule as on the Light Cycles). There is still one hull gauge: it
+  shows the hull of the WEAKER ship, so both players see how near the end is. SINCE BUILD 20 A DIGIT LEFT OF
+  THE GAUGE SAYS WHOSE SHIP THAT IS (1 or 2), AND EACH PLAYER HAS HIS OWN SCORE: the number in the "SCORE" frame
+  is player 1's points, the number to the right of the frame is player 2's. A cannon shot's points go to the
+  ship that fired it; the points of other weapons (lasers and the like) cannot be told apart yet and go to
+  player 1's number. The flight's result and its medals use the sum, as before. A repair item mends both
+  ships. Both ships look the same; player 2's starts a little to the right. Tested by scripts (both ships
+  are hit; either ship falling ends the flight; all nine routes flown with two ships; only player 1 firing,
+  only player 2 firing, both firing); not yet played by two people.
+- NEW IN BUILD 12: THE SPECIAL RIDES. The new disc file gives player 2 his own Light Cycle (Space Paranoids),
+  his own flying Sora in the Pooh game with the balloon, and his own rider in the Magic Carpet parts of
+  Agrabah (the fights in the ruins, the race to the tower, Jafar). Each is moved by its own controller.
+  SINCE BUILD 16 EACH HERO HAS HIS OWN CARPET on the carpet rides (before, player 2's hero flew in the riding
+  pose with nothing under him). One thing to know: on the Light Cycle the ride is over when EITHER cycle is
+  destroyed, as the game does it for one rider; nobody can be picked up there.
+- THE THREE SMALL GAMES (since build 19). The carpet escape from the ruins, the toy cannon (Gift Wrapping) and
+  the sidecar near the end were made for one hero; from build 12 to 16 both controllers drove that one hero.
+  NOW PLAYER 2 HAS HIS OWN: the game makes a second hero (or cannon) beside the first when the small game
+  begins.
+  The carpet escape: two heroes, each on his own carpet, each with his own HP; when one falls the other can
+  help him up, as in a fight. The sidecar: two machines, each with its own "Attack / Laser / Drain" buttons
+  and its own HP; a Game Over and "Continue" bring both back. The toy cannon: two cannons side by side, each
+  turned and fired by its own controller; SINCE BUILD 20 EACH PLAYER HAS HIS OWN VIEW: the game's view from
+  behind the cannon, centred on HIS cannon. The score and the toy count are for both, and "Reload" loads both.
+  Tested by scripts (the escape flown to its end; the sidecar through a Game Over and "Continue"; the toy
+  cannon played to its end and on into the next room). Not yet played by two people.
+- The title menu and other screens without a hero listen to either controller, as since build 12.
+- NEW IN BUILD 12: the world map (fly, "Land" with Triangle), the Moogle's workshop and the "Retry / Quit"
+  menu at the end of a small game work with player 2's controller.
+- NEW IN BUILD 12: when Donald or Goofy uses a Potion, it goes to the hero who has less HP (before, always to
+  player 1's hero).
+- NEW IN BUILD 12: after "Continue" player 2 has the Drive gauge, the form and the Summon he had when he came
+  into the room, as player 1 always had. (In build 11 a Summon he had brought into the room left at once.)
+- NEW IN BUILD 12: Limits were tested again. They work for player 2 also when the heroes are far apart. A
+  Limit needs a fight; in a quiet room the list is grey for both players, as in the original game.
+- NEW IN BUILD 12: three sources of fault lines are closed: the game ran out of green command signs in long
+  boss fights (it has twice as many now), a Drive Form carried through a door, and magic effects that had
+  ended. Also a grey square in place of player 2's menu during "READY GO!" and an orange glint beside his
+  gauge in the first town.
+- NEW IN BUILD 10: the dark form (it can come by itself when a player starts a Drive Form) was tried with
+  player 2: his hero turns dark, both helpers leave, his FORM gauge counts down, then everything is back.
+- Known small thing: Stitch walks on the screen glass. He shows on BOTH screens, whoever called him.
+- Known small thing: the sound is one sound for both PCs. You hear the game from player 1's camera.
+
+------------------------------------------------------------------
+KNOWN PROBLEMS (no need to report these)
+------------------------------------------------------------------
+- Own screens are new. If they give trouble (wrong picture, very slow, a crash), read the folder
+  SHARED-SCREEN-FALLBACK: it holds the same game with one shared screen.
+- The game can drop below its normal pace for a moment in busy fights, because it draws the world twice.
+- Text boxes, story text and the "Waiting for the other player." sign appear on both screens (both players
+  should see them).
+- Donald and Goofy stay with player 1's hero while the heroes are together (see above for far apart).
+- When one player's menu changes its look (he hops on or off a skateboard), the rows of the other player's menu
+  can blink for a moment.
+- Item drops (not the HP / MP / munny balls): since build 22 either player's hero picks them up, and what is
+  picked up goes into both bags (tested with a material dropped in Agrabah).
+- Since build 22 you choose who gets a Potion, Hi-Potion, Ether or Elixir: the first "Sora" in the window is
+  player 1's hero, the last "Sora" player 2's (if you pick yourself while your partner is down, he gets it).
+  Shortcut items: the hero who is down, else the one who used it.
+- While a hero is down there is no countdown, only the red face in the gauge.
+- The item shop, the Moogle's workshop, the main menu with its pages, the save menu, the world map, the Gummi
+  Menu, the Game Over menu and the "Retry / Quit" menus work with either controller.
+- Some small games listen for a button on EITHER controller where the game means "the rider" (the whirlwinds
+  in the Land of Dragons, for example): a press by one player can count for the other's ride.
+- A boss move that grabs or carries a hero: up to build 19 it took one hero; build 20 took both heroes; SINCE
+  BUILD 21 AN ENEMY'S GRAB TAKES THE HERO IT IS AIMED AT AGAIN (shared moves take both): read "BOSSES
+  THAT HOLD A HERO" further down. Since build 13 the move's green command is in the menu of the player whose
+  hero the boss took (tested at Shan-Yu's gate clash: player 2 alone can win it).
+  Shan-Yu's clash has its own rule (next point).
+- SHAN-YU'S CLASH (since build 16). When Shan-Yu locks blades with one hero and the other hero is up, free and
+  near (about 500 units, a few steps), the other hero is put beside and a little behind his friend and is in
+  the clash too. Both screens show the clash. Each player has "Press" (and at the end "Takedown") in his own
+  menu, and each player's Triangle pushes. One press makes both heroes push and counts once, and the clash
+  lasts as long as in the game, so two players who both press win it sooner than one. A hero who is far away
+  when the clash starts stays free and can go on fighting. The falcon's lift takes one hero only, as before.
+  Tested with scripts for both players, in both roles; not yet played by two people.
+- PLAYER 2'S OWN GEAR (since build 15). The pause menu belongs to the player who opened it. When PLAYER 2
+  presses START, "Items", then "Sora" shows HIS armour and accessories, and what he puts on or takes off there
+  is his alone. When player 1 presses START it shows player 1's. Each takes from his own bag (since build 21;
+  before: the one common bag). Each hero
+  gets the Strength, Defense, AP and the other numbers of his own things, in every room and after a load.
+  SINCE BUILD 19 THE ABILITIES' SWITCHES ARE HIS OWN TOO. When PLAYER 2 opened the menu, "Abilities", then
+  "Sora" shows which abilities HE has switched on and his own AP count; "Equip" / "Don't Equip" there changes
+  only his. In a fight each hero has the abilities of his own switches. Every ability the game gives is given
+  to both, and switched on for him when the game switches it on. In a new game, and in a save from an older
+  build, he starts with the same switches as player 1.
+  SINCE BUILD 20 HIS KEYBLADE, HIS ITEM PLACES, HIS FIGHT ITEMS AND HIS SHORTCUTS ARE HIS OWN TOO. When PLAYER
+  2 opened the menu, "Items", then "Sora" shows HIS Keyblade and HIS item places, and "Customize" his own four
+  shortcuts. Each player has his own stock of the fight items (Potion, Hi-Potion, Ether, Elixir, Mega-Potion,
+  Mega-Ether, Megalixir): what one player uses or puts into a place is not taken from the other. WHATEVER THE
+  GAME GIVES (a chest, a prize, a reward) IS THERE FOR EACH PLAYER: a fight item goes to both stocks, and
+  (since build 21) a Keyblade, an armour, an accessory or a material into both bags. The two
+  heroes can carry different Keyblades; a Keyblade that the story itself puts into the hero's hand goes into
+  both hands.
+  SINCE BUILD 21 EACH PLAYER HAS HIS OWN WALLET AND HIS OWN BAG (Keyblades, armour, accessories and
+  materials; the fight items had their own stock already). Munny the game gives goes into both wallets in full;
+  what the game gives (a chest, a prize, a reward) goes into both bags, once into each (no longer two copies
+  in one bag). A SHOP OR THE MOOGLE IS THE SHOP OF THE PLAYER WHO OPENED IT (with his Triangle): it shows HIS
+  munny and HIS things; what he buys he pays from his wallet and it goes into his bag, what he sells leaves
+  his bag and its munny goes into his wallet, and the Moogle uses his materials. Player 2's pause menu shows
+  his munny and his bag. PLAYER 2'S BAG KEEPS UP TO 7 OF ONE KEYBLADE, ONE ARMOUR OR ONE ACCESSORY (and up to
+  99 of one material, as the game); player 1's up to 99, as the game. A thing one player puts on Donald,
+  Goofy or a guest comes back into the bag of the player who takes it off there.
+  STILL COMMON: Tent, the Boosts and the Drive recoveries (they act on the one Sora and the party), Donald's,
+  Goofy's and the guests' weapons, the recipes, Torn Pages, the magic elements and the key items, the list of
+  abilities learned, the Drive Forms' own abilities and a Drive Form's second Keyblade. In a new game, and in
+  a save from an older build, player 2 starts with the same Keyblade, item places, stock, shortcuts, munny and
+  bag as player 1.
+  IN A SAVE FROM AN OLDER BUILD player 2 has nothing on at first (before build 15 he had the same bonuses as
+  player 1). Give him something from the bag.
+  Small things: when the game gives an ability switched on, player 2 gets it switched on even if his own AP
+  is used up; his menu then shows more AP in use than he has until he switches something off. A shop marks
+  player 1's things as "equipped". While a menu is
+  open either controller can move in it, as before.
+- BOSSES THAT HOLD A HERO (changed in build 21). A BOSS'S GRAB, RIDE OR THROW TAKES ONLY THE HERO IT IS AIMED
+  AT; THE OTHER PLAYER KEEPS FIGHTING. (Build 20 put the other hero into every hold too. Now a grab that aims
+  at one hero takes that hero only, as the game.) In the last Xemnas's part where Riku must free Sora, the
+  player whose hero Xemnas took plays Riku with his own controller, and the other player fights on.
+  SHARED MOVES TAKE BOTH HEROES. The last Xemnas's laser part at the end (the game itself puts the player and
+  Riku into it). And, as in build 20, the moves of a thing that is no enemy: the whirlwinds that lift the heroes
+  in the Storm Rider fight, moving parts of The World That Never Was, the skateboards and Mail Delivery: both
+  heroes go along. In the laser part both heroes stand together and EACH PLAYER HAS HIS OWN "REFLECT" in his own menu: a press of
+  either player makes both heroes reflect and counts once. When both press in the very same instant, that is
+  one reflect.
+  EACH PLAYER KEEPS HIS OWN CONTROLLER IN A HOLD (build 20 joined the two controllers while both heroes were
+  held; that is gone). One press never counts twice.
+  NOT TAKEN TOGETHER, on purpose: a move that a hero starts with his OWN green command (Xaldin's jumps, Demyx's
+  water forms): he does it alone, and the other player can press the same command for himself. A hero who is
+  down is not taken. Shan-Yu's hold has its own rule, as before.
+  THE GROUNDSHAKER'S FROZEN HERO (builds 12 to 16) IS CURED AT ITS CAUSE: its shake-off captured whichever hero it
+  hit, also the one who stood beside the ride, and nothing ever let that hero go. That capture is no longer
+  made. Two safety nets stay: a hero left behind in a hold is thrown off about a second after the other one
+  is free, and a hero who stands in one and the same held pose for a minute is thrown off too.
+  LUXORD'S TRICKS (both fights): a hero who lost a card or command trick could stand still for up to a minute
+  (builds 14 to 19), because the OTHER hero's hit on Luxord broke off the very act that turns the loser into
+  a card or a die and lets him go. Cured: while a hero stands in Luxord's trick, a hit still takes Luxord's HP
+  but does not make him flinch. The loser is let go after two to seven seconds, as the game means it.
+  Not yet played by two people. If a hero is let go only after a minute, or not at all, tell me the fight.
+- SINCE BUILD 14: XIGBAR'S SNIPER PART and LUXORD'S CARD TRICK (both in The World That Never Was) work with two
+  heroes in the tests: the hero who presses the green command first does the move, the other stays free. In
+  builds 12 and 13 a hero could stay held for the rest of the fight when both pressed at once. A test script
+  cannot judge Luxord's card game itself, so SAVE BEFORE these two fights and tell me what you saw.
+  While a boss holds one hero in such a move, the OTHER player's Triangle on that boss does nothing. That is
+  on purpose.
+- KING MICKEY (when both heroes fall in a fight where the King can come): since build 13 EACH player plays a
+  King Mickey. The two share one HP bar and one Drive gauge. Healing Light brings both heroes back.
+- Enemy groups now wake up when EITHER hero walks into their place (before build 13 only for player 1's hero).
+- THE SAMURAI'S DUEL WORKS FOR PLAYER 2 in the tests (build 21): "Duel Stance" and "The End" are in his own menu,
+  and the Samurai falls to his finish. THE LARGE BODY'S "FULL SWING" works for player 2 too (build 22's tests):
+  it is offered only after a combo's last hit knocks a Large Body back; stand at its front or back, press Triangle.
+- The first hours (Roxas in Twilight Town) are full of special jobs. All of them can now be done by either
+  player. In Mail Delivery both ride and both can hand in letters. If a job cannot be finished, let player 1 do
+  it alone and tell me which one it was.
+  Grandstander (keep the ball in the air) now counts player 2's hits too; after a miss the ball comes back
+  beside player 1's hero.
+- If a form goes wrong, tell me which form and which player.
+- Continue after a Game Over inside a fight was tested in three fights (two bosses and a small game) with a
+  test line that gives the test disc the room memory a real game has. Still: SAVE OFTEN. If the game ever
+  stops after "Continue": close it on both PCs, start again, choose Load Game, and tell me in which fight.
+- Every mission of the game (302 of them) was STARTED once with two heroes by a test script: the first two
+  and a half minutes of each, with level 1 heroes. No script played a boss or a small game to its end, and no
+  script can judge how a fight feels. That is your part.
+- Saving while a Summon is out works: after loading, the Summon is there again and belongs to the player who
+  called it. Since build 22 player 2's Drive gauge after a load is his own saved one (before: player 1's).
+- Everything was tested by scripts on one PC only. You are the first two humans to play it.
+
+------------------------------------------------------------------
+WHAT TO SEND BACK
+------------------------------------------------------------------
+- The folder "logs" of this test folder, from BOTH PCs (every session writes a connection file and a game file).
+- A few words: where in the game you were, what each of you did, what you saw.
+- If the screen says "OUT OF SYNC": what you were doing at that moment.
+
+------------------------------------------------------------------
+RULES
+------------------------------------------------------------------
+- Both players: this same test folder (same package-id.txt), the same disc file (same check number), the same
+  BIOS file as always, the same memory card.
+- Do not change emulator settings (graphics, speed hacks) in "Controller settings"; only the controls.
+- The same Picture quality on both PCs ("4x High").
+- Do not add or remove files in emulator\patches. (The launcher writes one small file there itself,
+  game-file-check.pnach. It is not a patch; it makes the join check compare the game file. The file ending in
+  .view tells the emulator which picture this PC shows; without it both PCs show player 1's picture.)
+- For your other games keep using your normal PS2-ONLINE folder.

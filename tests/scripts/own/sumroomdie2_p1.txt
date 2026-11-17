@@ -1,0 +1,30 @@
+# hb9h disc + Summon kit + forced fall of both heroes at 7700: New Game, into the door at 5700, out at 6600, attacks
+# (Circle every 60 frames, 6700-7640: player 1's Drive gauge changes in the room), then Circle every 250 frames from 7800 (Continue)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5700 60 LY=255
+6600 60 LY=255
+6700 4 O
+6760 4 O
+6820 4 O
+6880 4 O
+6940 4 O
+7000 4 O
+7060 4 O
+7120 4 O
+7180 4 O
+7240 4 O
+7300 4 O
+7360 4 O
+7420 4 O
+7480 4 O
+7540 4 O
+7600 4 O
+7800 4 O
+8050 4 O
+8300 4 O
+10500 1 

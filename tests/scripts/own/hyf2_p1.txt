@@ -1,0 +1,13 @@
+# TEST (eighth round, plan row 44): the Hydra's room. Player 1 opens his Drive list at 6000 (three Down, Circle) and presses Circle on its first row at 6200.
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+6000 4 DOWN
+6030 4 DOWN
+6060 4 DOWN
+6100 4 O
+6200 4 O
+999999 1

@@ -1,0 +1,12 @@
+# fight disc + kit: New Game; player 1 runs away from 4760 for 130 frames, casts Cure (L1 + Cross) at 5000
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4760 130 LX=255
+4980 20 L1
+5000 4 L1 X
+5004 36 L1
+9000 1 

@@ -1,0 +1,6 @@
+# roam disc: P2 door at 4500; both walk back at 5600 and out again at 6500; bot after 7400
+4500 36 LY=0
+4560 60 LX=0
+5600 150 LY=255
+6500 150 LY=255
+7400 1 

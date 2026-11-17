@@ -1,0 +1,12 @@
+# TEST (ninth round, plan row 39): PLAYER 2 changes HIS Keyblade in his pause menu (5000 to 5800) and then stands still
+# (keychg2_p2.txt without the attacks: a later menu of player 1's must not be disturbed by his presses).
+5000 4 START
+5100 4 O
+5200 4 O
+5300 4 O
+5400 4 DOWN
+5460 4 O
+5600 4 X
+5700 4 X
+5800 4 X
+999999 1

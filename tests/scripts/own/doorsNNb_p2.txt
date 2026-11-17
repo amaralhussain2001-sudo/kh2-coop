@@ -1,0 +1,8 @@
+# TEST (tenth round, control b in co-op): player 2 (no form) follows player 1 through the doors: up 36 at 4700, left 80 at 5400, down 40 at 6900, 7900, 8900, 9900.
+4700 36 LY=0
+5400 80 LX=0
+6900 40 LY=255
+7900 40 LY=255
+8900 40 LY=255
+9900 40 LY=255
+999999 1

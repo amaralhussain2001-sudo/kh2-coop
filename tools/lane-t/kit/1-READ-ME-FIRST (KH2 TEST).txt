@@ -1,0 +1,115 @@
+PS2 ONLINE - KINGDOM HEARTS II, TWO PLAYERS - TEST BUILD
+=========================================================
+
+This is a TEST. It lives in its own folder (PS2-ONLINE-KH2-TEST). Your normal PS2-ONLINE folder is not changed
+and is not used. BOTH players must use this test folder, not the normal one.
+
+What it is: Kingdom Hearts II Final Mix with a second hero. Player 1 plays the game's hero (Roxas at the start,
+Sora later). Player 2 plays a second copy of the same hero with their own controller. Both PCs show the same
+picture. The text is English. The buttons are the ones of the Japanese disc (see below).
+
+!! "MY-GAMES (never share)" and "emulator\bios" hold YOUR game and YOUR PS2 BIOS. Never send them to anybody.
+
+------------------------------------------------------------------
+STEP 1: MAKE THE TWO-PLAYER DISC FILE (each player, once, about 3 minutes)
+------------------------------------------------------------------
+You need your OWN original disc file "Kingdom Hearts II - Final Mix (Japan)" (.iso, 4,330,192,896 bytes).
+1. Open the folder MAKE-KH2-DISC and double-click MAKE-KH2-DISC.bat.
+2. A window asks for your original disc file. Choose it. (Or drag the file onto MAKE-KH2-DISC.bat.)
+3. Wait for the five steps. Your original file is only read. A NEW file is written into this folder's
+   "MY-GAMES (never share)":  Kingdom Hearts II - Final Mix (2 Players TEST v1).iso
+4. At the end it must say OK and show this check number:
+       a60c8ab94399f276725591bff1d97f6c8e5d6887
+   Both players must get exactly this number. If it says NOT DONE, read the red text.
+Keep ONLY this one Kingdom Hearts file in this folder's MY-GAMES. Do not put the original disc file there.
+
+------------------------------------------------------------------
+STEP 2: THE SAME MEMORY CARD ON BOTH PCs
+------------------------------------------------------------------
+- At the first start neither player has a memory card in this test folder. The emulator makes a new empty one,
+  the same on both PCs. Nothing to do.
+- The first time you save, the game says "MEMORY CARD in slot 1 is not formatted. Format it?". The cursor is on
+  No: press Left, then Circle (Yes).
+- If you always play this test folder together, both cards stay the same.
+- If the game window says "Different memory card": close the game on BOTH PCs. Then either both delete the file
+  emulator\memcards\Mcd001.ps2 (the test saves are lost), or the host sends that one file to the friend
+  (it holds only the test saves) and the friend puts it into emulator\memcards.
+
+------------------------------------------------------------------
+STEP 3: START
+------------------------------------------------------------------
+1. Double-click START-KH2-TEST.bat. The window is called "PS2 Online - KH2 two-player TEST".
+   - Close your normal PS2-ONLINE first: the two cannot run at the same time (they use the same network ports).
+   - Windows may ask about the firewall again, because this is a new folder (for "pcsx2-qtx64" and
+     "ps2net-link"). Tick BOTH boxes, "Private networks" AND "Public networks", then click Allow.
+2. Game: the "2 Players TEST v1" file. Controllers: "2 players, no multitap". Screen: "Normal 4:3" (as the game
+   was made). "Widescreen 16:9" also stayed in sync in my test; it is a community change of the game's camera,
+   so it is the host's choice.
+3. HOST: press "Host a game" and send the join code. FRIEND: paste the code, press "Join". Same as in the normal
+   package (reply codes, Join by IP and Radmin work the same way; see "PS2-ONLINE general help.txt").
+4. The first time, the launcher checks the game file (up to a minute). Then the box "What is happening" shows
+       Game file check: XXXX-XXXX-XXXX-XXXX
+   It must be the same on both PCs. If the friend's file is different:
+   - joining with a code says so in the launcher;
+   - joining by IP is refused in the game window with "Different patch files in the emulator's patches folder".
+     In this test folder that message also means "the two game files are not the same".
+5. Title screen: New Game with Circle. Every question: Circle. The opening movie and story scenes can be skipped
+   by player 1: START, then Down, then Circle ("Skip Scene").
+
+------------------------------------------------------------------
+BUTTONS (Japanese disc layout, NOT changed)
+------------------------------------------------------------------
+  Circle   = confirm in menus; attack / use the selected command
+  Cross    = cancel in menus; jump
+  Triangle = Reaction Command (when the green command shows)
+  Square   = guard / dodge roll (after the skill is learned)
+  R1 = lock on, L1 (hold) = shortcuts, left stick = move, right stick = camera (player 1 only for now)
+  START    = pause; in a scene: skip
+Xbox pad: B = Circle, A = Cross, Y = Triangle, X = Square. Keyboard: L = Circle, K = Cross, I = Triangle,
+J = Square, Enter = START, arrows or WASD = move, Q / E = L1 / R1.
+The English text names the right buttons for this layout ("Jump with Cross"). A few tutorial PICTURES may still
+show the US buttons.
+
+------------------------------------------------------------------
+WHAT WORKS IN THIS BUILD
+------------------------------------------------------------------
+- A second hero stands beside player 1's hero in every room and in every form tried so far (Roxas, Sora, the lion,
+  the costumes).
+- Each hero is moved by its own controller: run, jump, attack and combos, guard, dodge, magic through the L1
+  shortcuts, own lock-on target.
+- Each hero has its own HP and MP. Level and skills are the same for both.
+- The camera, the command menu and the HP gauge on screen are player 1's.
+- A room exit works only when BOTH heroes stand in it.
+- Saving works (one shared save), also Continue after a Game Over.
+
+------------------------------------------------------------------
+KNOWN PROBLEMS (no need to report these)
+------------------------------------------------------------------
+- Enemies attack only player 1's hero. Player 2 is hit only by stray attacks.
+- If EITHER hero's HP reaches 0 it is Game Over. (Planned: a fallen hero gets up again like Goofy.)
+- Player 2 has no HP gauge, no command menu and no button prompts on screen. The two heroes look the same.
+- The camera follows player 1 only. Player 2 can walk out of the picture.
+- Exits: both heroes must stand in the doorway. At a narrow door player 2 may have to step sideways into it.
+  There is no "waiting for the other player" message yet.
+- START, the main menu and the save menu listen to controller 1 only.
+- NOT tested yet with two heroes: Drive Forms, Limits, Summons, items used on the other hero, most bosses, the
+  jobs and minigames, skateboard, Struggle. The first hours (Roxas in Twilight Town) are full of such special
+  activities, so expect problems there.
+- Everything was tested by scripts on one PC only. You are the first two humans to play it.
+
+------------------------------------------------------------------
+WHAT TO SEND BACK
+------------------------------------------------------------------
+- The folder "logs" of this test folder, from BOTH PCs (every session writes a connection file and a game file).
+- A few words: where in the game you were, what each of you did, what you saw.
+- If the screen says "OUT OF SYNC": what you were doing at that moment.
+
+------------------------------------------------------------------
+RULES
+------------------------------------------------------------------
+- Both players: this same test folder (same package-id.txt), the same disc file (same check number), the same
+  BIOS file as always, the same memory card.
+- Do not change emulator settings (graphics, speed hacks) in "Controller settings"; only the controls.
+- Do not add or remove files in emulator\patches. (The launcher writes one small file there itself,
+  game-file-check.pnach. It is not a patch; it makes the join check compare the game file.)
+- For your other games keep using your normal PS2-ONLINE folder.

@@ -1,0 +1,17 @@
+# TEST (eighth round, plan row 44): disc test-s1-hb13s. Player 1 takes Limit Form at 4700, walks up 36 frames at 5500 and left 60 frames at 5600 into the west door.
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 4 DOWN
+4730 4 DOWN
+4760 4 DOWN
+4800 4 O
+4815 4 DOWN
+4827 4 DOWN
+4870 4 O
+5500 36 LY=0
+5600 60 LX=0
+999999 1

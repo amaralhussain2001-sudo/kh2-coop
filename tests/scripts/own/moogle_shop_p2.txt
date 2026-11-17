@@ -1,0 +1,13 @@
+# Marketplace disc with the Moogle, P2 held beside the Moogle (pin c): turn, Triangle = Mog's Workshop; Circle (Synthesize), Down x2,
+# Circle, Cross x2 (back), Down (Quit), Circle
+5030 30 LY=0
+5100 4 TRI
+5300 4 O
+5500 4 DOWN
+5600 4 DOWN
+5700 4 O
+5850 4 X
+5950 4 X
+6050 4 DOWN
+6150 4 O
+6600 1 

@@ -1,0 +1,6 @@
+# roam disc + test kit, own screens: P2 moves the cursor to row 2 (Magic), opens the sub-menu, closes it, then holds L1 (shortcut list)
+4700 4 DOWN
+4760 4 O
+4900 4 X
+5000 120 L1
+5300 1 

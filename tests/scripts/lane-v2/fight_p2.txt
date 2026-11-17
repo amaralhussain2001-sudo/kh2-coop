@@ -1,0 +1,5 @@
+# P2 (fight disc): walk left a little, lock on with R1 later than P1, move the menu cursor down
+4600 40 LX=0
+4950 4 R1
+5050 4 DOWN
+7200 1 

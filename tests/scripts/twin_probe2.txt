@@ -1,0 +1,26 @@
+# reach control, dismiss tutorial boxes, then move / jump / attack
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4200 4 START
+4230 4 DOWN
+4260 4 O
+4680 4 START
+4710 4 DOWN
+4740 4 O
+5200 4 O
+5350 4 O
+5500 4 O
+5650 4 O
+5800 4 O
+5950 4 O
+6300 90 LX=255
+6500 90 LY=0
+6700 4 X
+6900 4 O
+7100 4 SQ
+7300 4 TRI
+7500 1 

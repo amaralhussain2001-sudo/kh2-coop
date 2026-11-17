@@ -1,0 +1,10 @@
+# TEST (2026-11-15 night): player 1 starts the game (ctl_p1's presses before 4600), then runs away (up 400 frames, left 300) and stands
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4800 400 LY=0
+5300 300 LX=0
+999999 1 

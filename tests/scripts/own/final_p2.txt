@@ -1,0 +1,17 @@
+# roam disc + Drive kit: P2 picks Drive > 5th form (Final), attacks, then Revert at 6100
+4700 4 DOWN
+4730 4 DOWN
+4760 4 DOWN
+4800 4 O
+4830 4 DOWN
+4845 4 DOWN
+4860 4 DOWN
+4875 4 DOWN
+4900 4 O
+5400 4 O
+5430 4 O
+6000 4 DOWN
+6030 4 DOWN
+6060 4 DOWN
+6100 4 O
+999999 1

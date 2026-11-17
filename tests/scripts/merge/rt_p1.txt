@@ -1,0 +1,12 @@
+# roam disc: New Game; P1 door at 4900; walks back at 5700; out again at 6600
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4900 33 LY=0
+4960 50 LX=0
+5700 150 LY=255
+6600 150 LY=255
+7400 1 

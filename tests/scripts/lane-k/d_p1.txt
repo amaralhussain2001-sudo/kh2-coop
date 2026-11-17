@@ -1,0 +1,11 @@
+# P1: New Game; turn camera 1 slowly for a long time; pause at 5300 and resume at 5400
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4900 200 RX=190
+5300 4 START
+5400 4 START
+5600 1 

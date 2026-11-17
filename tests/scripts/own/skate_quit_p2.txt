@@ -1,0 +1,4 @@
+# skate challenge: player 2 closes the rules screen (4800); at the result menu Circle at 9060 (Quit)
+4800 4 O
+9060 4 O
+999999 1 

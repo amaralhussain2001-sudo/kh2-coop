@@ -1,0 +1,14 @@
+gametitle=Kingdom Hearts II Final Mix (SLPM-66675, CRC F266B00B)
+comment=Two-player project, lane A v3 (pad): every player object uses its own controller.
+comment=Every PC in an online game must have this same file (it changes game code).
+patch=1,EE,000F0000,word,3C0F0035
+patch=1,EE,000F0004,word,8DEE2400
+patch=1,EE,000F0008,word,08059FC6
+patch=1,EE,000F000C,word,000E202B
+patch=1,EE,000F0020,word,8C8E0B38
+patch=1,EE,000F0024,word,ADEE09E4
+patch=1,EE,000F0028,word,08075AE8
+patch=1,EE,000F002C,word,01E0202D
+patch=1,EE,00178898,word,00000000
+patch=1,EE,001788A0,word,0803C008
+patch=1,EE,0017A000,word,0C03C000

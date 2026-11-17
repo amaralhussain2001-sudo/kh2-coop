@@ -1,0 +1,4 @@
+# pad 2 on the free-roam disc: walk up and left out of the west door; bot after 4700
+4500 30 LY=0
+4560 90 LX=0
+4700 1 

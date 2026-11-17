@@ -1,0 +1,3 @@
+# TEST (eighth round, job 7): player 2 runs forward alone into the enemy spawn zone at 4900 (lane R's spawn_p2, later)
+4900 40 LY=0
+999999 1

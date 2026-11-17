@@ -1,0 +1,16 @@
+# quiet Borough disc + Drive kit with the dark form: P2 picks Drive > 6th form (Anti), attacks, waits
+4700 4 DOWN
+4730 4 DOWN
+4760 4 DOWN
+4800 4 O
+4830 4 DOWN
+4845 4 DOWN
+4860 4 DOWN
+4875 4 DOWN
+4890 4 DOWN
+4920 4 O
+5400 4 O
+5430 4 O
+5460 4 O
+6000 60 LX=0
+999999 1

@@ -1,0 +1,11 @@
+# TEST (tenth round, glue 73): New Game, then PLAYER 2 opens Items, takes the first item (Potion), and in the PARTY window
+# goes down three rows (Sora, Donald, Goofy, SORA = player 2's hero) and confirms: once, at 5000 .. 5300.
+5000 4 DOWN
+5040 4 DOWN
+5080 4 O
+5160 4 O
+5200 4 DOWN
+5230 4 DOWN
+5260 4 DOWN
+5300 4 O
+5600 1 

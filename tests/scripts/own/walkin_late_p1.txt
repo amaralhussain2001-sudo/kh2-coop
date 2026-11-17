@@ -1,0 +1,10 @@
+# TEST (tenth round, open item d): New Game; then (the fall-back if player 2 cannot answer the box) DOWN at 9000, Circle at 9200.
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+9000 4 DOWN
+9200 4 O
+14000 1 

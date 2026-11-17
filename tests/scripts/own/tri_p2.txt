@@ -1,0 +1,3 @@
+# roam disc: P2 presses Triangle at 5000 (is the dim Examine banner a real command?)
+5000 4 TRI
+5300 1 

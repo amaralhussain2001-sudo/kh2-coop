@@ -1,0 +1,13 @@
+# TEST (eighth round, plan row 44): player 2 takes Limit Form (row 3) at 5400 and reverts at 6400.
+5400 4 DOWN
+5430 4 DOWN
+5460 4 DOWN
+5500 4 O
+5515 4 DOWN
+5527 4 DOWN
+5570 4 O
+6400 4 DOWN
+6430 4 DOWN
+6460 4 DOWN
+6500 4 O
+999999 1

@@ -1,0 +1,16 @@
+# hb9g disc + Summon kit: New Game, P1 calls the first Summon (pick at 5000; the entrance movie plays on his
+# screen), walks back into the door at 6000 and back out of the house at 6900
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 4 LEFT
+4740 4 DOWN
+4800 4 O
+4870 4 O
+5000 4 O
+6000 60 LY=255
+6900 60 LY=255
+7800 1 

@@ -1,0 +1,20 @@
+# hb9h disc (Borough with helpers and Heartless) + Summon kit + "HP 1 at 7300": New Game, into the door at 5700,
+# out again at 6600, then Circle every 250 frames from 7800 (Continue at the Game Over menu)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5700 60 LY=255
+6600 60 LY=255
+7800 4 O
+8050 4 O
+8300 4 O
+8550 4 O
+8800 4 O
+9050 4 O
+9300 4 O
+9550 4 O
+9800 4 O
+10500 1 

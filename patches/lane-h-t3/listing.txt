@@ -1,0 +1,225 @@
+Lane H patch for CRC F266B00B: the lines of patches\merged-v2\SLPM-66675_F266B00B.pnach (SHA-1 9168afbcfcf6cfc3303907c0aacfd26bd53254cf, 563 words) plus the words below.
+Parts: target search, player trap. KHI = 1.50 (KHI*KHI = 40100000 as a float), KLO = 1.25 (3FC80000), turn length 2^9 video frames.
+
+ROUTINES (cave 0x000F2000-0x000F2307, 194 words)
+h_tail:
+  000F2000  3C0F0035  lui t7,0x35                       
+  000F2004  8DEFE948  lw t7,-5816(t7)                   # player 1's hero
+  000F2008  14AF0015  bne a1,t7,0x000F2060              # the search did not end on "the player" (decoy list or last attacker): keep it
+  000F200C  3C0E000F  lui t6,0xF                        
+  000F2010  8DCE05CC  lw t6,1484(t6)                    
+  000F2014  11C00012  beq t6,zero,0x000F2060            # no twin in this room: the game's own behaviour
+  000F2018  00000000  nop                               
+  000F201C  12000010  beq s0,zero,0x000F2060            
+  000F2020  00000000  nop                               
+  000F2024  27BDFFD0  addiu sp,sp,-48                   
+  000F2028  FFBF0000  sd ra,0(sp)                       
+  000F202C  FFA40008  sd a0,8(sp)                       
+  000F2030  FFA60010  sd a2,16(sp)                      
+  000F2034  FFB10018  sd s1,24(sp)                      
+  000F2038  FFB20020  sd s2,32(sp)                      
+  000F203C  0C03C81A  jal 0x000F2068                    
+  000F2040  8C8D0000  lw t5,0(a0)                       # the searcher's previous target
+  000F2044  0040282D  daddu a1,v0,zero                  
+  000F2048  DFBF0000  ld ra,0(sp)                       
+  000F204C  DFA40008  ld a0,8(sp)                       
+  000F2050  DFA60010  ld a2,16(sp)                      
+  000F2054  DFB10018  ld s1,24(sp)                      
+  000F2058  DFB20020  ld s2,32(sp)                      
+  000F205C  27BD0030  addiu sp,sp,48                    
+h_pass:
+  000F2060  0806421E  j 0x00190878                      
+  000F2064  00000000  nop                               
+h_choose:
+  000F2068  27BDFFE0  addiu sp,sp,-32                   
+  000F206C  FFBF0000  sd ra,0(sp)                       
+  000F2070  FFB30008  sd s3,8(sp)                       
+  000F2074  01E0882D  daddu s1,t7,zero                  
+  000F2078  01C0902D  daddu s2,t6,zero                  
+  000F207C  01A0982D  daddu s3,t5,zero                  
+  000F2080  8E28048C  lw t0,1164(s1)                    # hero's unit slot
+  000F2084  8E49048C  lw t1,1164(s2)                    # twin's unit slot
+  000F2088  11000050  beq t0,zero,0x000F21CC            
+  000F208C  00000000  nop                               
+  000F2090  1120004E  beq t1,zero,0x000F21CC            
+  000F2094  00000000  nop                               
+  000F2098  8D080000  lw t0,0(t0)                       # hero's HP
+  000F209C  8D290000  lw t1,0(t1)                       # twin's HP
+  000F20A0  1920004A  blez t1,0x000F21CC                # the twin is down: player 1's hero
+  000F20A4  00000000  nop                               
+  000F20A8  1900004A  blez t0,0x000F21D4                # the hero is down: the twin
+  000F20AC  00000000  nop                               
+  000F20B0  0C05B00A  jal 0x0016C028                    
+  000F20B4  0200202D  daddu a0,s0,zero                  
+  000F20B8  C4400000  lwc1 f0,0(v0)                     
+  000F20BC  C4410004  lwc1 f1,4(v0)                     
+  000F20C0  C4420008  lwc1 f2,8(v0)                     
+  000F20C4  0C05B00A  jal 0x0016C028                    
+  000F20C8  0220202D  daddu a0,s1,zero                  
+  000F20CC  C4430000  lwc1 f3,0(v0)                     
+  000F20D0  C4440004  lwc1 f4,4(v0)                     
+  000F20D4  C4450008  lwc1 f5,8(v0)                     
+  000F20D8  460018C1  cop1 0x460018C1                   
+  000F20DC  46012101  cop1 0x46012101                   
+  000F20E0  46022941  cop1 0x46022941                   
+  000F20E4  460318C2  cop1 0x460318C2                   
+  000F20E8  46042102  cop1 0x46042102                   
+  000F20EC  46052942  cop1 0x46052942                   
+  000F20F0  460418C0  cop1 0x460418C0                   
+  000F20F4  46051A00  cop1 0x46051A00                   # f8 = squared distance searcher - hero
+  000F20F8  0C05B00A  jal 0x0016C028                    
+  000F20FC  0240202D  daddu a0,s2,zero                  
+  000F2100  C4430000  lwc1 f3,0(v0)                     
+  000F2104  C4440004  lwc1 f4,4(v0)                     
+  000F2108  C4450008  lwc1 f5,8(v0)                     
+  000F210C  460018C1  cop1 0x460018C1                   
+  000F2110  46012101  cop1 0x46012101                   
+  000F2114  46022941  cop1 0x46022941                   
+  000F2118  460318C2  cop1 0x460318C2                   
+  000F211C  46042102  cop1 0x46042102                   
+  000F2120  46052942  cop1 0x46052942                   
+  000F2124  460418C0  cop1 0x460418C0                   
+  000F2128  46051A40  cop1 0x46051A40                   # f9 = squared distance searcher - twin
+  000F212C  46084834  cop1 0x46084834                   
+  000F2130  45010006  bc1t 0x000F214C                   
+  000F2134  00000000  nop                               
+  000F2138  0220402D  daddu t0,s1,zero                  # t0 = the nearer hero (a tie: player 1's hero), t1 = the farther one
+  000F213C  0240482D  daddu t1,s2,zero                  
+  000F2140  46004286  cop1 0x46004286                   # f10 = nearer squared distance, f11 = farther
+  000F2144  10000005  beq zero,zero,0x000F215C          
+  000F2148  46004AC6  cop1 0x46004AC6                   
+h_twin_near:
+  000F214C  0240402D  daddu t0,s2,zero                  
+  000F2150  0220482D  daddu t1,s1,zero                  
+  000F2154  46004A86  cop1 0x46004A86                   
+  000F2158  460042C6  cop1 0x460042C6                   
+h_cmp:
+  000F215C  3C0A4010  lui t2,0x4010                     
+  000F2160  354A0000  ori t2,t2,0x0                     
+  000F2164  448A3000  mtc1 t2,f6                        # f6 = KHI * KHI
+  000F2168  460651C2  cop1 0x460651C2                   
+  000F216C  460B3834  cop1 0x460B3834                   # farther > KHI * nearer: one hero is clearly closer
+  000F2170  45010019  bc1t 0x000F21D8                   
+  000F2174  0100102D  daddu v0,t0,zero                  # -> the nearer hero
+  000F2178  3C0A3FC8  lui t2,0x3FC8                     
+  000F217C  354A0000  ori t2,t2,0x0                     
+  000F2180  448A3000  mtc1 t2,f6                        # f6 = KLO * KLO
+  000F2184  460651C2  cop1 0x460651C2                   
+  000F2188  46075834  cop1 0x46075834                   # farther < KLO * nearer: both about as close
+  000F218C  45010007  bc1t 0x000F21AC                   
+  000F2190  00000000  nop                               
+  000F2194  1271000D  beq s3,s1,0x000F21CC              # in between: keep the hero it already targets ...
+  000F2198  00000000  nop                               
+  000F219C  1272000D  beq s3,s2,0x000F21D4              
+  000F21A0  00000000  nop                               
+  000F21A4  1000000C  beq zero,zero,0x000F21D8          # ... or take the nearer one
+  000F21A8  0100102D  daddu v0,t0,zero                  
+h_share:
+  000F21AC  3C0A0035  lui t2,0x35                       
+  000F21B0  8D4AD4BC  lw t2,-11076(t2)                  # the game's frame counter
+  000F21B4  00105902  srl t3,s0,4                       # each enemy has its own phase (from its address)
+  000F21B8  014B5021  addu t2,t2,t3                     
+  000F21BC  000A5242  srl t2,t2,9                       
+  000F21C0  314A0001  andi t2,t2,0x1                    
+  000F21C4  15400003  bne t2,zero,0x000F21D4            
+  000F21C8  00000000  nop                               
+h_ret_hero:
+  000F21CC  10000002  beq zero,zero,0x000F21D8          
+  000F21D0  0220102D  daddu v0,s1,zero                  
+h_ret_twin:
+  000F21D4  0240102D  daddu v0,s2,zero                  
+h_ret:
+  000F21D8  DFBF0000  ld ra,0(sp)                       
+  000F21DC  DFB30008  ld s3,8(sp)                       
+  000F21E0  03E00008  jr ra                             
+  000F21E4  27BD0020  addiu sp,sp,32                    
+h_airun:
+  000F21E8  3C0F000F  lui t7,0xF                        
+  000F21EC  ADF027C0  sw s0,10176(t7)                   # remember whose script runs
+  000F21F0  27BDFFF0  addiu sp,sp,-16                   
+  000F21F4  FFBF0000  sd ra,0(sp)                       
+  000F21F8  0C05B352  jal 0x0016CD48                    
+  000F21FC  00000000  nop                               
+  000F2200  3C0F000F  lui t7,0xF                        
+  000F2204  ADE027C0  sw zero,10176(t7)                 
+  000F2208  DFBF0000  ld ra,0(sp)                       
+  000F220C  03E00008  jr ra                             
+  000F2210  27BD0010  addiu sp,sp,16                    
+h_player:
+  000F2214  3C0F0035  lui t7,0x35                       
+  000F2218  8DE2E948  lw v0,-5816(t7)                   # player 1's hero
+  000F221C  3C0E000F  lui t6,0xF                        
+  000F2220  8DCE27C0  lw t6,10176(t6)                   # the object whose script is running
+  000F2224  11C00029  beq t6,zero,0x000F22CC            
+  000F2228  3C0D000F  lui t5,0xF                        
+  000F222C  8DAD05CC  lw t5,1484(t5)                    
+  000F2230  11A00026  beq t5,zero,0x000F22CC            # no twin: the game's own answer
+  000F2234  00000000  nop                               
+  000F2238  10400024  beq v0,zero,0x000F22CC            
+  000F223C  00000000  nop                               
+  000F2240  8DCC0008  lw t4,8(t6)                       # the object's entry in the object table
+  000F2244  11800021  beq t4,zero,0x000F22CC            
+  000F2248  00000000  nop                               
+  000F224C  918C0004  lbu t4,4(t4)                      # its type
+  000F2250  240B0004  addiu t3,zero,4                   
+  000F2254  118B0007  beq t4,t3,0x000F2274              
+  000F2258  240B0003  addiu t3,zero,3                   
+  000F225C  118B0005  beq t4,t3,0x000F2274              
+  000F2260  240B000C  addiu t3,zero,12                  
+  000F2264  118B0003  beq t4,t3,0x000F2274              
+  000F2268  240B0015  addiu t3,zero,21                  
+  000F226C  158B0017  bne t4,t3,0x000F22CC              # not an enemy or boss: player 1's hero
+  000F2270  00000000  nop                               
+hp_enemy:
+  000F2274  8DCC09F4  lw t4,2548(t6)                    # the object this enemy targets now
+  000F2278  118D0013  beq t4,t5,0x000F22C8              # the twin: answer with the twin
+  000F227C  00000000  nop                               
+  000F2280  11820012  beq t4,v0,0x000F22CC              # player 1's hero
+  000F2284  00000000  nop                               
+  000F2288  27BDFFD0  addiu sp,sp,-48                   # no hero targeted yet: the rule
+  000F228C  FFBF0000  sd ra,0(sp)                       
+  000F2290  FFB00008  sd s0,8(sp)                       
+  000F2294  FFB10010  sd s1,16(sp)                      
+  000F2298  FFB20018  sd s2,24(sp)                      
+  000F229C  01C0802D  daddu s0,t6,zero                  
+  000F22A0  0040782D  daddu t7,v0,zero                  
+  000F22A4  01A0702D  daddu t6,t5,zero                  
+  000F22A8  0C03C81A  jal 0x000F2068                    
+  000F22AC  0000682D  daddu t5,zero,zero                
+  000F22B0  DFBF0000  ld ra,0(sp)                       
+  000F22B4  DFB00008  ld s0,8(sp)                       
+  000F22B8  DFB10010  ld s1,16(sp)                      
+  000F22BC  DFB20018  ld s2,24(sp)                      
+  000F22C0  03E00008  jr ra                             
+  000F22C4  27BD0030  addiu sp,sp,48                    
+hp_twin:
+  000F22C8  01A0102D  daddu v0,t5,zero                  
+hp_ret:
+  000F22CC  03E00008  jr ra                             
+  000F22D0  00000000  nop                               
+h_attdef:
+  000F22D4  8C8E0004  lw t6,4(a0)                       # the enemy object
+  000F22D8  3C0F0035  lui t7,0x35                       
+  000F22DC  8DF0E948  lw s0,-5816(t7)                   # the game's answer: the player (the caller expects it in s0)
+  000F22E0  3C0D000F  lui t5,0xF                        
+  000F22E4  8DAD05CC  lw t5,1484(t5)                    
+  000F22E8  11A00005  beq t5,zero,0x000F2300            
+  000F22EC  00000000  nop                               
+  000F22F0  8DCC09F4  lw t4,2548(t6)                    
+  000F22F4  158D0002  bne t4,t5,0x000F2300              # this enemy targets the twin: the twin
+  000F22F8  00000000  nop                               
+  000F22FC  01A0802D  daddu s0,t5,zero                  
+ha_ret:
+  000F2300  03E00008  jr ra                             
+  000F2304  00000000  nop                               
+
+HOOKS (words changed inside the game program; none is used by the merged build v2)
+  0016A96C  0C03C87A  jal 0x000F21E8           was 0C05B352 jal 0x0016CD48             run an object's AI script: remember the object while its script runs
+  00171074  0C03C885  jal 0x000F2214           was 0C05AC34 jal 0x0016B0D0             script call 'get the player' (table 1, number 3): the calling enemy's own hero
+  0018F458  0C03C8B5  jal 0x000F22D4           was 3C0F0035 lui t7,0x35                script call 'my last attacker' (table 2, number 88), no attacker: the calling enemy's own hero
+  0018F45C  8E240000  lw a0,0(s1)              was 8DF0E948 lw s0,-5816(t7)            delay slot of the line above: a0 = the script's first argument (was: load the engine's player)
+  001909A8  0C03C800  jal 0x000F2000           was 0C06421E jal 0x00190878             target search mode 2 (the player): same
+  00190A74  0803C800  j 0x000F2000             was 0806421E j 0x00190878               target search mode 0 (decoy list, else the player): end goes through the rule
+  00190B28  0803C800  j 0x000F2000             was 0806421E j 0x00190878               target search mode 1 (decoy list, last attacker, else the player): same
+
+VARIABLES of this lane (not written by the patch file; they rely on zero memory at boot): 0x000F27C0-0x000F27FF

@@ -1,0 +1,4 @@
+# fight disc: player 2 runs away from frame 5000 for 300 frames, waits, and runs back from 6200
+5000 300 LY=0
+6200 300 LY=255
+9000 1 

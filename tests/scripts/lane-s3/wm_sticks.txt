@@ -1,0 +1,13 @@
+# world map jump disc: New Game, then stick tests on the map
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5000 120 LY=0
+5300 120 LX=255
+5600 120 LY=255
+5900 120 LX=0
+6200 120 LX=255 X
+6600 1 

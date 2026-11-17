@@ -1,0 +1,10 @@
+# TEST (tenth round): which hero does the HOST's controller move? New Game, then the host walks up 300 frames at 5000 and right 200 at 5400.
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5000 300 LY=0
+5400 200 LX=255
+6000 1 

@@ -1,0 +1,4 @@
+# save-point disc (hb13s): player 2 turns (LY=0, 10 frames at 4800), Triangle at 4900
+4800 10 LY=0
+4900 4 TRI
+999999 1 

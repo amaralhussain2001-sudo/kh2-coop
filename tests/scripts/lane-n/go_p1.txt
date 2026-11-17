@@ -1,0 +1,14 @@
+# roam disc: New Game; player 1 walks a little at 4700; from 5500 a Circle press every 200 frames (Continue after Game Over)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 40 LY=255
+5500 4 O
+5700 4 O
+5900 4 O
+6100 4 O
+6300 4 O
+9000 1 

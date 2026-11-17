@@ -1,0 +1,11 @@
+title: lane S1 free roam in Tram Common with Sora's skateboards (tests only)
+game: kh2
+assets:
+  - name: ard/tt07.ard
+    method: binarc
+    source:
+      - name: map
+        type: AreaDataScript
+        method: areadatascript
+        source:
+          - name: tt07_map.txt

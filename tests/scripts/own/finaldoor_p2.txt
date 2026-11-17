@@ -1,0 +1,24 @@
+# TEST (eighth round, register G5): player 2 picks Drive > 5th form (Final), walks to the door (as formdoor_p2,
+# 200 frames later), then jumps and glides (Cross, Cross held) and attacks in the next room.
+4700 4 DOWN
+4730 4 DOWN
+4760 4 DOWN
+4800 4 O
+4830 4 DOWN
+4845 4 DOWN
+4860 4 DOWN
+4875 4 DOWN
+4900 4 O
+5300 36 LY=0
+5360 60 LX=0
+6000 4 X
+6020 60 X
+6200 4 O
+6230 4 O
+6400 4 X
+6420 60 X
+6600 4 O
+6630 4 O
+6800 4 X
+6815 80 X
+999999 1

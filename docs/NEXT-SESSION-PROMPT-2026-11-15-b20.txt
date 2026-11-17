@@ -1,0 +1,122 @@
+Project: Kingdom Hearts II Final Mix two-player mod, in C:\Users\PC FORCE\Desktop\New folder (3).
+
+Read first: docs\STATE.md, section "PICK UP HERE": its blocks "STILL OWED" and "WHAT THE USER HAS NOW", then
+"THE USER'S STANDING INSTRUCTIONS". Then "Ninth round" parts 87 to 104. Then KH2-COOP-PLAN.md (rows 9, 35, 36,
+37, 39, 52), docs\ROW9-PAIRED-MOVES.md and docs\REQUIREMENT-full-parity.md.
+
+Current state (written 2026-11-15):
+- dist\PS2-ONLINE-KH2-TEST is TEST BUILD 20, package id 945785865e22, built 2026-11-15 13:20. The disc is still
+  "TEST v5" (not changed since build 12).
+- Build 20 = patches\merged-v14 (shared screen, 7,167 words) and patches\merged-v14-own (own screens, 9,157
+  words). Its whole regression was clean (116 result lines, never out of sync, 0 fault lines) and the package
+  rehearsal too. 50 boss fights played on purpose: all in sync, no hero left held; 48 with 0 fault lines, 2
+  (mu08 74, ca01 51) with the 50 known lines of a jump-started mission's end. The logs to compare with:
+  local\reg-b24\.
+- ONE POINT IS OPEN IN BUILD 20: Gummi route 8 (job 2). TWO THINGS WAIT FOR MY WORD: answers B and D.
+- Build 19 was never tested by me. Nothing is running. Nothing is half done.
+- New since build 19: player 2's own Keyblade, item places, fight items and shortcuts; a boss's hold takes
+  both heroes, and both controllers count while both are held (both players steer Riku); the Groundshaker's
+  real cause is cured; Luxord's tricks let the loser go in time; the toy cannon has a view for each player;
+  the Gummi flight has a score for each player and a digit at the hull gauge.
+
+MY ANSWERS (given 2026-11-15, STATE part 105; I change a line only if my answer changes):
+A. I test NO build until the game is completely finished. Then I test once. Do not wait for a two-PC result.
+B. A move that a hero starts with his OWN green command (Xaldin's jumps, Demyx's water forms, Luxord's games)
+   stays that hero's alone, the other keeps fighting. You explained it to me. I have given NO WORD yet.
+   [ I write here: OK   or   NOT OK, build it so that the other hero goes with him ]
+   Without my word here it is NOT closed.
+C. I AM PLAYING: tests hidden, ONE run at a time (the whole regression with reg_serial.sh).
+   [ if I am not playing that day I change this line to: I am NOT playing, several hidden lanes at once ]
+D. NOT OK as built. EACH PLAYER HIS OWN BAG AND HIS OWN WALLET. The munny they gain goes to BOTH wallets in
+   full. Spending is each one alone: he pays from his own wallet, and what he buys goes into his own bag.
+
+JOBS, in this order. Do not stop between them.
+1. If answer A names logs: read them first. For each fault: find the cause, fix it, verify the fix with a test.
+2. Gummi route 8, found at the end of the ninth round (STATE parts 103, 104). With the same button scripts the
+   builds v112 and v115 (= build 20) fly route 8 a little differently from every build before: in the first
+   try the score is 17,799 / 31,529 / 43,219 against 17,849 / 31,609 / 43,299 at frames 12000 / 14000 / 16000,
+   ship 2's hull is 175 against 155 at 14000, and in the second try a ship is lost. The six regressions from
+   v81 to v97 (builds 16 to 19) all give the old numbers; v112 and v115 both give the new ones. No fault line,
+   in sync. HYPOTHESIS: glue 66 (--ship2score) changes something in the flight.
+   - First the control: route 8 on v107 (it has no glue 66; kit patches\test-own-v107-gum8):
+     bash tools/own/gum_routes2.sh <own> <sandbox> <port> <pine> <logName> 8
+     If v107 gives the old numbers, glue 66 is the cause. If v107 gives the new ones already, step back to
+     v103 (kit patches\test-own-v103-gum8) and find which glue it is.
+   - Then find the cause and fix it. Verify on all nine routes: route 8's first try gives the old numbers
+     again, and no route differs from build 19 by more than two runs of build 19 differ from each other.
+3. Answer B. OK: write my OK into docs\REQUIREMENT-full-parity.md, the plan (row 9) and
+   docs\ROW9-PAIRED-MOVES.md, close it. NOT OK: build it boss by boss, or prove per boss why it cannot be done.
+   NO WORD from me in the line: leave it as built, keep it on the open list, do not ask, go on.
+4. Answer D: build the own bag and the own wallet (the state of this job is in docs\STATE.md, block STILL OWED).
+   If no place in the save data can be defended for a second bag, do not build on a guess: write the evidence
+   and tell me that it is blocked, with the reason.
+5. The Gummi points of other weapons than cannons go to player 1's number. Give them to the ship that fired
+   (tools\own\ovl_shotclasses.py lists the shot classes). First step: find out which weapons the test's ship
+   carries. HYPOTHESIS: cannons only; then a ship with other weapons must be made for the test first.
+6. Glue 68 (both controllers count in a hold) was looked at only in the last Xemnas's Riku part. Check what ONE
+   player's lone press does in the other holds with both heroes (the Groundshaker's ride, Cerberus, Scar, the
+   Dark Thorn, the armoured Xemnas): does a press count twice, does the other player's menu move.
+7. Both heroes inside the Hydra's hold were seen only on an earlier candidate (v104). Make it happen on build 20.
+8. Player 2's Drive Form files in a new room "may be thrown out" (STATE part 92). Ask for them again when his
+   body is built in a new room, or show with a tight room that it cannot happen.
+9. Walking into the toy cannon and the carpet escape through the story's own talk point. A test script could
+   not do it (the test start has no story progress). If I give a save at that point, use it; if not, say so.
+10. Old small things: the stray calls in one of six Shan-Yu clashes when both press (cause not found); not met
+    by any script: the Large Body's command, the Samurai duel, Luxord's card game as a game.
+11. After every change of the patches or the disc: the whole regression, the package, the rehearsal,
+    finish_two_pcs.py, the notes. At the very end ONE report: what is new, what I must do (copy the whole
+    folder to the second PC again), and what is still open with the reason.
+
+How tests are run (details in STATE.md, block STILL OWED):
+- Hidden always: start test commands WITHOUT KH2_TEST_SHOW. Ten sandboxes exist: run-m, run-v3, run-v3b,
+  run-v3c, run-x1 .. run-x6.
+- The whole regression on eight sandboxes, about 30 minutes:
+  bash tools/own/reg_par8.sh <own> <shared> <prefix> <countName>   (kits first: make_kits.sh <own>).
+  A NEW prefix each time: the next is b25 / w25. Never two regressions at once. The one-at-a-time form is
+  reg_serial.sh. Read it with:
+  python -I tools/own/reg_compare.py b25 w25 local/reg-b24 b24 w24 --save local/reg-b25
+- The boss fights played on purpose: tools\own\r9_chain46.sh (ten boss rooms) and r9_chain47.sh (the 40 other
+  fights) are the models; read them with python -I tools/own/row9_rs2.py --tags=<tag>,<tag>.
+- The rehearsal's model is tools\own\r9_chain48.sh.
+- The same button scripts do not give the same boss fight on another build. To test a cure, make the fault's
+  state on purpose (tools\own\make_orphan.py, make_once.py, make_callonce.py).
+- Before calling anything a fault, run the no-patch control (one hero).
+- A difference between two builds counts only when two runs on each side agree.
+- Kits that write a value every frame fight with a menu swap: write the value once.
+- The "Items" row of the command menu needs the save word + 0x36E8 not 0 (make_kit2.py --short=36E8:0001).
+- A Game Over in a jump start needs the Continue kit (-snapB).
+- When you stop tests, stop only this project's own processes (by process number or command line).
+- Never start r8_chain82, 83, 86, 99, 109, 111, 112 nor r8_master3.
+
+How the files are changed:
+- docs\STATE.md only with tools\own\state_add.py, tools\own\state_pickup.py and tools\own\state_pickup3.py
+  (never sed, the file is CRLF). "state_pickup.py owed" replaces the WHOLE block STILL OWED: read the old block
+  first and carry over every paragraph that must stay.
+- The builder tools\merge\merge_v7.py gets each new glue by a NEW one-off record script
+  (tools\merge\edit_merge_v7_<name>.py). Every edit_merge_v7_*.py, edit_make_own_*.py, edit_package_v*.py,
+  add_plan_rows_v*.py, edit_row9_report_b*.py and edit_checklist_b*.py that exists HAS RUN: never run one again.
+- docs\ROW9-PAIRED-MOVES.md is made by python -I tools/own/row9_report.py (with --xig= and --lux=, see STATE
+  part 102); change its texts in row9_report.py by a new one-off script.
+- In the builder but in no build: glue 59 (--onevictim: it made the Hydra worse) and the test options
+  --holdwatch-test, --together-far, --ship2first. Leave them out.
+- Python edits and long texts go into files made with the file tools, not into shell here-texts.
+- In a shell line, a "grep -c" that counts 0 stops an "&&" chain.
+
+An item is closed only when it is fixed and VERIFIED, or tested and it works, or proven not possible or too
+risky with the reason and the evidence written in docs\STATE.md. An exception (one hero only) needs the proof
+that two is impossible AND my OK.
+
+Rules:
+- Do not stop to ask A/B questions. Take your own recommended option, note it in docs\STATE.md and the plan,
+  and keep working until the list is done. I test once at the end. Only short progress lines meanwhile.
+- Player 2 must be a full player, never a passenger or a spectator.
+- Do not open extra lanes or agents. Several test runs at once in the sandboxes are fine when answer C says I
+  am not playing.
+- Tests run on the hidden desktop only (never --show).
+- Never modify the original disc file, Desktop\PS2-ONLINE, Desktop\openkh or
+  Desktop\New folder\digimon-online. local\ is private.
+- Never overwrite a patch folder or a script that a running test batch reads. Build into patches\test-* first.
+- Plain English, short sentences. Mark every claim VERIFIED or HYPOTHESIS.
+- Read every result line with its fault line count ("TLB misses N").
+- After each closed item, write it into docs\STATE.md at once, so nothing is lost if the session is summarized.
+- If I send logs from the two-PC test, read them first.

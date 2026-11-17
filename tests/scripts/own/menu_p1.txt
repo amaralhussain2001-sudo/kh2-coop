@@ -1,0 +1,11 @@
+# roam disc + test kit, own screens: P1 starts the game, later opens the Magic sub-menu too (while P2 holds L1)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5020 4 DOWN
+5060 4 O
+5200 4 X
+5300 1 

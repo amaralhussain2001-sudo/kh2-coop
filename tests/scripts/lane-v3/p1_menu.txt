@@ -1,0 +1,11 @@
+# P1: New Game; turn camera 1; then open and close the pause menu
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5000 40 RX=255
+5400 4 START
+5600 4 START
+5900 1 

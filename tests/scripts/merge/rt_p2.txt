@@ -1,0 +1,8 @@
+# roam disc: P2 door at 4500; in the Borough steps left 8 frames into the door line at 5500, walks back at 5700; in Merlin's house steps left 8 frames at 6400, out again at 6600
+4500 36 LY=0
+4560 60 LX=0
+5500 8 LX=0
+5700 150 LY=255
+6400 8 LX=0
+6600 150 LY=255
+7400 1 

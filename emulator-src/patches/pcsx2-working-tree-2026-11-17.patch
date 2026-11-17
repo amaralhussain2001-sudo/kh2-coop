@@ -1,0 +1,3163 @@
+diff --git a/pcsx2/CMakeLists.txt b/pcsx2/CMakeLists.txt
+index 4c8ce81..c1a1b2d 100644
+--- a/pcsx2/CMakeLists.txt
++++ b/pcsx2/CMakeLists.txt
+@@ -69,6 +69,7 @@ set(pcsx2Sources
+ 	COP0.cpp
+ 	COP2.cpp
+ 	Counters.cpp
++	PS2Net/PS2Net.cpp
+ 	Dmac.cpp
+ 	GameDatabase.cpp
+ 	Elfheader.cpp
+diff --git a/pcsx2/Counters.cpp b/pcsx2/Counters.cpp
+index 6b66726..ddea2bb 100644
+--- a/pcsx2/Counters.cpp
++++ b/pcsx2/Counters.cpp
+@@ -10,6 +10,7 @@
+ #include "IopCounters.h"
+ 
+ #include "GS.h"
++#include "PS2Net/PS2Net.h"
+ #include "GS/GS.h"
+ #include "MTGS.h"
+ #include "PerformanceMetrics.h"
+@@ -496,6 +497,9 @@ static __fi void VSyncStart(u64 sCycle)
+ 	if (!VMManager::Internal::IsExecutionInterrupted())
+ 		VMManager::Internal::Throttle(true);
+ 
++	// PS2Net own-screen view: choose what this PC shows of the picture, before the picture is pushed.
++	PS2Net::OnFramePush();
++
+ 	if (!EmuConfig.GS.AdvancedFrameDisplay)
+ 	{
+ 		gsPostVsyncStart(); // MUST be after framelimit; doing so before causes funk with frame times!
+@@ -504,6 +508,9 @@ static __fi void VSyncStart(u64 sCycle)
+ 	// Poll input after MTGS frame push, just in case it has to stall to catch up.
+ 	VMManager::Internal::PollInputOnCPUThread();
+ 
++	// PS2Net: online sessions exchange this frame's controller inputs here (no-op otherwise).
++	PS2Net::OnVsync();
++
+ 	EECNT_LOG("    ================  EE COUNTER VSYNC START (frame: %d)  ================", g_FrameCount);
+ 
+ 	// Memcard auto ejection - Uses a tick system timed off of real time, decrementing one tick per frame.
+diff --git a/pcsx2/GS/GSState.cpp b/pcsx2/GS/GSState.cpp
+index 9b048ee..1a8bafd 100644
+--- a/pcsx2/GS/GSState.cpp
++++ b/pcsx2/GS/GSState.cpp
+@@ -5,6 +5,7 @@
+ #include "GS/GSDump.h"
+ #include "GS/GSGL.h"
+ #include "GS/GSPerfMon.h"
++#include "GS/GSPresentView.h"
+ #include "GS/GSUtil.h"
+ 
+ #include "common/Console.h"
+@@ -1478,6 +1479,9 @@ void GSState::GIFPackedRegHandlerFOG(const GIFPackedReg* RESTRICT r)
+ 
+ void GSState::GIFPackedRegHandlerA_D(const GIFPackedReg* RESTRICT r)
+ {
++	// PS2Net own-screen view: a LABEL write can be the marker between two players' views (display only).
++	if ((r->A_D.ADDR & 0x7F) == GIF_A_D_REG_LABEL)
++		GSPresentView::OnLabel(r->r.U32[0]);
+ 	(this->*m_fpGIFRegHandlers[r->A_D.ADDR & 0x7F])(&r->r);
+ }
+ 
+@@ -2656,6 +2660,10 @@ void GSState::FlushPrim()
+ 		if (!skip_draw)
+ 			Draw();
+ 
++		// PS2Net own-screen view, marker test only.
++		if (GSPresentView::g_count_draws)
++			GSPresentView::OnDraw();
++
+ 		g_perfmon.Put(GSPerfMon::Draw, 1);
+ 		g_perfmon.Put(GSPerfMon::Prim, idx_buff.tail / GSUtil::GetVertexCount(PRIM->PRIM));
+ 
+@@ -3426,6 +3434,8 @@ void GSState::Transfer(const u8* mem, u32 size)
+ 							case GIFPath::TYPE_ADONLY: // very common
+ 								do
+ 								{
++									if ((((GIFPackedReg*)mem)->A_D.ADDR & 0x7F) == GIF_A_D_REG_LABEL)
++										GSPresentView::OnLabel(((GIFPackedReg*)mem)->r.U32[0]);
+ 									(this->*m_fpGIFRegHandlers[((GIFPackedReg*)mem)->A_D.ADDR & 0x7F])(&((GIFPackedReg*)mem)->r);
+ 
+ 									mem += sizeof(GIFPackedReg);
+diff --git a/pcsx2/GS/Renderers/Common/GSRenderer.cpp b/pcsx2/GS/Renderers/Common/GSRenderer.cpp
+index b5c7cc6..d3b161a 100644
+--- a/pcsx2/GS/Renderers/Common/GSRenderer.cpp
++++ b/pcsx2/GS/Renderers/Common/GSRenderer.cpp
+@@ -8,6 +8,7 @@
+ #include "GS/GSDump.h"
+ #include "GS/GSGL.h"
+ #include "GS/GSPerfMon.h"
++#include "GS/GSPresentView.h"
+ #include "GS/GSUtil.h"
+ #include "GSDumpReplayer.h"
+ #include "Host.h"
+@@ -15,6 +16,7 @@
+ #include "pcsx2/Config.h"
+ #include "VMManager.h"
+ 
++#include "common/Console.h"
+ #include "common/FileSystem.h"
+ #include "common/Image.h"
+ #include "common/Path.h"
+@@ -26,6 +28,7 @@
+ 
+ #include <algorithm>
+ #include <array>
++#include <cmath>
+ #include <deque>
+ #include <thread>
+ #include <mutex>
+@@ -47,6 +50,255 @@ std::unique_ptr<GSRenderer> g_gs_renderer;
+ // we might be switching while the other thread reads it.
+ static GSVector4 s_last_draw_rect;
+ 
++// ---------------------------------------------------------------------------------------------------------------
++// PS2Net own-screen view (display only), see GS/GSPresentView.h. Everything here runs on the GS thread.
++struct ViewMarkerCopy
++{
++	u32 bp = 0;
++	GSTexture* tex = nullptr;
++	u64 at = 0; // video frame count when it was taken
++};
++static GSPresentView::State s_view;
++static GSTexture* s_view_hold = nullptr; // kind 3: copy of the last picture that belonged to this PC
++static std::array<ViewMarkerCopy, 4> s_view_marker; // kind 2: copies taken at the marker, one per frame buffer
++static u32 s_view_marker_next = 0;
++static u32 s_view_full_once = 0; // video frames for which the unchanged picture is merged (test snapshots)
++static u64 s_view_draws = 0; // kind 2 test: draws since the last vsync
++static u64 s_view_draws_max = 0;
++static u32 s_view_log_target = 0;
++static u64 s_view_vsyncs = 0; // video frames presented, for the age of a marker copy
++static u32 s_view_shown_bp = 0xFFFFFFFFu, s_view_shown_psm = 0; // kind 2: the frame buffer shown last
++static bool s_view_fake_done = false;
++static u32 s_view_log_store = 0, s_view_log_hit = 0, s_view_log_miss = 0, s_view_log_draws = 0; // a few log lines only
++bool GSPresentView::g_count_draws = false;
++
++static void ReleaseViewHold()
++{
++	if (s_view_hold && g_gs_device)
++		g_gs_device->Recycle(s_view_hold);
++	s_view_hold = nullptr;
++}
++
++static void ReleaseViewMarkers()
++{
++	for (ViewMarkerCopy& m : s_view_marker)
++	{
++		if (m.tex && g_gs_device)
++			g_gs_device->Recycle(m.tex);
++		m = ViewMarkerCopy();
++	}
++}
++
++void GSPresentView::Apply(const State& state)
++{
++	if (state.kind != 3)
++		ReleaseViewHold();
++	// Copies taken at a marker are dropped when the full-size layout ends or this PC does not show them.
++	if ((s_view.kind == 2 && state.kind != 2) || !state.show_copy || state.marker_id == 0)
++		ReleaseViewMarkers();
++	if (state.marker_id == 0)
++		s_view_shown_bp = 0xFFFFFFFFu;
++	s_view = state;
++	if (s_view.kind == 1 && !(s_view.right > s_view.left && s_view.bottom > s_view.top))
++		s_view.kind = 0;
++	g_count_draws = (s_view.kind == 2 && s_view.fake_after_draws != 0);
++}
++
++void GSPresentView::FullPictureOnce()
++{
++	s_view_full_once = 2;
++}
++
++bool GSPresentView::NoDeinterlace()
++{
++	return s_view.kind == 3;
++}
++
++bool GSPresentView::MarkerWanted(u32 label_id)
++{
++	// A PC obeys its own player's marker and, if the game has one, the marker meant for everybody.
++	// Needs proper testing with more than two players and with back ends other than Direct3D 12.
++	if (s_view.marker_id == 0)
++		return false;
++	return label_id == s_view.marker_id || (s_view.marker_all_id != 0 && label_id == s_view.marker_all_id);
++}
++
++int GSPresentView::KeepWanted(u32 label_id, u32* restore_bp)
++{
++	if (s_view.keep_save_id != 0 && label_id == s_view.keep_save_id)
++		return 1;
++	if (s_view.keep_restore_id != 0 && label_id == s_view.keep_restore_id)
++	{
++		*restore_bp = s_view.keep_restore_bp;
++		return 2;
++	}
++	return 0;
++}
++
++bool GSPresentView::MarkerOfShownBuffer()
++{
++	return s_view.marker_shown_buffer;
++}
++
++bool GSPresentView::ShownFrameBuffer(u32* bp, u32* psm)
++{
++	if (s_view_shown_bp == 0xFFFFFFFFu)
++		return false;
++	*bp = s_view_shown_bp;
++	*psm = s_view_shown_psm;
++	return true;
++}
++
++bool GSPresentView::FakeMarkerDue(u32 frame_block)
++{
++	if (s_view.kind != 2 || !s_view.fake_after_draws)
++		return false;
++	s_view_draws++;
++	if (frame_block == s_view_shown_bp && (s_view_log_target++ % 900) < 3 && s_view_log_target < 20000)
++	{
++		Console.WriteLn("(PS2Net view) marker test: draw %llu of this video frame goes to the frame buffer on display (%05x)",
++			static_cast<unsigned long long>(s_view_draws), frame_block);
++	}
++	if (s_view_draws < s_view.fake_after_draws || s_view_fake_done)
++		return false;
++	if (s_view.fake_every > 1 && (s_view_vsyncs % s_view.fake_every) != 0)
++		return false;
++	s_view_fake_done = true;
++	return true;
++}
++
++void GSPresentView::StoreMarkerCopy(u32 bp, GSTexture* tex)
++{
++	// Only the PC that shows the copy needs it.
++	if (!s_view.show_copy || !tex || !g_gs_device)
++		return;
++	ViewMarkerCopy* slot = nullptr;
++	for (ViewMarkerCopy& m : s_view_marker)
++	{
++		if (m.tex && m.bp == bp)
++			slot = &m;
++	}
++	if (!slot)
++	{
++		slot = &s_view_marker[s_view_marker_next];
++		s_view_marker_next = (s_view_marker_next + 1) % static_cast<u32>(s_view_marker.size());
++	}
++	const GSVector2i size = tex->GetSize();
++	if (slot->tex && (slot->tex->GetWidth() != size.x || slot->tex->GetHeight() != size.y || slot->tex->GetFormat() != tex->GetFormat()))
++	{
++		g_gs_device->Recycle(slot->tex);
++		slot->tex = nullptr;
++	}
++	if (!slot->tex)
++		slot->tex = g_gs_device->CreateRenderTarget(size.x, size.y, tex->GetFormat(), false);
++	if (!slot->tex)
++		return;
++	slot->bp = bp;
++	slot->at = s_view_vsyncs;
++	g_gs_device->CopyRect(tex, slot->tex, GSVector4i(0, 0, size.x, size.y), 0, 0);
++	if (s_view_log_store < 12)
++	{
++		s_view_log_store++;
++		Console.WriteLn("(PS2Net view) marker: copied frame buffer %05x (%dx%d) after %llu draws of this video frame", bp, size.x, size.y,
++			static_cast<unsigned long long>(s_view_draws));
++	}
++}
++
++GSTexture* GSPresentView::MarkerCopyFor(u32 bp, u32 psm, GSTexture* tex)
++{
++	if (s_view.marker_id == 0 || !tex)
++		return nullptr;
++	s_view_shown_bp = bp;
++	s_view_shown_psm = psm;
++	if (s_view.kind != 2 || !s_view.show_copy || s_view_full_once)
++		return nullptr;
++	for (const ViewMarkerCopy& m : s_view_marker)
++	{
++		if (m.tex && m.bp == bp && m.tex->GetWidth() == tex->GetWidth() && m.tex->GetHeight() == tex->GetHeight() &&
++			(!s_view.marker_hold || s_view_vsyncs - m.at <= s_view.marker_hold))
++		{
++			if (s_view_log_hit < 4)
++			{
++				s_view_log_hit++;
++				Console.WriteLn("(PS2Net view) marker: showing the copy of frame buffer %05x", bp);
++			}
++			return m.tex;
++		}
++	}
++	if ((s_view_log_miss++ % 900) < 2 && s_view_log_miss < 20000)
++	{
++		Console.WriteLn("(PS2Net view) marker: no copy for the displayed frame buffer %05x (%dx%d); copies held: %05x %05x %05x %05x", bp,
++			tex->GetWidth(), tex->GetHeight(), s_view_marker[0].tex ? s_view_marker[0].bp : 0xFFFFF, s_view_marker[1].tex ? s_view_marker[1].bp : 0xFFFFF,
++			s_view_marker[2].tex ? s_view_marker[2].bp : 0xFFFFF, s_view_marker[3].tex ? s_view_marker[3].bp : 0xFFFFF);
++	}
++	return nullptr;
++}
++
++// kind 3: the picture this PC shows for the video frame. The newest one if it is ours (a copy is kept when
++// new_frame is true), otherwise the kept copy of our last one.
++static GSTexture* PickPresentPicture(GSTexture* current, bool new_frame)
++{
++	if (s_view.kind != 3 || !current)
++		return current;
++	if (s_view.mine)
++	{
++		if (new_frame)
++		{
++			const GSVector2i size = current->GetSize();
++			if (s_view_hold && (s_view_hold->GetWidth() != size.x || s_view_hold->GetHeight() != size.y))
++				ReleaseViewHold();
++			if (!s_view_hold)
++				s_view_hold = g_gs_device->CreateRenderTarget(size.x, size.y, GSTexture::Format::Color, false);
++			if (s_view_hold)
++				g_gs_device->StretchRect(current, s_view_hold, GSVector4(0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y)),
++					ShaderConvert::COPY, Nearest);
++		}
++		return current;
++	}
++	return s_view_hold ? s_view_hold : current;
++}
++
++// kind 1: narrows the source rectangle to this PC's part. Call it AFTER the destination rectangle was computed
++// from the whole picture, so the part is stretched over the same screen area the whole picture would cover.
++static void ApplyPresentView(GSVector4i& src_rect, GSVector4& src_uv, const GSVector2i& tex_size)
++{
++	if (s_view.kind != 1)
++		return;
++	const float w = static_cast<float>(src_rect.z - src_rect.x);
++	const float h = static_cast<float>(src_rect.w - src_rect.y);
++	float l = static_cast<float>(src_rect.x) + w * s_view.left;
++	float t = static_cast<float>(src_rect.y) + h * s_view.top;
++	float r = static_cast<float>(src_rect.x) + w * s_view.right;
++	float b = static_cast<float>(src_rect.y) + h * s_view.bottom;
++	// Stay half a texel away from an inner edge, so filtering does not pull in the neighbouring part.
++	if (s_view.left > 0.0f)
++		l += 0.5f;
++	if (s_view.top > 0.0f)
++		t += 0.5f;
++	if (s_view.right < 1.0f)
++		r -= 0.5f;
++	if (s_view.bottom < 1.0f)
++		b -= 0.5f;
++	src_uv = GSVector4(l, t, r, b) / GSVector4(tex_size).xyxy();
++	src_rect = GSVector4i(static_cast<int>(l), static_cast<int>(t), static_cast<int>(std::ceil(r)), static_cast<int>(std::ceil(b)));
++}
++
++static void ViewEndOfVSync()
++{
++	if (s_view_full_once)
++		s_view_full_once--;
++	if (GSPresentView::g_count_draws && s_view_draws > s_view_draws_max && s_view_log_draws < 40)
++	{
++		s_view_log_draws++;
++		s_view_draws_max = s_view_draws;
++		Console.WriteLn("(PS2Net view) marker test: %llu draws in one video frame (highest so far)", static_cast<unsigned long long>(s_view_draws));
++	}
++	s_view_draws = 0;
++	s_view_fake_done = false;
++	s_view_vsyncs++;
++}
++// ---------------------------------------------------------------------------------------------------------------
++
+ // Last time we reset the renderer due to a GPU crash, if any.
+ static Common::Timer::Value s_last_gpu_reset_time;
+ 
+@@ -73,6 +325,8 @@ void GSRenderer::Reset(bool hardware_reset)
+ void GSRenderer::Destroy()
+ {
+ 	GSCapture::EndCapture();
++	ReleaseViewHold();
++	ReleaseViewMarkers();
+ }
+ 
+ void GSRenderer::UpdateRenderFixes()
+@@ -184,7 +438,7 @@ bool GSRenderer::Merge(int field)
+ 		src_gs_read[i] = ((GSVector4(curCircuit.framebufferRect) + GSVector4(0, y_offset[i], 0, y_offset[i])) * scale) / GSVector4(tex[i]->GetSize()).xyxy();
+ 
+ 		float interlace_offset = 0.0f;
+-		if (isReallyInterlaced() && m_regs->SMODE2.FFMD && !is_bob && !GSConfig.DisableInterlaceOffset && GSConfig.InterlaceMode != GSInterlaceMode::Off)
++		if (isReallyInterlaced() && m_regs->SMODE2.FFMD && !is_bob && !GSConfig.DisableInterlaceOffset && GSConfig.InterlaceMode != GSInterlaceMode::Off && !GSPresentView::NoDeinterlace())
+ 		{
+ 			interlace_offset = (scale.y) * static_cast<float>(field ^ field2);
+ 		}
+@@ -236,7 +490,7 @@ bool GSRenderer::Merge(int field)
+ 	const u32 c = (m_regs->BGCOLOR.U32[0] & 0x00FFFFFFu) | (m_regs->PMODE.ALP << 24);
+ 	g_gs_device->Merge(tex, src_gs_read, dst, fs, m_regs->PMODE, m_regs->EXTBUF, c);
+ 
+-	if ((tex[0] || tex[1]) && isReallyInterlaced() && GSConfig.InterlaceMode != GSInterlaceMode::Off)
++	if ((tex[0] || tex[1]) && isReallyInterlaced() && GSConfig.InterlaceMode != GSInterlaceMode::Off && !GSPresentView::NoDeinterlace())
+ 	{
+ 		const float offset = is_bob ? (tex[1] ? tex_scale[1] : tex_scale[0]) : 0.0f;
+ 
+@@ -633,6 +887,15 @@ void GSRenderer::VSync(u32 field, bool registers_written, bool idle_frame)
+ 
+ 	const bool blank_frame = !Merge(field);
+ 
++	// PS2Net own-screen view, alternate video frames: this PC's own picture is always shown, even when the
++	// emulator would skip it as a repeated frame, and a copy of it is kept for the other player's frames.
++	if (s_view.kind == 3 && s_view.mine)
++	{
++		skip_frame = false;
++		if (!blank_frame)
++			PickPresentPicture(g_gs_device->GetCurrent(), true);
++	}
++
+ 	m_last_draw_n = s_n;
+ 	m_last_transfer_n = s_transfer_n;
+ 
+@@ -660,12 +923,14 @@ void GSRenderer::VSync(u32 field, bool registers_written, bool idle_frame)
+ 		GSTexture* current = g_gs_device->GetCurrent();
+ 		if (current && !blank_frame)
+ 		{
++			current = PickPresentPicture(current, false);
+ 			src_rect = CalculateDrawSrcRect(current, m_real_size);
+ 			src_uv = GSVector4(src_rect) / GSVector4(current->GetSize()).xyxy();
+ 			draw_rect = CalculateDrawDstRect(g_gs_device->GetWindowWidth(), g_gs_device->GetWindowHeight(),
+ 				src_rect, current->GetSize(), s_display_alignment, g_gs_device->UsesLowerLeftOrigin(),
+ 				GetVideoMode() == GSVideoMode::SDTV_480P);
+ 			s_last_draw_rect = draw_rect;
++			ApplyPresentView(src_rect, src_uv, current->GetSize());
+ 
+ 			if (GSConfig.CASMode != GSCASMode::Disabled)
+ 			{
+@@ -847,6 +1112,8 @@ void GSRenderer::VSync(u32 field, bool registers_written, bool idle_frame)
+ 		}
+ 	}
+ 
++	ViewEndOfVSync();
++
+ 	if (GSConfig.ShouldDump(s_n, g_perfmon.GetFrame()) && GSConfig.SaveTransferImages)
+ 		DumpTransferImages();
+ }
+@@ -987,15 +1254,16 @@ void GSRenderer::PresentCurrentFrame()
+ {
+ 	if (BeginPresentFrame(false))
+ 	{
+-		GSTexture* current = g_gs_device->GetCurrent();
++		GSTexture* current = PickPresentPicture(g_gs_device->GetCurrent(), false);
+ 		if (current)
+ 		{
+-			const GSVector4i src_rect(CalculateDrawSrcRect(current, m_real_size));
+-			const GSVector4 src_uv(GSVector4(src_rect) / GSVector4(current->GetSize()).xyxy());
++			GSVector4i src_rect(CalculateDrawSrcRect(current, m_real_size));
++			GSVector4 src_uv(GSVector4(src_rect) / GSVector4(current->GetSize()).xyxy());
+ 			const GSVector4 draw_rect(CalculateDrawDstRect(g_gs_device->GetWindowWidth(), g_gs_device->GetWindowHeight(),
+ 				src_rect, current->GetSize(), s_display_alignment, g_gs_device->UsesLowerLeftOrigin(),
+ 				GetVideoMode() == GSVideoMode::SDTV_480P));
+ 			s_last_draw_rect = draw_rect;
++			ApplyPresentView(src_rect, src_uv, current->GetSize());
+ 
+ 			const u64 current_time = Common::Timer::GetCurrentValue();
+ 			const float shader_time = static_cast<float>(Common::Timer::ConvertValueToSeconds(current_time - m_shader_time_start));
+@@ -1061,7 +1329,8 @@ bool GSRenderer::IsIdleFrame() const
+ bool GSRenderer::SaveSnapshotToMemory(u32 window_width, u32 window_height, bool apply_aspect, bool crop_borders,
+ 	u32* width, u32* height, std::vector<u32>* pixels)
+ {
+-	GSTexture* const current = g_gs_device->GetCurrent();
++	// PS2Net own-screen view: screenshots keep the unchanged picture unless the session asked for this PC's view.
++	GSTexture* const current = s_view.in_screenshots ? PickPresentPicture(g_gs_device->GetCurrent(), false) : g_gs_device->GetCurrent();
+ 	if (!current)
+ 	{
+ 		*width = 0;
+@@ -1070,8 +1339,8 @@ bool GSRenderer::SaveSnapshotToMemory(u32 window_width, u32 window_height, bool
+ 		return false;
+ 	}
+ 
+-	const GSVector4i src_rect(CalculateDrawSrcRect(current, m_real_size));
+-	const GSVector4 src_uv(GSVector4(src_rect) / GSVector4(current->GetSize()).xyxy());
++	GSVector4i src_rect(CalculateDrawSrcRect(current, m_real_size));
++	GSVector4 src_uv(GSVector4(src_rect) / GSVector4(current->GetSize()).xyxy());
+ 
+ 	const bool is_progressive = (GetVideoMode() == GSVideoMode::SDTV_480P);
+ 	GSVector4 draw_rect;
+@@ -1102,6 +1371,8 @@ bool GSRenderer::SaveSnapshotToMemory(u32 window_width, u32 window_height, bool
+ 		draw_rect = CalculateDrawDstRect(window_width, window_height, src_rect, current->GetSize(),
+ 			GSDisplayAlignment::LeftOrTop, false, is_progressive);
+ 	}
++	if (s_view.in_screenshots)
++		ApplyPresentView(src_rect, src_uv, current->GetSize());
+ 	const u32 draw_width = static_cast<u32>(draw_rect.z - draw_rect.x);
+ 	const u32 draw_height = static_cast<u32>(draw_rect.w - draw_rect.y);
+ 	const u32 image_width = crop_borders ? draw_width : std::max(draw_width, window_width);
+diff --git a/pcsx2/GS/Renderers/HW/GSRendererHW.cpp b/pcsx2/GS/Renderers/HW/GSRendererHW.cpp
+index 564f12e..0f79c87 100644
+--- a/pcsx2/GS/Renderers/HW/GSRendererHW.cpp
++++ b/pcsx2/GS/Renderers/HW/GSRendererHW.cpp
+@@ -5,6 +5,7 @@
+ #include "GS/Renderers/HW/GSTextureReplacements.h"
+ #include "GS/GSGL.h"
+ #include "GS/GSPerfMon.h"
++#include "GS/GSPresentView.h"
+ #include "GS/GSUtil.h"
+ #include "Host.h"
+ #include "common/Console.h"
+@@ -173,6 +174,9 @@ GSTexture* GSRendererHW::GetOutput(int i, float& scale, int& y_offset)
+ 		rt->Update();
+ 		t = rt->m_texture;
+ 		scale = rt->m_scale;
++		// PS2Net own-screen view: this PC may show the copy taken at the marker instead of the final picture.
++		if (GSTexture* view_copy = GSPresentView::MarkerCopyFor(rt->m_TEX0.TBP0, rt->m_TEX0.PSM, t))
++			t = view_copy;
+ 
+ 		const int delta = bp_adj - rt->m_TEX0.TBP0;
+ 		if (delta > 0 && curFramebuffer.FBW != 0)
+@@ -11228,3 +11232,52 @@ bool GSRendererHW::IsCoverageAlphaSupported()
+ {
+ 	return IsCoverageAlpha() && IsRTWritten() && g_gs_device->Features().aa1;
+ }
++
++// ---------------------------------------------------------------------------------------------------------------
++// PS2Net own-screen view (display only), see GS/GSPresentView.h.
++void GSRendererHW::CaptureViewMarker(bool flush_first, bool shown_buffer)
++{
++	// Everything drawn so far must be in the frame buffer before it is copied.
++	if (flush_first)
++		Flush(GSFlushReason::UNKNOWN);
++	// The frame buffer being drawn to, or (per-game setting, and in the test) the one that is on display.
++	u32 bp = m_context->FRAME.Block();
++	u32 psm = m_context->FRAME.PSM;
++	if (shown_buffer && !GSPresentView::ShownFrameBuffer(&bp, &psm))
++		return;
++	GSTextureCache::Target* rt = g_texture_cache->GetTargetWithSharedBits(bp, psm);
++	if (!rt || !rt->m_texture)
++		return;
++	rt->Update();
++	GSPresentView::StoreMarkerCopy(rt->m_TEX0.TBP0, rt->m_texture);
++}
++
++void GSRendererHW::KeepViewPicture(bool save, u32 restore_bp)
++{
++	// Everything sent so far must be done first: the draws into the picture, and the game's loading of it.
++	Flush(GSFlushReason::UNKNOWN);
++	if (save)
++		g_texture_cache->KeepViewTarget(m_context->FRAME.Block(), m_context->FRAME.PSM);
++	else
++		g_texture_cache->PasteViewTarget(restore_bp);
++}
++
++void GSPresentView::OnLabel(u32 label_id)
++{
++	if (!GSIsHardwareRenderer())
++		return;
++	if (MarkerWanted(label_id))
++		GSRendererHW::GetInstance()->CaptureViewMarker(true, MarkerOfShownBuffer());
++	u32 restore_bp = 0;
++	if (const int keep = KeepWanted(label_id, &restore_bp))
++		GSRendererHW::GetInstance()->KeepViewPicture(keep == 1, restore_bp);
++}
++
++void GSPresentView::OnDraw()
++{
++	if (!GSIsHardwareRenderer())
++		return;
++	GSRendererHW* const hw = GSRendererHW::GetInstance();
++	if (FakeMarkerDue(hw->m_context->FRAME.Block()))
++		hw->CaptureViewMarker(false, true);
++}
+diff --git a/pcsx2/GS/Renderers/HW/GSRendererHW.h b/pcsx2/GS/Renderers/HW/GSRendererHW.h
+index 4ee9d55..a6f338b 100644
+--- a/pcsx2/GS/Renderers/HW/GSRendererHW.h
++++ b/pcsx2/GS/Renderers/HW/GSRendererHW.h
+@@ -351,6 +351,10 @@ public:
+ 	virtual ~GSRendererHW() override;
+ 
+ 	__fi static GSRendererHW* GetInstance() { return static_cast<GSRendererHW*>(g_gs_renderer.get()); }
++	// PS2Net own-screen view (GS/GSPresentView.h): keep a copy of the frame buffer being drawn, as it is now.
++	void CaptureViewMarker(bool flush_first, bool shown_buffer);
++	// PS2Net own-screen view: keep a copy of the frame buffer being drawn to / put it into the frame buffer at bp.
++	void KeepViewPicture(bool save, u32 restore_bp);
+ 	__fi HWCachedCtx* GetCachedCtx() { return &m_cached_ctx; }
+ 	__fi u32 GetLastChannelShuffleFBP() { return m_last_channel_shuffle_fbp; }
+ 	void Destroy() override;
+diff --git a/pcsx2/GS/Renderers/HW/GSTextureCache.cpp b/pcsx2/GS/Renderers/HW/GSTextureCache.cpp
+index 81110bb..813dadc 100644
+--- a/pcsx2/GS/Renderers/HW/GSTextureCache.cpp
++++ b/pcsx2/GS/Renderers/HW/GSTextureCache.cpp
+@@ -60,6 +60,7 @@ GSTextureCache::GSTextureCache()
+ 
+ GSTextureCache::~GSTextureCache()
+ {
++	DropViewTarget(); // PS2Net own-screen view
+ 	RemoveAll(true, true, true);
+ 
+ 	s_hash_cache_purge_list = {};
+@@ -5842,6 +5843,111 @@ GSTextureCache::Target* GSTextureCache::GetExactTarget(u32 BP, u32 BW, int type,
+ 	return nullptr;
+ }
+ 
++// ---------------------------------------------------------------------------------------------------------------
++// PS2Net own-screen view: see GSTextureCache.h. The kept copy lives outside the target list (it has no place in
++// the emulated graphics memory), so nothing in the emulated machine changes.
++namespace
++{
++	struct KeptViewTarget
++	{
++		GSTexture* tex = nullptr;
++		float scale = 1.0f;
++		GSVector2i unscaled = {};
++		bool valid_rgb = false;
++		bool valid_alpha_low = false;
++		bool valid_alpha_high = false;
++		bool alpha_range = false;
++		int alpha_max = 0;
++		int alpha_min = 0;
++	};
++	KeptViewTarget s_kept_view;
++} // namespace
++
++void GSTextureCache::DropViewTarget()
++{
++	if (s_kept_view.tex && g_gs_device)
++		g_gs_device->Recycle(s_kept_view.tex);
++	s_kept_view = KeptViewTarget();
++}
++
++bool GSTextureCache::KeepViewTarget(u32 BP, u32 PSM)
++{
++	Target* src = GetTargetWithSharedBits(BP, PSM);
++	if (!src || !src->m_texture || src->m_type != RenderTarget || src->m_TEX0.TBP0 != BP)
++	{
++		DropViewTarget();
++		return false;
++	}
++	src->Update();
++	// The copy holds plain alpha values, whatever way the target stores them just now.
++	src->UnscaleRTAlpha();
++	const GSVector2i size = src->m_texture->GetSize();
++	if (s_kept_view.tex && (s_kept_view.tex->GetWidth() != size.x || s_kept_view.tex->GetHeight() != size.y ||
++							   s_kept_view.tex->GetFormat() != src->m_texture->GetFormat()))
++		DropViewTarget();
++	if (!s_kept_view.tex)
++		s_kept_view.tex = g_gs_device->CreateRenderTarget(size.x, size.y, src->m_texture->GetFormat(), false);
++	if (!s_kept_view.tex)
++		return false;
++	g_gs_device->CopyRect(src->m_texture, s_kept_view.tex, GSVector4i(0, 0, size.x, size.y), 0, 0);
++	s_kept_view.scale = src->m_scale;
++	s_kept_view.unscaled = GSVector2i(src->m_valid.z, src->m_valid.w);
++	s_kept_view.valid_rgb = src->m_valid_rgb;
++	s_kept_view.valid_alpha_low = src->m_valid_alpha_low;
++	s_kept_view.valid_alpha_high = src->m_valid_alpha_high;
++	s_kept_view.alpha_range = src->m_alpha_range;
++	s_kept_view.alpha_max = src->m_alpha_max;
++	s_kept_view.alpha_min = src->m_alpha_min;
++	return true;
++}
++
++bool GSTextureCache::PasteViewTarget(u32 BP)
++{
++	if (!s_kept_view.tex)
++		return false;
++	const int w = s_kept_view.unscaled.x;
++	const int h = s_kept_view.unscaled.y;
++	if (w <= 0 || h <= 0)
++		return false;
++	const u32 bw = static_cast<u32>((w + 63) / 64);
++	// The destination is found, or made, the way a move inside the graphics memory does it (see Move()).
++	Target* dst = GetExactTarget(BP, bw, RenderTarget, BP);
++	if (!dst)
++	{
++		GIFRegTEX0 new_TEX0 = {};
++		new_TEX0.TBP0 = BP;
++		new_TEX0.TBW = bw;
++		new_TEX0.PSM = PSMCT32;
++		const GSVector2i target_size = GetTargetSize(BP, bw, PSMCT32, Common::AlignUpPow2(w, 64), h);
++		dst = LookupDrawTarget(new_TEX0, target_size, s_kept_view.scale, RenderTarget);
++		if (!dst)
++			dst = Target::Create(new_TEX0, target_size.x, target_size.y, s_kept_view.scale, RenderTarget, true);
++		if (!dst)
++			return false;
++	}
++	if (!dst->m_texture || dst->m_scale != s_kept_view.scale)
++		return false;
++	dst->UpdateValidity(GSVector4i(0, 0, w, h));
++	// What the game just loaded (at native resolution) goes into the target first, so it cannot cover the copy later.
++	dst->Update();
++	dst->UnscaleRTAlpha();
++	InvalidateVideoMemType(DepthStencil, dst->m_TEX0.TBP0);
++	const int scaled_w = std::min(static_cast<int>(w * s_kept_view.scale), s_kept_view.tex->GetWidth());
++	const int scaled_h = std::min(static_cast<int>(h * s_kept_view.scale), s_kept_view.tex->GetHeight());
++	if (scaled_w > dst->m_texture->GetWidth() || scaled_h > dst->m_texture->GetHeight())
++		return false;
++	g_gs_device->CopyRect(s_kept_view.tex, dst->m_texture, GSVector4i(0, 0, scaled_w, scaled_h), 0, 0);
++	dst->m_valid_rgb |= s_kept_view.valid_rgb;
++	dst->m_valid_alpha_low |= s_kept_view.valid_alpha_low;
++	dst->m_valid_alpha_high |= s_kept_view.valid_alpha_high;
++	dst->m_alpha_range |= s_kept_view.alpha_range;
++	dst->m_alpha_max = s_kept_view.alpha_max;
++	dst->m_alpha_min = s_kept_view.alpha_min;
++	dst->UpdateValidity(GSVector4i(0, 0, w, h));
++	dst->UpdateDrawn(GSVector4i(0, 0, w, h));
++	return true;
++}
++
+ GSTextureCache::Target* GSTextureCache::GetTargetWithSharedBits(u32 BP, u32 PSM) const
+ {
+ 	auto& rts = m_dst[GSLocalMemory::m_psm[PSM].depth ? DepthStencil : RenderTarget];
+diff --git a/pcsx2/GS/Renderers/HW/GSTextureCache.h b/pcsx2/GS/Renderers/HW/GSTextureCache.h
+index a4d9256..827ce3e 100644
+--- a/pcsx2/GS/Renderers/HW/GSTextureCache.h
++++ b/pcsx2/GS/Renderers/HW/GSTextureCache.h
+@@ -554,6 +554,15 @@ public:
+ 	/// Looks up a target in the cache, and only returns it if the BP/BW match exactly.
+ 	Target* GetExactTarget(u32 BP, u32 BW, int type, u32 end_bp);
+ 	Target* GetTargetWithSharedBits(u32 BP, u32 PSM) const;
++
++	// PS2Net own-screen view (GS/GSPresentView.h), display only. A game patch that draws one view per player may
++	// send a finished view picture through main memory and back; with a raised internal resolution it would come
++	// back at native sharpness. KeepViewTarget keeps a copy of the frame buffer at BP as it is now (at the
++	// renderer's resolution); PasteViewTarget puts that copy into the frame buffer at BP after the game has
++	// loaded the native-resolution picture there. Needs proper testing outside Kingdom Hearts II.
++	bool KeepViewTarget(u32 BP, u32 PSM);
++	bool PasteViewTarget(u32 BP);
++	void DropViewTarget();
+ 	Target* FindOverlappingTarget(GSTextureCache::Target* target) const;
+ 	Target* FindOverlappingTarget(u32 BP, u32 end_bp) const;
+ 	Target* FindOverlappingTarget(u32 BP, u32 BW, u32 PSM, GSVector4i rc) const;
+diff --git a/pcsx2/PS2Net/PS2Net.cpp b/pcsx2/PS2Net/PS2Net.cpp
+new file mode 100644
+index 0000000..1b246e6
+--- /dev/null
++++ b/pcsx2/PS2Net/PS2Net.cpp
+@@ -0,0 +1,2101 @@
++// SPDX-License-Identifier: GPL-3.0+
++// PS2Net: plays a game's own local multiplayer online, in lockstep. Not part of upstream PCSX2.
++// Design: digimon-online/docs/DESIGN.md. Needs proper testing; the test log is in digimon-online/docs/TESTS.md.
++//
++// Every PC runs the same game from power-on with the same settings. Once per emulated frame (vsync) each PC reads
++// its own controller (PCSX2 pad 1), sends it to the host tagged with "frame now + delay", and waits until the host
++// has sent the inputs of ALL players for the current frame. Player k's input then drives emulated controller slot k.
++// The host is player 1 and relays (star network over UDP). Memory hashes are compared to prove the PCs stay equal.
++
++#include "PS2Net/PS2Net.h"
++
++#include "Config.h"
++#include "Counters.h"
++#include "GS/GS.h"
++#include "GS/GSPresentView.h"
++#include "GS.h"
++#include "Host.h"
++#include "Memory.h"
++#include "MTGS.h"
++#include "PerformanceMetrics.h"
++#include "SIO/Pad/Pad.h"
++#include "SIO/Pad/PadDualshock2.h"
++#include "VMManager.h"
++#include "ps2/BiosTools.h"
++
++#include "common/Console.h"
++#include "common/FileSystem.h"
++#include "common/MemorySettingsInterface.h"
++#include "common/Path.h"
++#include "common/SettingsWrapper.h"
++#include "common/StringUtil.h"
++
++#include "fmt/format.h"
++
++#include <algorithm>
++#include <array>
++#include <chrono>
++#include <cstdio>
++#include <cstring>
++#include <deque>
++#include <memory>
++#include <random>
++#include <string>
++#include <vector>
++
++#ifdef _WIN32
++#include <winsock2.h>
++#include <ws2tcpip.h>
++#pragma comment(lib, "ws2_32")
++#else
++#error "PS2Net: only the Windows socket code is written so far"
++#endif
++
++namespace PS2Net
++{
++	namespace
++	{
++		constexpr u32 kMagic = 0x314E3250; // "P2N1"
++		constexpr u32 kProtocol = 4; // 2: layout + patch hash; 3: screen; 4: one-way inputs (partial SETs) + timed start
++		constexpr u8 kNoSlot = 0xFF; // player not used by this controller layout
++		constexpr u32 kMaxPlayers = 4;
++		constexpr u32 kRing = 512; // frames kept for resending; must be far larger than delay + lag
++		constexpr u32 kChunks = 64; // a memory hash "block" covers 64 frames: 1/64 of RAM is hashed each frame
++		constexpr u32 kNone = 0xFFFFFFFFu;
++		constexpr u32 kMaxFramesPerSet = 12; // keeps a host packet under ~1100 bytes with 4 players
++		constexpr u32 kMaxFramesPerIn = 30;
++		constexpr u32 kInputSize = REPORT_SIZE + 2; // report + flags + reserved
++
++		enum PacketType : u8
++		{
++			PKT_HELLO = 1,
++			PKT_WELCOME = 2,
++			PKT_REFUSE = 3,
++			PKT_START = 4,
++			PKT_STARTACK = 5,
++			PKT_IN = 6,
++			PKT_SET = 7,
++			PKT_BYE = 8,
++		};
++
++		enum InputFlags : u8
++		{
++			FLAG_ANALOG_BUTTON = 1, // the DualShock 2 "Analog" button is held
++		};
++
++		struct PadInput
++		{
++			u8 report[REPORT_SIZE];
++			u8 flags;
++			u8 reserved;
++		};
++
++		PadInput NeutralInput()
++		{
++			PadInput in{};
++			in.report[0] = 0xFF;
++			in.report[1] = 0xFF;
++			for (int i = 2; i < 6; i++)
++				in.report[i] = Pad::ANALOG_NEUTRAL_POSITION;
++			return in;
++		}
++
++		// ------------------------------------------------------------------------------------------------------
++		// Settings from the session INI
++		struct Config
++		{
++			bool enabled = false;
++			bool host = false;
++			std::string host_address = "127.0.0.1";
++			u16 port = 28150;
++			u32 players = 2; // host: how many players to wait for
++			std::string name = "Player";
++			u32 delay = 0; // 0 = automatic from the measured round-trip time
++			// Emulated controller of player 1..4: port 1, then a multitap in port 2 (slots 2A, 2B, 2C).
++			// Digimon Rumble Arena 2 uses this layout (docs/TESTS.md j01/j02); other games may want 0,2,3,4.
++			std::array<u8, kMaxPlayers> slots = {0, 1, 5, 6};
++			std::string bot = "none"; // none | random | script
++			std::string script;
++			std::string bot_then = "idle"; // after the script: idle | random | live
++			u32 bot_seed = 1;
++			std::string log_file;
++			std::vector<u32> snap_frames;
++			std::vector<u32> dump_frames; // test only: write the EE main memory to snap_dir at these frames
++			u32 snap_every = 0;
++			std::string snap_dir;
++			u32 exit_at_frame = 0;
++			u32 drop_after_s = 20;
++			u32 impair_loss_pct = 0;
++			u32 impair_delay_ms = 0;
++			u32 impair_jitter_ms = 0;
++			std::vector<u32> peek; // test only: log these EE words with the stats
++			bool smooth = true; // host: bigger input delay on uneven internet connections (fewer pauses)
++			u8 screen = 0; // 0 = 4:3 as the game was made, 1 = the game's widescreen 16:9 patch
++			// Own-screen view (display only): 0 = my own player's view, N = player N's view, 0xFF = whole picture.
++			u8 view = 0;
++			bool snap_view = false; // test snapshots show what this PC shows instead of the unchanged picture
++		};
++
++		Config s_cfg;
++		bool s_cfg_loaded = false;
++
++		std::vector<u32> ParseList(const std::string& v)
++		{
++			std::vector<u32> out;
++			for (const std::string_view part : StringUtil::SplitString(v, ',', true))
++			{
++				if (const std::optional<u32> n = StringUtil::FromChars<u32>(StringUtil::StripWhitespace(part)))
++					out.push_back(*n);
++			}
++			return out;
++		}
++
++		void LoadConfig()
++		{
++			if (s_cfg_loaded)
++				return;
++			s_cfg_loaded = true;
++			const char* path = std::getenv("PS2NET_CONFIG");
++			if (!path || !*path)
++				return;
++			const std::optional<std::string> text = FileSystem::ReadFileToString(path);
++			if (!text)
++			{
++				Console.Error("(PS2Net) cannot read session file %s", path);
++				return;
++			}
++			Config c;
++			c.enabled = true;
++			for (const std::string_view raw : StringUtil::SplitString(*text, '\n', true))
++			{
++				const std::string_view line = StringUtil::StripWhitespace(raw);
++				if (line.empty() || line[0] == ';' || line[0] == '#' || line[0] == '[')
++					continue;
++				const size_t eq = line.find('=');
++				if (eq == std::string_view::npos)
++					continue;
++				const std::string key = StringUtil::toLower(StringUtil::StripWhitespace(line.substr(0, eq)));
++				const std::string val(StringUtil::StripWhitespace(line.substr(eq + 1)));
++				const u32 num = StringUtil::FromChars<u32>(val).value_or(0);
++				if (key == "role")
++					c.host = StringUtil::toLower(val) == "host";
++				else if (key == "host")
++					c.host_address = val;
++				else if (key == "port")
++					c.port = static_cast<u16>(num ? num : 28150);
++				else if (key == "players")
++					c.players = std::clamp<u32>(num, 1, kMaxPlayers);
++				else if (key == "name")
++					c.name = val.substr(0, 15);
++				else if (key == "delay")
++					c.delay = std::min<u32>(num, 30);
++				else if (key == "slots")
++				{
++					const std::vector<u32> v = ParseList(val);
++					c.slots.fill(kNoSlot);
++					for (size_t i = 0; i < v.size() && i < kMaxPlayers; i++)
++						c.slots[i] = static_cast<u8>(std::min<u32>(v[i], 7));
++				}
++				else if (key == "bot")
++					c.bot = StringUtil::toLower(val);
++				else if (key == "script")
++					c.script = val;
++				else if (key == "botthen")
++					c.bot_then = StringUtil::toLower(val);
++				else if (key == "botseed")
++					c.bot_seed = num;
++				else if (key == "logfile")
++					c.log_file = val;
++				else if (key == "snapframes")
++					c.snap_frames = ParseList(val);
++				else if (key == "dumpframes")
++					c.dump_frames = ParseList(val);
++				else if (key == "snapevery")
++					c.snap_every = num;
++				else if (key == "snapdir")
++					c.snap_dir = val;
++				else if (key == "exitatframe")
++					c.exit_at_frame = num;
++				else if (key == "dropafter")
++					c.drop_after_s = num;
++				else if (key == "impairloss")
++					c.impair_loss_pct = std::min<u32>(num, 100);
++				else if (key == "impairdelay")
++					c.impair_delay_ms = num;
++				else if (key == "impairjitter")
++					c.impair_jitter_ms = num;
++				else if (key == "buffer")
++					c.smooth = StringUtil::toLower(val) != "fast";
++				else if (key == "screen")
++					c.screen = (val == "16:9") ? 1 : 0;
++				else if (key == "view")
++					c.view = (StringUtil::toLower(val) == "off") ? 0xFF : static_cast<u8>(std::min<u32>(num, kMaxPlayers));
++				else if (key == "snapview")
++					c.snap_view = (num != 0);
++				else if (key == "peek")
++				{
++					for (const std::string_view part : StringUtil::SplitString(val, ',', true))
++						if (auto n = StringUtil::FromChars<u32>(StringUtil::StripWhitespace(part), 16))
++							c.peek.push_back(*n);
++				}
++			}
++			// the layout decides the most players (for example 2 without a multitap)
++			const u32 usable = static_cast<u32>(std::count_if(c.slots.begin(), c.slots.end(), [](u8 v) { return v != kNoSlot; }));
++			c.players = std::clamp<u32>(c.players, 1, std::max<u32>(usable, 1));
++			s_cfg = c;
++		}
++
++		// ------------------------------------------------------------------------------------------------------
++		// Own-screen view (display only). Some games (with a patch) draw one view per player. A small settings
++		// file next to the game's patch file, <patches folder>/<SERIAL>_<CRC>.view, tells how. The emulator holds
++		// no game-specific numbers. Nothing here changes the emulated machine, so it cannot affect the sync.
++		//   LayoutAddress = 000F6F00   EE address (hex) of the game's layout byte; 0 = none (TestLayout is used)
++		//   SideValue = 1              layout value: ONE picture with one part per player (Player1.. below)
++		//   MarkerValue = 2            layout value: full-size views drawn one after the other, a LABEL register
++		//                              write (GS register 0x62) between them
++		//   AlternateValue = 3         layout value: the players' pictures on alternating video frames
++		//   Player1 = 0.5 0 1 1        side by side: left top right bottom, as fractions of the game picture
++		//   Player2 = 0 0 0.5 1
++		//   MarkerId = 56570001        marker layout: low 32 bits (hex) of the LABEL write
++		//   MarkerPlayer = 1           marker layout: the player whose picture is complete at the marker
++		//   MarkerBuffer = frame       marker layout: what is copied at the marker: frame = the frame buffer being
++		//                              drawn to (FRAME register), display = the frame buffer that is on display
++		//   MarkerHold = 8             marker layout: video frames a copy is shown without a new marker (0 = no limit)
++		//   OwnerAddress = 000F6F02    alternate layout: EE address (hex) of a byte saying whose picture the
++		//                              display registers select now (0 = player 1, 1 = player 2, other = all)
++		//   LayoutDelay = 0            video frames (0..3) by which the game writes the layout and owner bytes before
++		//                              the picture they describe is on display
++		//   TestLayout / MarkerTestDraws / MarkerTestEvery   development and tests only
++		struct ViewRect
++		{
++			float l = 0.0f, t = 0.0f, r = 1.0f, b = 1.0f;
++			bool set = false;
++		};
++		struct ViewSettings
++		{
++			bool loaded = false;
++			u32 layout_addr = 0;
++			u32 side_value = 1;
++			u32 marker_value = 2;
++			u32 alternate_value = 3;
++			u32 test_layout = 1;
++			std::array<ViewRect, kMaxPlayers> rect;
++			u32 marker_id = 0;
++			u32 marker_player = 1;
++			// Marker1Id .. Marker4Id: an own marker for each player (MarkerId + MarkerPlayer set one of them);
++			// MarkerAllId: a marker every PC with an own marker obeys too.
++			std::array<u32, kMaxPlayers> marker_ids = {};
++			u32 marker_all_id = 0;
++			// KeepSaveId / KeepRestoreId / KeepRestoreBlock: see GSPresentView::State.
++			u32 keep_save_id = 0;
++			u32 keep_restore_id = 0;
++			u32 keep_restore_bp = 0;
++			u32 marker_hold = 8;
++			bool marker_shown_buffer = false;
++			u32 marker_test_draws = 0;
++			u32 marker_test_every = 1;
++			u32 owner_addr = 0;
++			u32 layout_delay = 0;
++		};
++		ViewSettings s_view;
++		std::array<u8, 4> s_view_layout_hist{}; // the layout and owner bytes of the last video frames, newest first
++		std::array<u8, 4> s_view_owner_hist{};
++		GSPresentView::State s_view_posted;
++		u32 s_view_repost = 0;
++
++		void Log(const std::string& msg);
++
++		void LoadViewSettings()
++		{
++			s_view = ViewSettings();
++			s_view_layout_hist.fill(0);
++			s_view_owner_hist.fill(0xFF);
++			const std::string path = Path::Combine(EmuFolders::Patches,
++				fmt::format("{}_{:08X}.view", VMManager::GetDiscSerial(), VMManager::GetDiscCRC()));
++			const std::optional<std::string> text = FileSystem::ReadFileToString(path.c_str());
++			if (!text)
++				return;
++			for (const std::string_view raw : StringUtil::SplitString(*text, '\n', true))
++			{
++				std::string_view line = StringUtil::StripWhitespace(raw);
++				const size_t comment = line.find_first_of(";#");
++				if (comment != std::string_view::npos)
++					line = StringUtil::StripWhitespace(line.substr(0, comment));
++				const size_t eq = line.find('=');
++				if (line.empty() || eq == std::string_view::npos)
++					continue;
++				const std::string key = StringUtil::toLower(StringUtil::StripWhitespace(line.substr(0, eq)));
++				std::string val(StringUtil::StripWhitespace(line.substr(eq + 1)));
++				const u32 dec = StringUtil::FromChars<u32>(val).value_or(0);
++				const u32 hex = StringUtil::FromChars<u32>(val, 16).value_or(0);
++				if (key == "layoutaddress")
++					s_view.layout_addr = hex;
++				else if (key == "sidevalue" || key == "viewsvalue")
++					s_view.side_value = dec;
++				else if (key == "markervalue")
++					s_view.marker_value = dec;
++				else if (key == "alternatevalue")
++					s_view.alternate_value = dec;
++				else if (key == "testlayout")
++					s_view.test_layout = dec;
++				else if (key == "markerid")
++					s_view.marker_id = hex;
++				else if (key == "markerplayer")
++					s_view.marker_player = dec;
++				else if (key == "markerallid")
++					s_view.marker_all_id = hex;
++				else if (key == "keepsaveid")
++					s_view.keep_save_id = hex;
++				else if (key == "keeprestoreid")
++					s_view.keep_restore_id = hex;
++				else if (key == "keeprestoreblock")
++					s_view.keep_restore_bp = hex;
++				else if (key.size() == 9 && key.compare(0, 6, "marker") == 0 && key.compare(7, 2, "id") == 0 && key[6] >= '1' &&
++						 key[6] < static_cast<char>('1' + kMaxPlayers))
++					s_view.marker_ids[key[6] - '1'] = hex;
++				else if (key == "markerbuffer")
++					s_view.marker_shown_buffer = (StringUtil::toLower(val) == "display");
++				else if (key == "markerhold")
++					s_view.marker_hold = dec;
++				else if (key == "markertestevery")
++					s_view.marker_test_every = dec;
++				else if (key == "markertestdraws")
++					s_view.marker_test_draws = dec;
++				else if (key == "owneraddress")
++					s_view.owner_addr = hex;
++				else if (key == "layoutdelay")
++					s_view.layout_delay = std::min<u32>(dec, 3);
++				else if (key.size() == 7 && key.compare(0, 6, "player") == 0 && key[6] >= '1' && key[6] < static_cast<char>('1' + kMaxPlayers))
++				{
++					std::replace(val.begin(), val.end(), ',', ' ');
++					std::vector<float> f;
++					for (const std::string_view part : StringUtil::SplitString(val, ' ', true))
++						if (const std::optional<float> n = StringUtil::FromChars<float>(part))
++							f.push_back(*n);
++					if (f.size() == 4 && f[2] > f[0] && f[3] > f[1] && f[0] >= 0.0f && f[1] >= 0.0f && f[2] <= 1.0f && f[3] <= 1.0f)
++					{
++						ViewRect& v = s_view.rect[key[6] - '1'];
++						v.l = f[0];
++						v.t = f[1];
++						v.r = f[2];
++						v.b = f[3];
++						v.set = true;
++					}
++				}
++			}
++			// MarkerId + MarkerPlayer is the short form for one player's marker.
++			if (s_view.marker_id != 0 && s_view.marker_player >= 1 && s_view.marker_player <= kMaxPlayers &&
++				s_view.marker_ids[s_view.marker_player - 1] == 0)
++				s_view.marker_ids[s_view.marker_player - 1] = s_view.marker_id;
++			s_view.loaded = true;
++			std::string parts;
++			for (u32 i = 0; i < kMaxPlayers; i++)
++				if (s_view.marker_ids[i])
++					parts += fmt::format(" marker of player {} = {:08X};", i + 1, s_view.marker_ids[i]);
++			if (s_view.marker_all_id)
++				parts += fmt::format(" marker for everybody = {:08X};", s_view.marker_all_id);
++			if (s_view.keep_save_id && s_view.keep_restore_id)
++				parts += fmt::format(" keep a picture at {:08X}, put it back at {:08X} into block {:05X};", s_view.keep_save_id,
++					s_view.keep_restore_id, s_view.keep_restore_bp);
++			for (u32 i = 0; i < kMaxPlayers; i++)
++				if (s_view.rect[i].set)
++					parts += fmt::format(" player {} = {} {} {} {};", i + 1, s_view.rect[i].l, s_view.rect[i].t, s_view.rect[i].r, s_view.rect[i].b);
++			if (s_view.layout_delay)
++				parts += fmt::format(" the bytes are {} video frame(s) ahead of the picture;", s_view.layout_delay);
++			Log(fmt::format("view: settings file {} (layout byte at {:08X}; side by side = {}, marker = {} with id {:08X} for player {}, "
++							"alternate = {} with owner byte at {:08X});{}",
++				Path::GetFileName(path), s_view.layout_addr, s_view.side_value, s_view.marker_value, s_view.marker_id,
++				s_view.marker_player, s_view.alternate_value, s_view.owner_addr, parts));
++		}
++
++		bool SameView(const GSPresentView::State& a, const GSPresentView::State& b)
++		{
++			return a.kind == b.kind && a.left == b.left && a.top == b.top && a.right == b.right && a.bottom == b.bottom &&
++				   a.show_copy == b.show_copy && a.marker_id == b.marker_id && a.marker_all_id == b.marker_all_id &&
++				   a.keep_save_id == b.keep_save_id && a.keep_restore_id == b.keep_restore_id &&
++				   a.keep_restore_bp == b.keep_restore_bp &&
++				   a.fake_after_draws == b.fake_after_draws &&
++				   a.marker_hold == b.marker_hold && a.marker_shown_buffer == b.marker_shown_buffer && a.fake_every == b.fake_every &&
++				   a.mine == b.mine && a.in_screenshots == b.in_screenshots;
++		}
++
++		void PostView(const GSPresentView::State& want, u32 frame, u32 who)
++		{
++			// Posted when something changes, and again now and then so a restarted GS thread gets it too.
++			const bool same = SameView(want, s_view_posted);
++			if (same && (want.kind == 0 || ++s_view_repost < 120))
++				return;
++			s_view_repost = 0;
++			if (want.kind != s_view_posted.kind || want.show_copy != s_view_posted.show_copy)
++			{
++				static constexpr const char* names[] = {"whole picture", "this player's part of the picture",
++					"full-size views with a marker", "alternate video frames"};
++				std::string what = names[want.kind & 3];
++				if (want.kind == 1 || want.kind == 3)
++					what += fmt::format(", player {}", who + 1);
++				if (want.kind == 2)
++					what += want.show_copy ? ", this PC shows the copy taken at the marker" : ", this PC shows the final picture";
++				if (want.kind != 0)
++				{
++					const u64 smode2 = *reinterpret_cast<const u64*>(PS2GS_BASE(0x12000020));
++					what += fmt::format(" (video mode: interlaced {}, frame mode {})", smode2 & 1, (smode2 >> 1) & 1);
++				}
++				Log(fmt::format("view: {} from frame {}", what, frame));
++			}
++			s_view_posted = want;
++			if (MTGS::IsOpen())
++				MTGS::RunOnGSThread([want]() { GSPresentView::Apply(want); });
++		}
++
++		// ------------------------------------------------------------------------------------------------------
++		// Log file (one per PC and session)
++		std::FILE* s_log = nullptr;
++
++		double NowMs()
++		{
++			using namespace std::chrono;
++			return duration<double, std::milli>(steady_clock::now().time_since_epoch()).count();
++		}
++
++		void Log(const std::string& msg)
++		{
++			Console.WriteLn("(PS2Net) %s", msg.c_str());
++			if (!s_log && !s_cfg.log_file.empty())
++				s_log = FileSystem::OpenCFile(s_cfg.log_file.c_str(), "ab");
++			if (s_log)
++			{
++				std::fprintf(s_log, "%.0f %s\n", NowMs(), msg.c_str());
++				std::fflush(s_log);
++			}
++		}
++
++		void Osd(const char* key, const std::string& msg, float seconds = 3.0f)
++		{
++			Host::AddKeyedOSDMessage(key, msg, seconds);
++		}
++
++		// ------------------------------------------------------------------------------------------------------
++		// Hashing
++		u64 Mix(u64 h, u64 v)
++		{
++			h ^= v * 0x9E3779B97F4A7C15ull;
++			h = (h << 31) | (h >> 33);
++			return h * 0xBF58476D1CE4E5B9ull;
++		}
++
++		u64 HashBytes(u64 h, const void* data, size_t size)
++		{
++			const u8* p = static_cast<const u8*>(data);
++			size_t i = 0;
++			for (; i + 8 <= size; i += 8)
++			{
++				u64 v;
++				std::memcpy(&v, p + i, 8);
++				h = Mix(h, v);
++			}
++			for (; i < size; i++)
++				h = Mix(h, p[i]);
++			return Mix(h, size);
++		}
++
++		u64 HashString(u64 h, std::string_view s) { return HashBytes(h, s.data(), s.size()); }
++
++		// Settings that change what the emulated PS2 computes. Display-only settings (resolution, filtering,
++		// window, audio output) may differ per PC. HYPOTHESIS: this list is complete enough; the memory hashes
++		// during play are the real proof.
++		u64 SettingsFingerprint(const Pcsx2Config& cfg, std::string* listing)
++		{
++			Pcsx2Config copy = cfg;
++			MemorySettingsInterface msi;
++			SettingsSaveWrapper wrap(msi);
++			copy.LoadSave(wrap);
++			static constexpr const char* kSections[] = {
++				"EmuCore/CPU", "EmuCore/CPU/Recompiler", "EmuCore/Speedhacks", "EmuCore/Gamefixes", "Pad"};
++			static constexpr const char* kCoreKeys[] = {"EnablePatches", "EnableCheats", "EnableWideScreenPatches",
++				"EnableNoInterlacingPatches", "EnableFastBoot", "EnableGameFixes", "HostFs", "CdvdPrecache",
++				"ManuallySetRealTimeClock", "RtcYear", "RtcMonth", "RtcDay", "RtcHour", "RtcMinute", "RtcSecond"};
++			static constexpr const char* kGsKeys[] = {"Renderer", "HWDownloadMode"};
++			u64 h = 0x5053324E6574ull;
++			auto add = [&](const char* sec, const std::string& k, const std::string& v) {
++				h = HashString(h, fmt::format("{}/{}={}\n", sec, k, v));
++				if (listing)
++					*listing += fmt::format("  {}/{} = {}\n", sec, k, v);
++			};
++			for (const char* sec : kSections)
++			{
++				auto kv = msi.GetKeyValueList(sec);
++				std::sort(kv.begin(), kv.end());
++				for (const auto& [k, v] : kv)
++					add(sec, k, v);
++			}
++			for (const char* k : kCoreKeys)
++				if (msi.ContainsValue("EmuCore", k))
++					add("EmuCore", k, msi.GetStringValue("EmuCore", k));
++			for (const char* k : kGsKeys)
++				if (msi.ContainsValue("EmuCore/GS", k))
++					add("EmuCore/GS", k, msi.GetStringValue("EmuCore/GS", k));
++			add("PS2Net", "Screen", std::to_string(s_cfg.screen));
++			for (u32 i = 0; i < Pad::NUM_CONTROLLER_PORTS; i++)
++				add("PadType", std::to_string(i), std::to_string(static_cast<int>(cfg.Pad.Ports[i].Type)));
++			return h;
++		}
++
++		const char* ScreenName(u8 screen)
++		{
++			return screen == 1 ? "widescreen 16:9" : "normal 4:3";
++		}
++
++		std::string LayoutName(const std::array<u8, kMaxPlayers>& slots)
++		{
++			std::string s;
++			for (u8 v : slots)
++				if (v != kNoSlot)
++					s += (s.empty() ? "" : ",") + std::to_string(v);
++			if (s == "0,1")
++				return "2 players, no multitap";
++			if (s == "0,2,3,4")
++				return "multitap in port 1";
++			if (s == "0,1,5,6")
++				return "multitap in port 2";
++			return "slots " + s;
++		}
++
++		// Patch files change game memory (for example the Digimon unlock), so every PC must have the same ones.
++		u64 PatchFilesHash()
++		{
++			u64 h = 0x5041544348ull;
++			FileSystem::FindResultsArray files;
++			FileSystem::FindFiles(EmuFolders::Patches.c_str(), "*.pnach", FILESYSTEM_FIND_FILES | FILESYSTEM_FIND_SORT_BY_NAME, &files);
++			for (const FILESYSTEM_FIND_DATA& f : files)
++			{
++				h = HashString(h, Path::GetFileName(f.FileName));
++				if (const std::optional<std::vector<u8>> data = FileSystem::ReadBinaryFile(f.FileName.c_str()))
++					h = HashBytes(h, data->data(), data->size());
++			}
++			return h;
++		}
++
++		u64 MemcardHash()
++		{
++			u64 h = 0x4D4344ull;
++			for (int i = 0; i < 2; i++)
++			{
++				const Pcsx2Config::McdOptions& m = EmuConfig.Mcd[i];
++				h = Mix(h, m.Enabled ? 1 : 0);
++				if (!m.Enabled)
++					continue;
++				const std::string path = Path::Combine(EmuFolders::MemoryCards, m.Filename);
++				if (const std::optional<std::vector<u8>> data = FileSystem::ReadBinaryFile(path.c_str()))
++					h = HashBytes(h, data->data(), data->size());
++				else
++					h = Mix(h, 0xDEAD); // folder card or missing file
++			}
++			return h;
++		}
++
++		// ------------------------------------------------------------------------------------------------------
++		// Byte buffers for packets (little endian)
++		struct Writer
++		{
++			std::vector<u8> b;
++			void u8_(u8 v) { b.push_back(v); }
++			void u16_(u16 v) { u8_(v & 0xFF); u8_(v >> 8); }
++			void u32_(u32 v) { u16_(v & 0xFFFF); u16_(v >> 16); }
++			void u64_(u64 v) { u32_(static_cast<u32>(v)); u32_(static_cast<u32>(v >> 32)); }
++			void bytes(const void* p, size_t n) { b.insert(b.end(), static_cast<const u8*>(p), static_cast<const u8*>(p) + n); }
++			void str(const std::string& s, size_t n)
++			{
++				for (size_t i = 0; i < n; i++)
++					u8_(i < s.size() ? static_cast<u8>(s[i]) : 0);
++			}
++		};
++
++		struct Reader
++		{
++			const u8* p;
++			size_t n;
++			size_t i = 0;
++			bool ok = true;
++			bool need(size_t k)
++			{
++				if (i + k > n)
++					ok = false;
++				return ok;
++			}
++			u8 u8_() { return need(1) ? p[i++] : 0; }
++			u16 u16_() { const u16 lo = u8_(); return static_cast<u16>(lo | (u8_() << 8)); }
++			u32 u32_() { const u32 lo = u16_(); return lo | (static_cast<u32>(u16_()) << 16); }
++			u64 u64_() { const u64 lo = u32_(); return lo | (static_cast<u64>(u32_()) << 32); }
++			void bytes(void* out, size_t k)
++			{
++				if (need(k))
++				{
++					std::memcpy(out, p + i, k);
++					i += k;
++				}
++			}
++			std::string str(size_t k)
++			{
++				std::string s;
++				for (size_t j = 0; j < k; j++)
++				{
++					const char c = static_cast<char>(u8_());
++					if (c)
++						s.push_back(c);
++				}
++				return s;
++			}
++		};
++
++		// ------------------------------------------------------------------------------------------------------
++		// Session state
++		struct Addr
++		{
++			sockaddr_storage sa{};
++			int len = 0;
++			bool operator==(const Addr& o) const { return len == o.len && std::memcmp(&sa, &o.sa, len) == 0; }
++			std::string ToString() const
++			{
++				char host[NI_MAXHOST] = {}, serv[NI_MAXSERV] = {};
++				getnameinfo(reinterpret_cast<const sockaddr*>(&sa), len, host, sizeof(host), serv, sizeof(serv),
++					NI_NUMERICHOST | NI_NUMERICSERV);
++				return fmt::format("{}:{}", host, serv);
++			}
++		};
++
++		struct FrameSlot
++		{
++			u32 frame = kNone;
++			std::array<bool, kMaxPlayers> have = {};
++			std::array<PadInput, kMaxPlayers> in = {};
++			u8 dropped = 0; // bit p: player p is gone, neutral input
++			bool complete = false; // client: the host sent this frame
++		};
++
++		struct Peer // host side: one connected client
++		{
++			Addr addr;
++			u32 nonce = 0;
++			std::string name;
++			bool started = false; // sent STARTACK or inputs
++			u32 ack_set = 0; // next frame the client still needs from us
++			u32 next_in = 0; // next frame we still need from the client
++			double last_rx_ms = 0;
++			u32 hellos = 0;
++			u32 rtt_ms = 0;
++			std::vector<u32> rtts; // round trips measured in the lobby (ms)
++			std::deque<std::pair<u32, u64>> reports; // (block, digest) not yet compared
++			bool dropped = false;
++			u32 last_report_block = kNone;
++		};
++
++		struct Delayed
++		{
++			double due_ms;
++			Addr to;
++			std::vector<u8> data;
++		};
++
++		struct Session
++		{
++			Config cfg;
++			SOCKET sock = INVALID_SOCKET;
++			Addr host_addr; // client: where the host is
++			u32 session_id = 0;
++			u32 nonce = 0;
++			u32 me = 0; // my player index (0 = host)
++			u32 players = 1;
++			u32 delay = 2;
++			std::array<u8, kMaxPlayers> slots = {0, 1, 5, 6};
++			std::array<std::string, kMaxPlayers> names;
++			bool started = false;
++			bool ended = false;
++			bool exit_requested = false;
++			u32 frame = 0; // session frame about to be emulated
++			std::vector<FrameSlot> ring = std::vector<FrameSlot>(kRing);
++			std::array<PadInput, kMaxPlayers> cur; // inputs of the current frame (what the controllers report)
++			std::array<u8, kMaxPlayers> prev_flags = {};
++			std::array<u32, kMaxPlayers> dropped_from = {kNone, kNone, kNone, kNone};
++			std::vector<Peer> peers; // host only; peers[k] = player k+1
++			u32 client_next_set = 0; // client: next frame not yet received from the host
++			u32 host_ack_in = 0; // client: next frame of ours the host still needs
++			double last_send_ms = 0;
++			double last_rx_ms = 0;
++			u32 rtt_ms = 0;
++			std::vector<u32> rtts; // client: round trips to the host measured in the lobby
++			double start_at = 0; // both sides: local time (ms) at which frame 0 begins
++			bool start_pending = false; // client: START received, waiting for start_at
++			bool forward = false; // host: new inputs arrived, pass them on at once
++			// hashing
++			u64 block_hash = 0;
++			std::array<u64, kChunks> chunk_hash = {};
++			std::deque<std::pair<u32, u64>> my_digests; // (block, digest), newest last
++			std::deque<std::pair<u32, std::array<u64, kChunks>>> my_chunks;
++			u32 report_block = kNone;
++			u64 report_digest = 0;
++			u32 desync_block = kNone;
++			u32 desync_player = 0;
++			bool desync_logged = false;
++			u64 compared = 0;
++			// statistics
++			u64 waits = 0;
++			double wait_total_ms = 0, wait_max_ms = 0;
++			double last_stats_ms = 0;
++			// bots
++			std::vector<std::pair<std::pair<u32, u32>, PadInput>> script; // ((from, to), input)
++			u32 script_end = 0;
++			// impairment
++			std::mt19937 rng{12345};
++			std::vector<Delayed> delayed;
++			u64 fingerprint = 0;
++			std::string fingerprint_listing;
++			u64 mcd_hash = 0;
++			u64 patch_hash = 0;
++		};
++
++		std::unique_ptr<Session> s_session;
++
++		// Diagnostics: how often the game polled each emulated controller slot (reply bytes), and with START held.
++		std::array<u64, 8> s_poll_bytes = {};
++		std::array<u64, 8> s_poll_start = {};
++
++		FrameSlot& Slot(u32 frame)
++		{
++			FrameSlot& fs = s_session->ring[frame % kRing];
++			if (fs.frame != frame)
++			{
++				fs = FrameSlot();
++				fs.frame = frame;
++			}
++			return fs;
++		}
++
++		const FrameSlot* PeekSlot(u32 frame)
++		{
++			const FrameSlot& fs = s_session->ring[frame % kRing];
++			return fs.frame == frame ? &fs : nullptr;
++		}
++
++		// ------------------------------------------------------------------------------------------------------
++		// Socket
++		bool s_wsa = false;
++
++		void RawSend(Session& s, const Addr& to, const std::vector<u8>& data)
++		{
++			sendto(s.sock, reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()), 0,
++				reinterpret_cast<const sockaddr*>(&to.sa), to.len);
++		}
++
++		void SendTo(Session& s, const Addr& to, const Writer& w)
++		{
++			if (s.cfg.impair_loss_pct && (s.rng() % 100) < s.cfg.impair_loss_pct)
++				return;
++			if (s.cfg.impair_delay_ms || s.cfg.impair_jitter_ms)
++			{
++				const double extra = s.cfg.impair_jitter_ms ? static_cast<double>(s.rng() % (s.cfg.impair_jitter_ms + 1)) : 0.0;
++				s.delayed.push_back({NowMs() + s.cfg.impair_delay_ms + extra, to, w.b});
++				return;
++			}
++			RawSend(s, to, w.b);
++		}
++
++		void FlushDelayed(Session& s)
++		{
++			const double now = NowMs();
++			for (size_t i = 0; i < s.delayed.size();)
++			{
++				if (s.delayed[i].due_ms <= now)
++				{
++					RawSend(s, s.delayed[i].to, s.delayed[i].data);
++					s.delayed.erase(s.delayed.begin() + i);
++				}
++				else
++					i++;
++			}
++		}
++
++		Writer Header(const Session& s, PacketType t)
++		{
++			Writer w;
++			w.u32_(kMagic);
++			w.u8_(t);
++			w.u32_(s.session_id);
++			return w;
++		}
++
++		bool OpenSocket(Session& s, std::string* error)
++		{
++			if (!s_wsa)
++			{
++				WSADATA wd;
++				if (WSAStartup(MAKEWORD(2, 2), &wd) != 0)
++				{
++					*error = "WSAStartup failed";
++					return false;
++				}
++				s_wsa = true;
++			}
++			int family = AF_INET6;
++			if (!s.cfg.host)
++			{
++				addrinfo hints{};
++				hints.ai_family = AF_UNSPEC;
++				hints.ai_socktype = SOCK_DGRAM;
++				addrinfo* res = nullptr;
++				const std::string port = std::to_string(s.cfg.port);
++				if (getaddrinfo(s.cfg.host_address.c_str(), port.c_str(), &hints, &res) != 0 || !res)
++				{
++					*error = fmt::format("cannot find the host address '{}'", s.cfg.host_address);
++					return false;
++				}
++				std::memcpy(&s.host_addr.sa, res->ai_addr, res->ai_addrlen);
++				s.host_addr.len = static_cast<int>(res->ai_addrlen);
++				family = res->ai_family;
++				freeaddrinfo(res);
++			}
++			s.sock = socket(family, SOCK_DGRAM, IPPROTO_UDP);
++			if (s.sock == INVALID_SOCKET)
++			{
++				*error = "cannot create a UDP socket";
++				return false;
++			}
++			u_long nb = 1;
++			ioctlsocket(s.sock, FIONBIO, &nb);
++			int buf = 1 << 20;
++			setsockopt(s.sock, SOL_SOCKET, SO_RCVBUF, reinterpret_cast<const char*>(&buf), sizeof(buf));
++			// Windows reports ICMP "port unreachable" as WSAECONNRESET on the next recvfrom; switch that off.
++			BOOL off = FALSE;
++			DWORD ret = 0;
++			WSAIoctl(s.sock, _WSAIOW(IOC_VENDOR, 12), &off, sizeof(off), nullptr, 0, &ret, nullptr, nullptr);
++			if (s.cfg.host)
++			{
++				DWORD v6only = 0; // accept IPv4 and IPv6 players on one socket
++				setsockopt(s.sock, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<const char*>(&v6only), sizeof(v6only));
++				sockaddr_in6 a{};
++				a.sin6_family = AF_INET6;
++				a.sin6_addr = in6addr_any;
++				a.sin6_port = htons(s.cfg.port);
++				if (bind(s.sock, reinterpret_cast<const sockaddr*>(&a), sizeof(a)) != 0)
++				{
++					*error = fmt::format("cannot use UDP port {} (is another copy already hosting?)", s.cfg.port);
++					return false;
++				}
++			}
++			return true;
++		}
++
++		void WaitForPacket(Session& s, int timeout_ms)
++		{
++			fd_set set;
++			FD_ZERO(&set);
++			FD_SET(s.sock, &set);
++			timeval tv{0, timeout_ms * 1000};
++			select(0, &set, nullptr, nullptr, &tv);
++		}
++
++		// ------------------------------------------------------------------------------------------------------
++		// Packets
++		void WriteInput(Writer& w, const PadInput& in) { w.bytes(&in, kInputSize); }
++		PadInput ReadInput(Reader& r)
++		{
++			PadInput in;
++			r.bytes(&in, kInputSize);
++			return in;
++		}
++
++		void SendHello(Session& s)
++		{
++			Writer w = Header(s, PKT_HELLO);
++			w.u32_(kProtocol);
++			w.u32_(s.nonce);
++			w.u64_(s.fingerprint);
++			w.u32_(VMManager::GetDiscCRC());
++			w.u32_(BiosChecksum);
++			w.str(VMManager::GetDiscSerial(), 16);
++			w.str(s.cfg.name, 16);
++			w.u64_(s.mcd_hash);
++			for (u32 p = 0; p < kMaxPlayers; p++)
++				w.u8_(s.cfg.slots[p]);
++			w.u64_(s.patch_hash);
++			w.u8_(s.cfg.screen);
++			w.u16_(static_cast<u16>(std::min<u32>(s.rtt_ms, 65535)));
++			w.u64_(static_cast<u64>(NowMs()));
++			SendTo(s, s.host_addr, w);
++		}
++
++		void SendRefuse(Session& s, const Addr& to, u32 nonce, const std::string& why)
++		{
++			Writer w = Header(s, PKT_REFUSE);
++			w.u32_(nonce);
++			w.str(why, 120);
++			SendTo(s, to, w);
++		}
++
++		void SendStart(Session& s, const Addr& to)
++		{
++			Writer w = Header(s, PKT_START);
++			w.u8_(static_cast<u8>(s.players));
++			w.u8_(static_cast<u8>(s.delay));
++			for (u32 p = 0; p < kMaxPlayers; p++)
++				w.u8_(s.slots[p]);
++			for (u32 p = 0; p < kMaxPlayers; p++)
++				w.str(s.names[p], 16);
++			w.u32_(static_cast<u32>(std::max(0.0, s.start_at - NowMs()))); // ms until frame 0 on the host
++			SendTo(s, to, w);
++		}
++
++		// client -> host: our inputs the host has not confirmed yet, plus our latest memory digest
++		void SendInputs(Session& s)
++		{
++			Writer w = Header(s, PKT_IN);
++			w.u32_(s.client_next_set);
++			const u32 newest = s.frame + s.delay; // we know our input up to here
++			u32 first = std::max(s.host_ack_in, s.delay);
++			if (newest + 1 > first + kMaxFramesPerIn)
++				first = newest + 1 - kMaxFramesPerIn;
++			const u32 count = newest >= first ? newest - first + 1 : 0;
++			w.u32_(first);
++			w.u8_(static_cast<u8>(count));
++			for (u32 f = first; f < first + count; f++)
++			{
++				const FrameSlot* fs = PeekSlot(f);
++				WriteInput(w, fs ? fs->in[s.me] : NeutralInput());
++			}
++			w.u32_(s.report_block);
++			w.u64_(s.report_digest);
++			w.u64_(static_cast<u64>(NowMs()));
++			SendTo(s, s.host_addr, w);
++			s.last_send_ms = NowMs();
++		}
++
++		bool AllInputsKnown(Session& s, u32 f)
++		{
++			if (f < s.delay)
++				return true;
++			const FrameSlot* fs = PeekSlot(f);
++			if (!fs)
++				return false;
++			for (u32 p = 0; p < s.players; p++)
++				if (!fs->have[p] && !(fs->dropped & (1u << p)))
++					return false;
++			return true;
++		}
++
++		void AdvanceClientAck(Session& s)
++		{
++			while (AllInputsKnown(s, s.client_next_set) && s.client_next_set < s.frame + kRing / 2)
++				s.client_next_set++;
++		}
++
++		bool HostFrameComplete(Session& s, u32 f)
++		{
++			if (f < s.delay)
++				return true;
++			const FrameSlot* fs = PeekSlot(f);
++			if (!fs)
++				return false;
++			for (u32 p = 0; p < s.players; p++)
++				if (!fs->have[p] && !(fs->dropped & (1u << p)))
++					return false;
++			return true;
++		}
++
++		// host -> each client: every other player's input the host knows for the frames the client still needs.
++		// Protocol 4: a frame does not have to be complete; each input travels on as soon as the host has it, so an
++		// input needs one way (player -> host -> other player) instead of a round trip. Needs proper testing.
++		void SendSets(Session& s)
++		{
++			const u32 per_frame = 2 + kInputSize * (s.players > 1 ? s.players - 1 : 1);
++			const u32 max_frames = std::clamp<u32>(1100 / per_frame, 4, 30);
++			for (u32 k = 0; k < s.peers.size(); k++)
++			{
++				Peer& peer = s.peers[k];
++				if (peer.dropped)
++					continue;
++				const u32 player = k + 1;
++				Writer w = Header(s, PKT_SET);
++				w.u32_(peer.next_in);
++				const u32 first = std::max(peer.ack_set, s.delay);
++				u32 count = 0;
++				while (count < max_frames && PeekSlot(first + count))
++					count++;
++				w.u32_(first);
++				w.u8_(static_cast<u8>(count));
++				w.u8_(static_cast<u8>(s.players));
++				for (u32 f = first; f < first + count; f++)
++				{
++					const FrameSlot* fs = PeekSlot(f);
++					u8 mask = 0;
++					for (u32 p = 0; p < s.players; p++)
++						if (p != player && fs->have[p] && !(fs->dropped & (1u << p)))
++							mask |= static_cast<u8>(1u << p);
++					w.u8_(mask);
++					w.u8_(fs->dropped);
++					for (u32 p = 0; p < s.players; p++)
++						if (mask & (1u << p))
++							WriteInput(w, fs->in[p]);
++				}
++				w.u32_(s.desync_block);
++				w.u8_(static_cast<u8>(s.desync_player));
++				w.u64_(static_cast<u64>(NowMs()));
++				SendTo(s, peer.addr, w);
++			}
++			s.last_send_ms = NowMs();
++		}
++
++		void NoteDesync(Session& s, u32 block, u32 player)
++		{
++			if (s.desync_block != kNone)
++				return;
++			s.desync_block = block;
++			s.desync_player = player;
++		}
++
++		void CompareReports(Session& s)
++		{
++			for (u32 k = 0; k < s.peers.size(); k++)
++			{
++				Peer& peer = s.peers[k];
++				if (peer.dropped)
++				{
++					peer.reports.clear();
++					continue;
++				}
++				while (!peer.reports.empty())
++				{
++					const auto [block, digest] = peer.reports.front();
++					auto it = std::find_if(s.my_digests.begin(), s.my_digests.end(), [b = block](const auto& e) { return e.first == b; });
++					if (it == s.my_digests.end())
++					{
++						if (!s.my_digests.empty() && block < s.my_digests.front().first)
++							peer.reports.pop_front(); // too old to compare
++						else
++							break; // we have not reached that block yet
++						continue;
++					}
++					s.compared++;
++					if (it->second != digest)
++					{
++						Log(fmt::format("OUT OF SYNC: player {} memory digest for block {} (frames {}-{}) is {:016x}, host has {:016x}",
++							k + 2, block, block * kChunks, block * kChunks + kChunks - 1, digest, it->second));
++						NoteDesync(s, block, k + 1);
++					}
++					peer.reports.pop_front();
++				}
++			}
++		}
++
++		void HandleHello(Session& s, const Addr& from, Reader& r)
++		{
++			const u32 proto = r.u32_();
++			const u32 nonce = r.u32_();
++			const u64 fp = r.u64_();
++			const u32 crc = r.u32_();
++			const u32 bios = r.u32_();
++			const std::string serial = r.str(16);
++			const std::string name = r.str(16);
++			const u64 mcd = r.u64_();
++			std::array<u8, kMaxPlayers> slots;
++			for (u32 p = 0; p < kMaxPlayers; p++)
++				slots[p] = r.u8_();
++			const u64 patches = r.u64_();
++			const u8 screen = r.u8_();
++			const u32 rtt = r.u16_();
++			const u64 t = r.u64_();
++			if (!r.ok)
++				return;
++			auto it = std::find_if(s.peers.begin(), s.peers.end(), [&](const Peer& p) { return p.nonce == nonce; });
++			if (it == s.peers.end())
++			{
++				std::string why;
++				if (proto != kProtocol)
++					why = "Different version of the online emulator. Everyone needs the same package.";
++				else if (s.started)
++					why = "The game has already started. Joining later is not possible yet.";
++				else if (s.peers.size() + 1 >= s.players)
++					why = "The game is full.";
++				else if (slots != s.slots)
++					why = fmt::format("Different controller layout: you chose '{}', the host uses '{}'. Choose the same layout.",
++						LayoutName(slots), LayoutName(s.slots));
++				else if (screen != s.cfg.screen)
++					why = fmt::format("Different screen: you chose '{}', the host uses '{}'. Choose the same screen.",
++						ScreenName(screen), ScreenName(s.cfg.screen));
++				else if (crc != VMManager::GetDiscCRC() || serial != VMManager::GetDiscSerial())
++					why = fmt::format("Different game disc ({} {:08X}); the host has {} {:08X}.", serial, crc,
++						VMManager::GetDiscSerial(), VMManager::GetDiscCRC());
++				else if (bios != BiosChecksum)
++					why = "Different PS2 BIOS. Everyone needs the same BIOS file.";
++				else if (patches != s.patch_hash)
++					why = "Different patch files in the emulator's patches folder (for example the character unlock). Everyone needs the same package.";
++				else if (fp != s.fingerprint)
++					why = "Different emulator settings (speed hacks, game fixes or renderer). Use the package settings.";
++				else if (mcd != s.mcd_hash)
++					why = "Different memory card. For now everyone needs the same memory card file.";
++				if (!why.empty())
++				{
++					Log(fmt::format("refused {} '{}': {}", from.ToString(), name, why));
++					SendRefuse(s, from, nonce, why);
++					return;
++				}
++				Peer p;
++				p.addr = from;
++				p.nonce = nonce;
++				p.name = name;
++				s.peers.push_back(p);
++				it = s.peers.end() - 1;
++				const u32 idx = static_cast<u32>(s.peers.size());
++				s.names[idx] = name;
++				Log(fmt::format("player {} '{}' joined from {}", idx + 1, name, from.ToString()));
++				Osd("ps2net_join", fmt::format("{} joined as player {}", name, idx + 1), 5.0f);
++			}
++			it->addr = from; // the player's address may change (NAT rebinding)
++			it->last_rx_ms = NowMs();
++			it->hellos++;
++			it->rtt_ms = rtt;
++			if (rtt > 0 && it->rtts.size() < 64)
++				it->rtts.push_back(rtt);
++			Writer w = Header(s, PKT_WELCOME);
++			w.u32_(nonce);
++			w.u8_(static_cast<u8>(it - s.peers.begin() + 1));
++			w.u8_(static_cast<u8>(s.players));
++			w.u8_(static_cast<u8>(s.peers.size() + 1));
++			w.u64_(t);
++			SendTo(s, from, w);
++		}
++
++		void HandleIn(Session& s, const Addr& from, Reader& r)
++		{
++			auto it = std::find_if(s.peers.begin(), s.peers.end(), [&](const Peer& p) { return p.addr == from; });
++			if (it == s.peers.end() || it->dropped)
++				return;
++			const u32 player = static_cast<u32>(it - s.peers.begin()) + 1;
++			const u32 ack_set = r.u32_();
++			const u32 first = r.u32_();
++			const u32 count = r.u8_();
++			std::vector<PadInput> ins;
++			for (u32 i = 0; i < count; i++)
++				ins.push_back(ReadInput(r));
++			const u32 block = r.u32_();
++			const u64 digest = r.u64_();
++			r.u64_();
++			if (!r.ok)
++				return;
++			it->started = true;
++			it->last_rx_ms = NowMs();
++			it->ack_set = std::max(it->ack_set, ack_set);
++			for (u32 i = 0; i < count; i++)
++			{
++				const u32 f = first + i;
++				if (f < s.frame || f >= s.frame + kRing / 2 || f >= s.dropped_from[player])
++					continue; // already applied, too far ahead, or the player was dropped
++				FrameSlot& fs = Slot(f);
++				if (!fs.have[player])
++				{
++					fs.have[player] = true;
++					fs.in[player] = ins[i];
++					s.forward = true;
++				}
++			}
++			while (true)
++			{
++				const FrameSlot* fs = PeekSlot(it->next_in);
++				if (it->next_in < s.delay || (fs && fs->have[player]))
++					it->next_in++;
++				else
++					break;
++			}
++			if (block != kNone && (it->last_report_block == kNone || block > it->last_report_block))
++			{
++				it->last_report_block = block;
++				it->reports.push_back({block, digest});
++			}
++		}
++
++		void HandleSet(Session& s, Reader& r)
++		{
++			const u32 ack_in = r.u32_();
++			const u32 first = r.u32_();
++			const u32 count = r.u8_();
++			const u32 players = r.u8_();
++			if (!r.ok || players != s.players)
++				return;
++			for (u32 i = 0; i < count; i++)
++			{
++				const u32 f = first + i;
++				const u8 mask = r.u8_();
++				const u8 dropped = r.u8_();
++				std::array<PadInput, kMaxPlayers> ins;
++				for (u32 p = 0; p < players; p++)
++					if (mask & (1u << p))
++						ins[p] = ReadInput(r);
++				if (!r.ok)
++					return;
++				if (f < s.frame || f >= s.frame + kRing / 2)
++					continue;
++				FrameSlot& fs = Slot(f);
++				fs.dropped |= dropped;
++				for (u32 p = 0; p < players; p++)
++				{
++					if (p == s.me || !(mask & (1u << p)) || fs.have[p])
++						continue;
++					fs.have[p] = true;
++					fs.in[p] = ins[p];
++				}
++			}
++			const u32 desync_block = r.u32_();
++			const u32 desync_player = r.u8_();
++			r.u64_();
++			if (!r.ok)
++				return;
++			s.host_ack_in = std::max(s.host_ack_in, ack_in);
++			AdvanceClientAck(s);
++			if (desync_block != kNone && s.desync_block == kNone)
++			{
++				s.desync_block = desync_block;
++				s.desync_player = desync_player;
++			}
++		}
++
++		void Receive(Session& s)
++		{
++			FlushDelayed(s);
++			u8 buf[2048];
++			while (true)
++			{
++				Addr from;
++				from.len = sizeof(from.sa);
++				const int n = recvfrom(s.sock, reinterpret_cast<char*>(buf), sizeof(buf), 0, reinterpret_cast<sockaddr*>(&from.sa), &from.len);
++				if (n <= 0)
++					break;
++				Reader r{buf, static_cast<size_t>(n)};
++				if (r.u32_() != kMagic)
++					continue;
++				const u8 type = r.u8_();
++				const u32 sid = r.u32_();
++				if (!r.ok)
++					continue;
++				if (s.cfg.host)
++				{
++					if (type == PKT_HELLO)
++						HandleHello(s, from, r);
++					else if (sid != s.session_id)
++						continue;
++					else if (type == PKT_STARTACK || type == PKT_IN)
++					{
++						auto it = std::find_if(s.peers.begin(), s.peers.end(), [&](const Peer& p) { return p.addr == from; });
++						if (it != s.peers.end())
++						{
++							it->started = true;
++							it->last_rx_ms = NowMs();
++						}
++						if (type == PKT_IN)
++							HandleIn(s, from, r);
++					}
++					else if (type == PKT_BYE)
++					{
++						auto it = std::find_if(s.peers.begin(), s.peers.end(), [&](const Peer& p) { return p.addr == from; });
++						if (it != s.peers.end())
++						{
++							Log(fmt::format("player {} said goodbye", it - s.peers.begin() + 2));
++							it->last_rx_ms = 0; // dropped by the timeout logic at once
++						}
++					}
++				}
++				else
++				{
++					if (!(from == s.host_addr))
++						continue;
++					s.last_rx_ms = NowMs();
++					if (type == PKT_WELCOME)
++					{
++						if (r.u32_() != s.nonce)
++							continue;
++						s.session_id = sid;
++						s.me = r.u8_();
++						const u32 needed = r.u8_();
++						const u32 connected = r.u8_();
++						const u64 t = r.u64_();
++						if (!r.ok)
++							continue;
++						s.rtt_ms = static_cast<u32>(std::max(0.0, NowMs() - static_cast<double>(t)));
++						if (s.rtts.size() < 64)
++							s.rtts.push_back(s.rtt_ms);
++						Osd("ps2net_lobby", fmt::format("Connected to the host as player {}. Players: {} of {}. Waiting...", s.me + 1,
++							connected, needed), 2.0f);
++					}
++					else if (type == PKT_REFUSE)
++					{
++						if (r.u32_() != s.nonce)
++							continue;
++						const std::string why = r.str(120);
++						Log("the host refused us: " + why);
++						Osd("ps2net_lobby", "The host refused the connection: " + why, 30.0f);
++						s.ended = true;
++					}
++					else if (sid != s.session_id)
++						continue;
++					else if (type == PKT_START)
++					{
++						const u32 players = r.u8_();
++						const u32 delay = r.u8_();
++						std::array<u8, kMaxPlayers> slots;
++						for (u32 p = 0; p < kMaxPlayers; p++)
++							slots[p] = r.u8_();
++						std::array<std::string, kMaxPlayers> names;
++						for (u32 p = 0; p < kMaxPlayers; p++)
++							names[p] = r.str(16);
++						const u32 remaining = r.u32_();
++						if (!r.ok)
++							continue;
++						if (!s.started && !s.start_pending)
++						{
++							s.players = players;
++							s.delay = delay;
++							s.slots = slots;
++							s.names = names;
++							// Start together with the host: the host begins `remaining` ms after it sent this packet, which
++							// took about half a round trip to arrive.
++							std::vector<u32> r2 = s.rtts.empty() ? std::vector<u32>{s.rtt_ms} : s.rtts;
++							std::sort(r2.begin(), r2.end());
++							const double one_way = r2[r2.size() / 2] / 2.0;
++							s.start_at = NowMs() + std::max(0.0, remaining - one_way);
++							s.start_pending = true;
++							Log(fmt::format("start: {} players, delay {} frames, I am player {}; begin in {:.0f} ms (one way about {:.0f} ms)",
++								players, delay, s.me + 1, s.start_at - NowMs(), one_way));
++						}
++						Writer w = Header(s, PKT_STARTACK);
++						SendTo(s, s.host_addr, w);
++					}
++					else if (type == PKT_SET && s.started)
++						HandleSet(s, r);
++					else if (type == PKT_BYE)
++					{
++						Log("the host ended the session");
++						Osd("ps2net_lobby", "The host left. The online game is over.", 30.0f);
++						s.ended = true;
++					}
++				}
++			}
++			if (s.cfg.host && s.forward && s.started)
++			{
++				s.forward = false;
++				SendSets(s);
++			}
++		}
++
++		// ------------------------------------------------------------------------------------------------------
++		// Local input: this PC's controller, or a bot for tests
++		PadInput ParseButtons(const std::vector<std::string_view>& words, size_t from)
++		{
++			PadInput in = NeutralInput();
++			u16 buttons = 0xFFFF;
++			static constexpr std::pair<const char*, int> kBits[] = {{"L2", 0}, {"R2", 1}, {"L1", 2}, {"R1", 3},
++				{"TRI", 4}, {"O", 5}, {"X", 6}, {"SQ", 7}, {"SELECT", 8}, {"L3", 9}, {"R3", 10}, {"START", 11},
++				{"UP", 12}, {"RIGHT", 13}, {"DOWN", 14}, {"LEFT", 15}};
++			// pressure byte index in the report for buttons 0..15 (see PadDualshock2::BuildReport)
++			static constexpr int kPressure[16] = {16, 17, 14, 15, 10, 11, 12, 13, -1, -1, -1, -1, 8, 6, 9, 7};
++			for (size_t i = from; i < words.size(); i++)
++			{
++				const std::string w = StringUtil::toUpper(words[i]);
++				if (w.rfind("LX=", 0) == 0 || w.rfind("LY=", 0) == 0 || w.rfind("RX=", 0) == 0 || w.rfind("RY=", 0) == 0)
++				{
++					const u8 v = static_cast<u8>(std::min<u32>(StringUtil::FromChars<u32>(w.substr(3)).value_or(127), 255));
++					const int idx = (w[0] == 'L') ? (w[1] == 'X' ? 4 : 5) : (w[1] == 'X' ? 2 : 3);
++					in.report[idx] = v;
++					continue;
++				}
++				if (w == "ANALOG")
++				{
++					in.flags |= FLAG_ANALOG_BUTTON;
++					continue;
++				}
++				for (const auto& [name, bit] : kBits)
++				{
++					if (w == name)
++					{
++						buttons &= ~(1u << bit);
++						if (kPressure[bit] >= 0)
++							in.report[kPressure[bit]] = 0xFF;
++					}
++				}
++			}
++			in.report[0] = static_cast<u8>(buttons >> 8);
++			in.report[1] = static_cast<u8>(buttons & 0xFF);
++			return in;
++		}
++
++		void LoadScript(Session& s)
++		{
++			if (s.cfg.script.empty())
++				return;
++			const std::optional<std::string> text = FileSystem::ReadFileToString(s.cfg.script.c_str());
++			if (!text)
++			{
++				Log("cannot read bot script " + s.cfg.script);
++				return;
++			}
++			// line: <frame> <number of frames> <buttons...>   e.g. "600 4 START" or "900 30 LX=255 X"
++			for (const std::string_view raw : StringUtil::SplitString(*text, '\n', true))
++			{
++				const std::string_view line = StringUtil::StripWhitespace(raw);
++				if (line.empty() || line[0] == '#' || line[0] == ';')
++					continue;
++				std::vector<std::string_view> words = StringUtil::SplitString(line, ' ', true);
++				if (words.size() < 2)
++					continue;
++				const u32 f = StringUtil::FromChars<u32>(words[0]).value_or(0);
++				const u32 n = StringUtil::FromChars<u32>(words[1]).value_or(1);
++				s.script.push_back({{f, f + n}, ParseButtons(words, 2)});
++				s.script_end = std::max(s.script_end, f + n);
++			}
++			Log(fmt::format("bot script: {} lines, ends at frame {}", s.script.size(), s.script_end));
++		}
++
++		PadInput RandomInput(const Session& s, u32 frame)
++		{
++			// Holds a random combination for 6-20 frames, then changes. START/SELECT/ANALOG are never pressed
++			// (pause menus would stop a long test). Same seed, player and frame always give the same input.
++			std::mt19937 seg_rng(s.cfg.bot_seed * 7919u + s.me * 104729u + (frame / 6) * 2654435761u);
++			const u32 len = 6 + seg_rng() % 15;
++			std::mt19937 rng(s.cfg.bot_seed * 7919u + s.me * 104729u + (frame / len) * 2246822519u);
++			std::vector<std::string_view> words;
++			static constexpr const char* kPool[] = {"X", "O", "SQ", "TRI", "L1", "R1", "L2", "R2", "UP", "DOWN", "LEFT", "RIGHT"};
++			const u32 k = rng() % 3;
++			for (u32 i = 0; i < k; i++)
++				words.push_back(kPool[rng() % std::size(kPool)]);
++			PadInput in = ParseButtons(words, 0);
++			in.report[4] = static_cast<u8>(rng() % 256);
++			in.report[5] = static_cast<u8>(rng() % 256);
++			return in;
++		}
++
++		PadInput LiveInput()
++		{
++			PadBase* pad = Pad::GetPad(0);
++			if (!pad || pad->GetType() != Pad::ControllerType::DualShock2)
++				return NeutralInput();
++			PadInput in{};
++			static_cast<PadDualshock2*>(pad)->BuildReport(in.report);
++			if (pad->GetRawInput(PadDualshock2::Inputs::PAD_ANALOG) > 0)
++				in.flags |= FLAG_ANALOG_BUTTON;
++			return in;
++		}
++
++		PadInput LocalInput(Session& s, u32 frame)
++		{
++			if (s.cfg.bot == "random")
++				return RandomInput(s, frame);
++			if (s.cfg.bot == "script")
++			{
++				if (frame < s.script_end || s.cfg.bot_then == "idle")
++				{
++					for (const auto& [range, in] : s.script)
++						if (frame >= range.first && frame < range.second)
++							return in;
++					return NeutralInput();
++				}
++				if (s.cfg.bot_then == "random")
++					return RandomInput(s, frame);
++			}
++			return LiveInput();
++		}
++
++		// ------------------------------------------------------------------------------------------------------
++		// Waiting (lobby and per frame). Keeps the window responsive and the on-screen messages visible.
++		bool KeepWaiting(Session& s, double started_ms, double& last_present_ms)
++		{
++			Host::PumpMessagesOnCPUThread();
++			if (VMManager::GetState() == VMState::Stopping)
++			{
++				Log("emulator is stopping, leaving the session");
++				s.ended = true;
++				return false;
++			}
++			const double now = NowMs();
++			if (now - started_ms > 300.0 && now - last_present_ms > 100.0)
++			{
++				MTGS::PresentCurrentFrame();
++				last_present_ms = now;
++			}
++			WaitForPacket(s, 2);
++			return !s.ended;
++		}
++
++		void RunLobby(Session& s)
++		{
++			const double t0 = NowMs();
++			double last_present = 0, last_hello = 0, last_start = 0, last_osd = 0;
++			Log(fmt::format("screen: {}", ScreenName(s.cfg.screen)));
++			Log(fmt::format("lobby: {} on port {}, {} player(s), disc {} {:08X}, BIOS checksum {:08X}, settings {:016x}, memory card {:016x}",
++				s.cfg.host ? "hosting" : fmt::format("joining {}", s.cfg.host_address), s.cfg.port, s.cfg.players,
++				VMManager::GetDiscSerial(), VMManager::GetDiscCRC(), BiosChecksum, s.fingerprint, s.mcd_hash));
++			Log("settings that must match:\n" + s.fingerprint_listing);
++			if (s.cfg.host && s.cfg.players <= 1)
++			{
++				s.started = true;
++				return;
++			}
++			while (!s.started)
++			{
++				Receive(s);
++				const double now = NowMs();
++				if (s.cfg.host)
++				{
++					const bool all_here = s.peers.size() + 1 >= s.players;
++					// measure every friend's connection for about 3 seconds (a hello every 250 ms) before choosing the delay
++					const bool rtt_known = std::all_of(s.peers.begin(), s.peers.end(), [](const Peer& p) { return p.rtts.size() >= 10 || p.hellos >= 20; });
++					if (all_here && rtt_known)
++					{
++						if (s.delay == 0)
++						{
++							// Protocol 4: an input travels one way (friend -> host, host -> friend, or friend -> host ->
++							// friend), and all PCs start at the same moment, so the delay covers a one-way trip, not a
++							// round trip. The 90 % value of the measured round trips ignores a single lucky/unlucky sample.
++							std::vector<u32> p90s;
++							for (const Peer& p : s.peers)
++							{
++								std::vector<u32> r = p.rtts.empty() ? std::vector<u32>{p.rtt_ms} : p.rtts;
++								std::sort(r.begin(), r.end());
++								p90s.push_back(r[std::min<size_t>(r.size() - 1, (r.size() * 9) / 10)]);
++							}
++							std::sort(p90s.rbegin(), p90s.rend());
++							const u32 worst = p90s.empty() ? 0 : p90s[0];
++							// two friends: friend A -> host -> friend B = both one-way trips
++							const double need = p90s.size() >= 2 ? (p90s[0] + p90s[1]) / 2.0 : worst / 2.0;
++							u32 delay = static_cast<u32>((need + 16.68) / 16.68) + 1;
++							// "Smooth": over the internet (not the same house) add 3 frames = 50 ms, so the common small
++							// delays do not pause the game (user test 2026-11-05: average pause 52 ms).
++							const bool internet = worst >= 20;
++							if (s.cfg.smooth && internet)
++								delay += 3;
++							s.delay = std::clamp<u32>(delay, 3, 20);
++							s.start_at = now + std::max(500.0, 3.0 * worst);
++							Log(fmt::format("round trip (90 %) worst {} ms, one-way path {:.0f} ms, {} -> input delay {} frames ({} ms)",
++								worst, need, s.cfg.smooth ? (internet ? "smooth, internet" : "smooth, same house") : "fast", s.delay,
++								static_cast<u32>(s.delay * 16.68)));
++						}
++						if (now - last_start > 100.0)
++						{
++							for (const Peer& p : s.peers)
++								SendStart(s, p.addr);
++							last_start = now;
++						}
++						if (now >= s.start_at && std::all_of(s.peers.begin(), s.peers.end(), [](const Peer& p) { return p.started; }))
++						{
++							s.started = true;
++							Log(fmt::format("start: {} players, delay {} frames", s.players, s.delay));
++						}
++					}
++					if (now - last_osd > 1000.0)
++					{
++						Osd("ps2net_lobby", fmt::format("Hosting on port {}. Players: {} of {}. Waiting...", s.cfg.port,
++							s.peers.size() + 1, s.players), 2.0f);
++						last_osd = now;
++					}
++				}
++				else
++				{
++					if (s.start_pending)
++					{
++						if (now >= s.start_at)
++							s.started = true;
++					}
++					else if (now - last_hello > 250.0)
++					{
++						SendHello(s);
++						last_hello = now;
++					}
++					if (s.session_id == 0 && now - last_osd > 1000.0)
++					{
++						Osd("ps2net_lobby", fmt::format("Connecting to {} port {}... ({} s)", s.cfg.host_address, s.cfg.port,
++							static_cast<int>((now - t0) / 1000.0)), 2.0f);
++						last_osd = now;
++					}
++				}
++				if (!KeepWaiting(s, t0, last_present))
++					return;
++			}
++			Host::RemoveKeyedOSDMessage("ps2net_lobby");
++			Osd("ps2net_start", fmt::format("Online game started: {} players, you are player {}. Input delay {} frames ({:.2f} s).",
++				s.players, s.me + 1, s.delay, s.delay * 16.68 / 1000.0), 8.0f);
++			s.last_rx_ms = NowMs();
++			for (Peer& p : s.peers)
++				p.last_rx_ms = NowMs();
++		}
++
++		// ------------------------------------------------------------------------------------------------------
++		// Memory hash: 1/64 of EE RAM (+ 1/64 of IOP RAM) each frame; one digest per 64 frames.
++		void HashStep(Session& s, u32 frame)
++		{
++			const u32 chunk = frame % kChunks;
++			const size_t ee = Ps2MemSize::MainRam / kChunks;
++			const size_t iop = Ps2MemSize::IopRam / kChunks;
++			u64 h = HashBytes(0x4545ull + chunk, eeMem->Main + chunk * ee, ee);
++			h = HashBytes(h, iopMem->Main + chunk * iop, iop);
++			s.chunk_hash[chunk] = h;
++			s.block_hash = Mix(s.block_hash, h);
++			if (chunk == kChunks - 1)
++			{
++				const u32 block = frame / kChunks;
++				s.my_digests.push_back({block, s.block_hash});
++				s.my_chunks.push_back({block, s.chunk_hash});
++				while (s.my_digests.size() > 64)
++					s.my_digests.pop_front();
++				while (s.my_chunks.size() > 16)
++					s.my_chunks.pop_front();
++				s.report_block = block;
++				s.report_digest = s.block_hash;
++				s.block_hash = 0;
++			}
++		}
++
++		void ShowDesync(Session& s)
++		{
++			if (s.desync_block == kNone || s.desync_logged)
++				return;
++			s.desync_logged = true;
++			const u32 frame = s.desync_block * kChunks;
++			Log(fmt::format("OUT OF SYNC detected (player {} differs) in frames {}-{}", s.desync_player + 1, frame, frame + kChunks - 1));
++			for (const auto& [block, chunks] : s.my_chunks)
++			{
++				if (block != s.desync_block)
++					continue;
++				std::string line = fmt::format("my chunk hashes for block {}:", block);
++				for (u32 c = 0; c < kChunks; c++)
++					line += fmt::format(" {:016x}", chunks[c]);
++				Log(line);
++			}
++			Osd("ps2net_desync", fmt::format("OUT OF SYNC with player {} (since about frame {}). The PCs no longer show the same game.",
++				s.desync_player + 1, frame), 30.0f);
++		}
++
++		void HostDropCheck(Session& s, u32 frame)
++		{
++			if (s.cfg.drop_after_s == 0)
++				return;
++			const double now = NowMs();
++			for (u32 k = 0; k < s.peers.size(); k++)
++			{
++				Peer& p = s.peers[k];
++				if (p.dropped || now - p.last_rx_ms < s.cfg.drop_after_s * 1000.0)
++					continue;
++				const u32 player = k + 1;
++				p.dropped = true;
++				s.dropped_from[player] = frame;
++				for (u32 f = frame; f < frame + kRing / 2; f++)
++				{
++					FrameSlot& fs = s.ring[f % kRing];
++					if (fs.frame == f)
++						fs.dropped |= static_cast<u8>(1u << player);
++				}
++				Log(fmt::format("player {} '{}' did not answer for {} s: dropped from frame {} (controller released)", player + 1,
++					p.name, s.cfg.drop_after_s, frame));
++				Osd("ps2net_drop", fmt::format("{} (player {}) lost connection and was removed.", p.name, player + 1), 10.0f);
++			}
++		}
++
++		void ApplyFrame(Session& s, u32 frame)
++		{
++			const FrameSlot* fs = PeekSlot(frame);
++			for (u32 p = 0; p < kMaxPlayers; p++)
++			{
++				PadInput in = NeutralInput();
++				if (p < s.players && frame >= s.delay && fs && !(fs->dropped & (1u << p)))
++					in = fs->in[p];
++				s.cur[p] = in;
++				// Analog button: toggles the pad mode on the press, at this frame on every PC.
++				const bool pressed = (in.flags & FLAG_ANALOG_BUTTON) && !(s.prev_flags[p] & FLAG_ANALOG_BUTTON);
++				s.prev_flags[p] = in.flags;
++				if (pressed && p < s.players && s.slots[p] != kNoSlot)
++				{
++					PadBase* pad = Pad::GetPad(s.slots[p]);
++					if (pad && pad->GetType() == Pad::ControllerType::DualShock2)
++						static_cast<PadDualshock2*>(pad)->ToggleAnalogFromSession();
++				}
++			}
++		}
++
++		void TestHooks(Session& s, u32 frame)
++		{
++			const bool snap = (s.cfg.snap_every && frame % s.cfg.snap_every == 0 && frame) ||
++							  std::find(s.cfg.snap_frames.begin(), s.cfg.snap_frames.end(), frame) != s.cfg.snap_frames.end();
++			if (snap && !s.cfg.snap_dir.empty())
++			{
++				std::string path = Path::Combine(s.cfg.snap_dir, fmt::format("p{}_f{:06d}.png", s.me + 1, frame));
++				// The snapshot is the unchanged picture unless SnapView asks for what this PC shows.
++				const bool full = !s.cfg.snap_view;
++				MTGS::RunOnGSThread([path, full]() {
++					if (full)
++						GSPresentView::FullPictureOnce();
++					GSQueueSnapshot(path, 0);
++				});
++			}
++			if (!s.cfg.snap_dir.empty() &&
++				std::find(s.cfg.dump_frames.begin(), s.cfg.dump_frames.end(), frame) != s.cfg.dump_frames.end())
++			{
++				// Test only: the whole EE main memory at an exact session frame (read only).
++				const std::string dump_path = Path::Combine(s.cfg.snap_dir, fmt::format("p{}_ram_f{:06d}.bin", s.me + 1, frame));
++				if (std::FILE* f = FileSystem::OpenCFile(dump_path.c_str(), "wb"))
++				{
++					std::fwrite(eeMem->Main, 1, Ps2MemSize::MainRam, f);
++					std::fclose(f);
++				}
++			}
++			if (s.cfg.exit_at_frame && frame == s.cfg.exit_at_frame)
++			{
++				Log(fmt::format("test end at frame {}: hashes compared {}, desync block {}", frame, s.compared,
++					s.desync_block == kNone ? std::string("none") : std::to_string(s.desync_block)));
++				Host::RequestVMShutdown(false, false, false);
++			}
++		}
++
++		void Stats(Session& s)
++		{
++			const double now = NowMs();
++			if (now - s.last_stats_ms < 10000.0)
++				return;
++			s.last_stats_ms = now;
++			std::string polls;
++			for (u32 i = 0; i < 8; i++)
++				if (s_poll_bytes[i])
++					polls += fmt::format(" slot{}={}/{}", i, s_poll_bytes[i], s_poll_start[i]);
++			s_poll_bytes = {};
++			s_poll_start = {};
++			Log("polls (reply bytes / with START held):" + (polls.empty() ? std::string(" none") : polls));
++			if (!s.cfg.peek.empty())
++			{
++				std::string words;
++				for (u32 a : s.cfg.peek)
++					words += fmt::format(" {:08X}={:08X}", a, memRead32(a));
++				Log("peek:" + words);
++			}
++			Log(fmt::format("speed: game frames per second {:.1f}, PS2 vsyncs per second {:.1f}", PerformanceMetrics::GetInternalFPS(), PerformanceMetrics::GetFPS()));
++			Log(fmt::format("stats: frame {}, waits {}, wait total {:.0f} ms, longest {:.0f} ms, digests compared {}, rtt {} ms, {}",
++				s.frame, s.waits, s.wait_total_ms, s.wait_max_ms, s.compared, s.rtt_ms,
++				s.desync_block == kNone ? "in sync" : fmt::format("OUT OF SYNC since block {}", s.desync_block)));
++		}
++
++		void EndSession(bool say_bye)
++		{
++			if (!s_session)
++				return;
++			Session& s = *s_session;
++			if (say_bye && s.sock != INVALID_SOCKET)
++			{
++				Writer w = Header(s, PKT_BYE);
++				for (int i = 0; i < 3; i++)
++				{
++					if (s.cfg.host)
++						for (const Peer& p : s.peers)
++							RawSend(s, p.addr, w.b);
++					else
++						RawSend(s, s.host_addr, w.b);
++				}
++			}
++			Log(fmt::format("session closed at frame {} (digests compared {}, {})", s.frame, s.compared,
++				s.desync_block == kNone ? "never out of sync" : fmt::format("out of sync since block {}", s.desync_block)));
++			if (s.sock != INVALID_SOCKET)
++				closesocket(s.sock);
++			s_session.reset();
++		}
++	} // namespace
++
++	void OverrideCoreSettings(Pcsx2Config& cfg)
++	{
++		LoadConfig();
++		if (!s_cfg.enabled)
++			return;
++		// Multi-threaded VU1 lets host thread timing reach the game. HYPOTHESIS: off is needed; measure the cost.
++		cfg.Speedhacks.vuThread = false;
++		// The BIOS reads the PC clock. Every PC uses the same fixed date and time instead.
++		cfg.ManuallySetRealTimeClock = true;
++		cfg.RtcYear = 4;
++		cfg.RtcMonth = 9;
++		cfg.RtcDay = 3;
++		cfg.RtcHour = 12;
++		cfg.RtcMinute = 0;
++		cfg.RtcSecond = 0;
++		cfg.EnableCheats = false;
++		// Screen shape: the widescreen patches change the game's camera, so the host's choice applies to every PC.
++		cfg.EnableWideScreenPatches = (s_cfg.screen == 1);
++		// Controllers: exactly the session's slots are DualShock 2, everything else is unplugged.
++		bool port0_tap = false, port1_tap = false;
++		for (u32 p = 0; p < kMaxPlayers; p++)
++		{
++			const u8 slot = s_cfg.slots[p];
++			if (slot == kNoSlot)
++				continue;
++			port0_tap |= (slot >= 2 && slot <= 4);
++			port1_tap |= (slot >= 5);
++		}
++		cfg.Pad.MultitapPort0_Enabled = port0_tap;
++		cfg.Pad.MultitapPort1_Enabled = port1_tap;
++		for (u32 i = 0; i < Pad::NUM_CONTROLLER_PORTS; i++)
++		{
++			const bool used = std::find(s_cfg.slots.begin(), s_cfg.slots.end(), static_cast<u8>(i)) != s_cfg.slots.end();
++			cfg.Pad.Ports[i].Type = used ? Pad::ControllerType::DualShock2 : Pad::ControllerType::NotConnected;
++		}
++		// Pad 1 (slot 0) also carries this PC's own controller bindings, so it must stay a DualShock 2.
++		cfg.Pad.Ports[0].Type = Pad::ControllerType::DualShock2;
++	}
++
++	bool IsActive()
++	{
++		LoadConfig();
++		return s_cfg.enabled && !(s_session && s_session->ended);
++	}
++
++	bool GetSlotReport(u32 unified_slot, u8 out[REPORT_SIZE])
++	{
++		if (!IsActive())
++			return false;
++		if (!s_session || !s_session->started)
++		{
++			const PadInput n = NeutralInput();
++			std::memcpy(out, n.report, REPORT_SIZE);
++			return true;
++		}
++		const Session& s = *s_session;
++		for (u32 p = 0; p < kMaxPlayers; p++)
++		{
++			if (s.slots[p] == unified_slot)
++			{
++				std::memcpy(out, s.cur[p].report, REPORT_SIZE);
++				if (unified_slot < 8)
++				{
++					s_poll_bytes[unified_slot]++;
++					if (!(out[0] & 0x08)) // START = button bit 11, active low
++						s_poll_start[unified_slot]++;
++				}
++				return true;
++			}
++		}
++		const PadInput n = NeutralInput();
++		std::memcpy(out, n.report, REPORT_SIZE);
++		return true;
++	}
++
++	void OnFramePush()
++	{
++		GSPresentView::State want;
++		u32 who = 0, frame = 0;
++		if (s_session && !s_session->ended && s_session->started && s_view.loaded && s_session->cfg.view != 0xFF)
++		{
++			const Session& s = *s_session;
++			frame = s.frame;
++			who = s.cfg.view ? (s.cfg.view - 1u) : s.me;
++			// The bytes as the game has them now; what is on display may be the picture of LayoutDelay frames ago.
++			for (u32 i = 3; i > 0; i--)
++			{
++				s_view_layout_hist[i] = s_view_layout_hist[i - 1];
++				s_view_owner_hist[i] = s_view_owner_hist[i - 1];
++			}
++			s_view_layout_hist[0] = static_cast<u8>(s_view.layout_addr ? memRead8(s_view.layout_addr) : s_view.test_layout);
++			s_view_owner_hist[0] = static_cast<u8>(s_view.owner_addr ? memRead8(s_view.owner_addr) : (s.frame & 1u));
++			const u32 layout = s_view_layout_hist[s_view.layout_delay];
++			want.in_screenshots = s.cfg.snap_view;
++			// The marker of the full-size layout can arrive before its layout value is used here: always known.
++			// Each PC waits for its own player's marker; a PC whose player has none shows the final picture.
++			const u32 my_marker = (who < kMaxPlayers) ? s_view.marker_ids[who] : 0;
++			want.marker_id = my_marker;
++			want.marker_all_id = s_view.marker_all_id;
++			want.keep_save_id = s_view.keep_save_id;
++			want.keep_restore_id = s_view.keep_restore_id;
++			want.keep_restore_bp = s_view.keep_restore_bp;
++			want.marker_hold = s_view.marker_hold;
++			want.marker_shown_buffer = s_view.marker_shown_buffer;
++			want.show_copy = (my_marker != 0);
++			if (layout != 0 && layout == s_view.side_value)
++			{
++				if (who < kMaxPlayers && s_view.rect[who].set)
++				{
++					want.kind = 1;
++					want.left = s_view.rect[who].l;
++					want.top = s_view.rect[who].t;
++					want.right = s_view.rect[who].r;
++					want.bottom = s_view.rect[who].b;
++				}
++			}
++			else if (layout != 0 && layout == s_view.marker_value)
++			{
++				want.kind = 2;
++				want.fake_after_draws = s_view.marker_test_draws;
++				want.fake_every = s_view.marker_test_every;
++			}
++			else if (layout != 0 && layout == s_view.alternate_value)
++			{
++				want.kind = 3;
++				const u32 owner = s_view_owner_hist[s_view.layout_delay];
++				want.mine = (owner == who) || owner >= kMaxPlayers;
++			}
++			if (want.kind == 0)
++				want.in_screenshots = false;
++		}
++		PostView(want, frame, who);
++	}
++
++	void OnVsync()
++	{
++		LoadConfig();
++		if (!s_cfg.enabled)
++			return;
++		if (!s_session)
++		{
++			// First frame after power-on: open the network and wait until every player is there.
++			// Everything the PS2 did before this point is the same on every PC (same disc, BIOS, settings, card).
++			auto s = std::make_unique<Session>();
++			s->cfg = s_cfg;
++			s->players = s_cfg.host ? s_cfg.players : 1;
++			s->delay = s_cfg.delay;
++			s->slots = s_cfg.slots;
++			s->names[0] = s_cfg.name;
++			std::random_device rd;
++			s->nonce = rd() | 1u;
++			s->session_id = s_cfg.host ? (rd() | 1u) : 0;
++			s->fingerprint = SettingsFingerprint(EmuConfig, &s->fingerprint_listing);
++			s->mcd_hash = MemcardHash();
++			s->patch_hash = PatchFilesHash();
++			s->rng.seed(s->nonce);
++			for (PadInput& in : s->cur)
++				in = NeutralInput();
++			s_session = std::move(s);
++			LoadViewSettings();
++			Session& ss = *s_session;
++			LoadScript(ss);
++			std::string error;
++			if (!OpenSocket(ss, &error))
++			{
++				Log("network error: " + error);
++				Osd("ps2net_lobby", "Online game cannot start: " + error, 30.0f);
++				ss.ended = true;
++				return;
++			}
++			RunLobby(ss);
++			if (ss.ended)
++				return;
++		}
++		Session& s = *s_session;
++		if (s.ended)
++		{
++			// Test runs (ExitAtFrame set) close the emulator when the session ends early, e.g. the host left first.
++			if (s.cfg.exit_at_frame && !s.exit_requested)
++			{
++				s.exit_requested = true;
++				Host::RequestVMShutdown(false, false, false);
++			}
++			return;
++		}
++
++		const u32 frame = s.frame;
++		// 1. This PC's input for frame + delay.
++		{
++			FrameSlot& fs = Slot(frame + s.delay);
++			fs.in[s.me] = LocalInput(s, frame + s.delay);
++			fs.have[s.me] = true;
++			if (!s.cfg.host)
++				AdvanceClientAck(s);
++			if (s.cfg.host)
++				for (u32 p = 1; p < s.players; p++)
++					if (frame + s.delay >= s.dropped_from[p])
++						fs.dropped |= static_cast<u8>(1u << p);
++		}
++		// 2. Exchange, then wait for the complete frame.
++		Receive(s);
++		if (s.cfg.host)
++			SendSets(s);
++		else
++			SendInputs(s);
++		const auto ready = [&]() {
++			if (frame < s.delay)
++				return true;
++			return AllInputsKnown(s, frame);
++		};
++		if (!ready())
++		{
++			const double t0 = NowMs();
++			double last_present = 0, last_osd = 0;
++			while (!ready())
++			{
++				Receive(s);
++				const double now = NowMs();
++				if (now - s.last_send_ms > 15.0)
++				{
++					if (s.cfg.host)
++						SendSets(s);
++					else
++						SendInputs(s);
++				}
++				if (s.cfg.host)
++					HostDropCheck(s, frame);
++				if (now - t0 > 1000.0 && now - last_osd > 500.0)
++				{
++					std::string who;
++					if (s.cfg.host)
++					{
++						const FrameSlot* fs = PeekSlot(frame);
++						for (u32 p = 1; p < s.players; p++)
++							if (!(fs && (fs->have[p] || (fs->dropped & (1u << p)))))
++								who += fmt::format(" {} (player {})", s.peers[p - 1].name, p + 1);
++					}
++					else
++					{
++						const FrameSlot* fs = PeekSlot(frame);
++						for (u32 p = 0; p < s.players; p++)
++							if (p != s.me && !(fs && (fs->have[p] || (fs->dropped & (1u << p)))))
++								who += fmt::format(" {} (player {})", s.names[p], p + 1);
++					}
++					Osd("ps2net_wait", fmt::format("Waiting for{}... {} s", who, static_cast<int>((now - t0) / 1000.0)), 1.0f);
++					last_osd = now;
++				}
++				if (!s.cfg.host && now - s.last_rx_ms > 30000.0)
++				{
++					Log("no packet from the host for 30 s; leaving the session");
++					Osd("ps2net_wait", "Lost the connection to the host. The online game is over.", 30.0f);
++					s.ended = true;
++				}
++				if (!KeepWaiting(s, t0, last_present))
++					return;
++			}
++			const double waited = NowMs() - t0;
++			s.waits++;
++			s.wait_total_ms += waited;
++			s.wait_max_ms = std::max(s.wait_max_ms, waited);
++		}
++		// 3. Use it: every PC applies the same inputs at the same emulated moment.
++		ApplyFrame(s, frame);
++		if (s.cfg.host)
++			SendSets(s); // the frame just completed may be new for the clients
++		HashStep(s, frame);
++		if (s.cfg.host)
++			CompareReports(s);
++		ShowDesync(s);
++		TestHooks(s, frame);
++		Stats(s);
++		if (frame % 300 == 150)
++		{
++			// Settings that change during the game (user opened the settings, or per-game settings arrived) are
++			// logged; they only matter if they differ between PCs, which the memory hashes then show.
++			std::string listing;
++			const u64 fp = SettingsFingerprint(EmuConfig, &listing);
++			if (fp != s.fingerprint)
++			{
++				Log(fmt::format("note: emulator settings changed at frame {} (fingerprint {:016x} -> {:016x}):\n{}", frame,
++					s.fingerprint, fp, listing));
++				s.fingerprint = fp;
++			}
++		}
++		s.frame++;
++	}
++
++	void OnVMShutdown()
++	{
++		EndSession(true);
++		PostView(GSPresentView::State(), 0, 0);
++		s_view = ViewSettings();
++		if (s_log)
++		{
++			std::fclose(s_log);
++			s_log = nullptr;
++		}
++	}
++} // namespace PS2Net
+diff --git a/pcsx2/PS2Net/PS2Net.h b/pcsx2/PS2Net/PS2Net.h
+new file mode 100644
+index 0000000..6a0a122
+--- /dev/null
++++ b/pcsx2/PS2Net/PS2Net.h
+@@ -0,0 +1,38 @@
++// SPDX-License-Identifier: GPL-3.0+
++// PS2Net: plays a game's own local multiplayer (several controllers / multitap) online, in lockstep.
++// Not part of upstream PCSX2. Off unless the environment variable PS2NET_CONFIG names a session INI file.
++
++#pragma once
++
++#include "common/Pcsx2Types.h"
++
++
++struct Pcsx2Config;
++
++namespace PS2Net
++{
++	// Size of the reply a DualShock 2 sends for a poll after the 3 header bytes:
++	// buttons (2), right stick x/y, left stick x/y, 12 pressure values.
++	static constexpr u32 REPORT_SIZE = 18;
++
++	// Called from VMManager::LoadCoreSettings after the settings were read.
++	// Forces the settings every PC in a session must share (multitap, controller types, clock, MTVU off).
++	void OverrideCoreSettings(Pcsx2Config& cfg);
++
++	// True while a session runs: emulated controllers then report the synced inputs, not this PC's live input.
++	bool IsActive();
++
++	// Once per emulated frame, right after the host input was polled (Counters.cpp VSyncStart).
++	// Sends this PC's input and waits until every player's input for the current frame is known.
++	void OnVsync();
++
++	// Once per emulated frame, right BEFORE the finished picture is handed to the GS thread (Counters.cpp
++	// VSyncStart). Own-screen view: tells the GS thread what this PC shows of the picture. Display only.
++	void OnFramePush();
++
++	// Called by the DualShock 2 poll handler. Returns false when the slot is not driven by the session.
++	bool GetSlotReport(u32 unified_slot, u8 out[REPORT_SIZE]);
++
++	// VM shutdown: ends the session and closes the socket.
++	void OnVMShutdown();
++} // namespace PS2Net
+diff --git a/pcsx2/SIO/Pad/PadDualshock2.cpp b/pcsx2/SIO/Pad/PadDualshock2.cpp
+index dfc5c97..1f8d1ef 100644
+--- a/pcsx2/SIO/Pad/PadDualshock2.cpp
++++ b/pcsx2/SIO/Pad/PadDualshock2.cpp
+@@ -9,6 +9,7 @@
+ #include "Common.h"
+ #include "Input/InputManager.h"
+ #include "Host.h"
++#include "PS2Net/PS2Net.h"
+ 
+ #include "IconsPromptFont.h"
+ 
+@@ -210,7 +211,12 @@ u8 PadDualshock2::ButtonQuery(u8 commandByte)
+ 
+ u8 PadDualshock2::Poll(u8 commandByte)
+ {
+-	const u32 buttons = GetButtons();
++	// PS2Net: in an online session the reply comes from the synced inputs instead of this PC's controller.
++	// Needs proper testing.
++	u8 report[PS2Net::REPORT_SIZE];
++	if (!PS2Net::GetSlotReport(this->unifiedSlot, report))
++		BuildReport(report);
++	const u32 buttons = 0xffff0000u | (static_cast<u32>(report[0]) << 8) | report[1];
+ 	u8 largeMotor = 0x00;
+ 	u8 smallMotor = 0x00;
+ 
+@@ -265,41 +271,28 @@ u8 PadDualshock2::Poll(u8 commandByte)
+ 			}
+ 
+ 			return buttons & 0xff;
+-		case 5:
+-			return GetPressure(Inputs::PAD_R_RIGHT);
+-		case 6:
+-			return GetPressure(Inputs::PAD_R_UP);
+-		case 7:
+-			return GetPressure(Inputs::PAD_L_RIGHT);
+ 		case 8:
+ 			// PS1 mode: If the controller reaches this byte, it is in analog mode and has irrefutably reached the last byte.
+ 			// There's simply nothing to check, we know it's done and time to stop acknowledgements.
+ 			g_Sio0.SetAcknowledge(false);
+-			return GetPressure(Inputs::PAD_L_UP);
++			return report[5];
++		case 5:
++		case 6:
++		case 7:
+ 		case 9:
+-			return IsButtonBitSet(buttons, 13) ? GetPressure(Inputs::PAD_RIGHT) : 0;
+ 		case 10:
+-			return IsButtonBitSet(buttons, 15) ? GetPressure(Inputs::PAD_LEFT) : 0;
+ 		case 11:
+-			return IsButtonBitSet(buttons, 12) ? GetPressure(Inputs::PAD_UP) : 0;
+ 		case 12:
+-			return IsButtonBitSet(buttons, 14) ? GetPressure(Inputs::PAD_DOWN) : 0;
+ 		case 13:
+-			return IsButtonBitSet(buttons, 4) ? GetPressure(Inputs::PAD_TRIANGLE) : 0;
+ 		case 14:
+-			return IsButtonBitSet(buttons, 5) ? GetPressure(Inputs::PAD_CIRCLE) : 0;
+ 		case 15:
+-			return IsButtonBitSet(buttons, 6) ? GetPressure(Inputs::PAD_CROSS) : 0;
+ 		case 16:
+-			return IsButtonBitSet(buttons, 7) ? GetPressure(Inputs::PAD_SQUARE) : 0;
+ 		case 17:
+-			return IsButtonBitSet(buttons, 2) ? GetPressure(Inputs::PAD_L1) : 0;
+ 		case 18:
+-			return IsButtonBitSet(buttons, 3) ? GetPressure(Inputs::PAD_R1) : 0;
+ 		case 19:
+-			return IsButtonBitSet(buttons, 0) ? GetPressure(Inputs::PAD_L2) : 0;
+ 		case 20:
+-			return IsButtonBitSet(buttons, 1) ? GetPressure(Inputs::PAD_R2) : 0;
++			// PS2Net: bytes 5..20 = sticks and pressures, same values as before (see BuildReport).
++			return report[commandBytesReceived - 3];
+ 	}
+ 	
+ 	Console.Warning("%s(%02X) Did not reach a valid return path! Returning zero as a failsafe!", __FUNCTION__, commandByte);
+@@ -721,7 +714,8 @@ void PadDualshock2::Set(u32 index, float value)
+ 			}
+ 		}
+ 
+-		if (index == Inputs::PAD_ANALOG && !this->analogPressed && value > 0)
++		// PS2Net: in an online session the Analog button travels with the synced inputs instead.
++		if (index == Inputs::PAD_ANALOG && !this->analogPressed && value > 0 && !PS2Net::IsActive())
+ 		{
+ 			this->analogPressed = true;
+ 
+@@ -900,6 +894,44 @@ u8 PadDualshock2::GetPressure(u32 index) const
+ 	}
+ }
+ 
++// PS2Net: the poll reply bytes 3..20 for this PC's live input, exactly what Poll() returned before.
++void PadDualshock2::BuildReport(u8 out[18]) const
++{
++	const u32 b = GetButtons();
++	out[0] = (b >> 8) & 0xff;
++	out[1] = b & 0xff;
++	out[2] = GetPressure(Inputs::PAD_R_RIGHT);
++	out[3] = GetPressure(Inputs::PAD_R_UP);
++	out[4] = GetPressure(Inputs::PAD_L_RIGHT);
++	out[5] = GetPressure(Inputs::PAD_L_UP);
++	out[6] = IsButtonBitSet(b, 13) ? GetPressure(Inputs::PAD_RIGHT) : 0;
++	out[7] = IsButtonBitSet(b, 15) ? GetPressure(Inputs::PAD_LEFT) : 0;
++	out[8] = IsButtonBitSet(b, 12) ? GetPressure(Inputs::PAD_UP) : 0;
++	out[9] = IsButtonBitSet(b, 14) ? GetPressure(Inputs::PAD_DOWN) : 0;
++	out[10] = IsButtonBitSet(b, 4) ? GetPressure(Inputs::PAD_TRIANGLE) : 0;
++	out[11] = IsButtonBitSet(b, 5) ? GetPressure(Inputs::PAD_CIRCLE) : 0;
++	out[12] = IsButtonBitSet(b, 6) ? GetPressure(Inputs::PAD_CROSS) : 0;
++	out[13] = IsButtonBitSet(b, 7) ? GetPressure(Inputs::PAD_SQUARE) : 0;
++	out[14] = IsButtonBitSet(b, 2) ? GetPressure(Inputs::PAD_L1) : 0;
++	out[15] = IsButtonBitSet(b, 3) ? GetPressure(Inputs::PAD_R1) : 0;
++	out[16] = IsButtonBitSet(b, 0) ? GetPressure(Inputs::PAD_L2) : 0;
++	out[17] = IsButtonBitSet(b, 1) ? GetPressure(Inputs::PAD_R2) : 0;
++}
++
++// PS2Net: the Analog button of an online player, applied at the same emulated frame on every PC.
++void PadDualshock2::ToggleAnalogFromSession()
++{
++	if (this->analogLocked)
++		return;
++	this->analogLight = !this->analogLight;
++	this->currentMode = this->analogLight ? Pad::Mode::ANALOG : Pad::Mode::DIGITAL;
++	const auto [port, slot] = sioConvertPadToPortAndSlot(unifiedSlot);
++	Host::AddKeyedOSDMessage(fmt::format("PadAnalogButtonChange{}{}", port, slot),
++		this->analogLight ? fmt::format(TRANSLATE_FS("Pad", "Analog light is now on for port {0} / slot {1}"), port + 1, slot + 1) :
++							fmt::format(TRANSLATE_FS("Pad", "Analog light is now off for port {0} / slot {1}"), port + 1, slot + 1),
++		Host::OSD_INFO_DURATION);
++}
++
+ bool PadDualshock2::IsAnalogLightEnabled() const
+ {
+ 	return this->analogLight;
+diff --git a/pcsx2/SIO/Pad/PadDualshock2.h b/pcsx2/SIO/Pad/PadDualshock2.h
+index 57dd3fc..cb65cf6 100644
+--- a/pcsx2/SIO/Pad/PadDualshock2.h
++++ b/pcsx2/SIO/Pad/PadDualshock2.h
+@@ -161,6 +161,10 @@ public:
+ 
+ 	bool Freeze(StateWrapper& sw) override;
+ 
++	// PS2Net (online sessions): poll reply bytes for the live input, and a synced Analog button press.
++	void BuildReport(u8 out[18]) const;
++	void ToggleAnalogFromSession();
++
+ 	u8 SendCommandByte(u8 commandByte) override;
+ 
+ 	static const Pad::ControllerInfo ControllerInfo;
+diff --git a/pcsx2/VMManager.cpp b/pcsx2/VMManager.cpp
+index 082d574..9455051 100644
+--- a/pcsx2/VMManager.cpp
++++ b/pcsx2/VMManager.cpp
+@@ -42,6 +42,7 @@
+ #include "USB/USB.h"
+ #include "Vif_Dynarec.h"
+ #include "VMManager.h"
++#include "PS2Net/PS2Net.h"
+ #include "ps2/BiosTools.h"
+ 
+ #include "common/Console.h"
+@@ -657,6 +658,7 @@ void VMManager::LoadCoreSettings(SettingsInterface& si)
+ {
+ 	SettingsLoadWrapper slw(si);
+ 	EmuConfig.LoadSave(slw);
++	PS2Net::OverrideCoreSettings(EmuConfig);
+ 	Patch::ApplyPatchSettingOverrides();
+ 
+ 	// Achievements hardcore mode disallows setting some configuration options.
+@@ -1687,6 +1689,7 @@ void VMManager::Shutdown(bool save_resume_state)
+ 	// we'll probably already be stopping (this is how Qt calls shutdown),
+ 	// but just in case, so any of the stuff we call here knows we don't have a valid VM.
+ 	s_state.store(VMState::Stopping, std::memory_order_release);
++	PS2Net::OnVMShutdown();
+ 
+ 	SetTimerResolutionIncreased(false);
+ 
+@@ -1799,6 +1802,11 @@ bool VMManager::RequestReset()
+ void VMManager::Reset()
+ {
+ 	pxAssert(HasValidVM());
++	if (PS2Net::IsActive())
++	{
++		Host::AddKeyedOSDMessage("ps2net_reset", "Reset is not possible during an online game.", 5.0f);
++		return;
++	}
+ 
+ 	// If we're running, we're probably going to be executing this at event test time,
+ 	// at vsync, which happens in the middle of event handling. Resetting everything
+@@ -1930,6 +1938,11 @@ std::string VMManager::GetCurrentSaveStateFileName(s32 slot, bool backup)
+ 
+ bool VMManager::DoLoadState(const char* filename, Error* error)
+ {
++	if (PS2Net::IsActive())
++	{
++		Error::SetString(error, "Save states cannot be loaded during an online game (the other PCs would not load it).");
++		return false;
++	}
+ 	if (GSDumpReplayer::IsReplayingDump())
+ 	{
+ 		Error::SetString(error, TRANSLATE_STR("VMManager", "Cannot load state while replaying a GS dump."));
+diff --git a/pcsx2/pcsx2.vcxproj b/pcsx2/pcsx2.vcxproj
+index f7d9924..82a8af3 100644
+--- a/pcsx2/pcsx2.vcxproj
++++ b/pcsx2/pcsx2.vcxproj
+@@ -512,6 +512,7 @@
+     <ClCompile Include="ps2\BiosTools.cpp" />
+     <ClCompile Include="BuildVersion.cpp" />
+     <ClCompile Include="Counters.cpp" />
++    <ClCompile Include="PS2Net\PS2Net.cpp" />
+     <ClCompile Include="FiFo.cpp" />
+     <ClCompile Include="Hw.cpp" />
+     <ClCompile Include="HwRead.cpp" />
+@@ -965,6 +966,7 @@
+     <ClInclude Include="Config.h" />
+     <ClInclude Include="SaveState.h" />
+     <ClInclude Include="Counters.h" />
++    <ClInclude Include="PS2Net\PS2Net.h" />
+     <ClInclude Include="Dmac.h" />
+     <ClInclude Include="Hardware.h" />
+     <ClInclude Include="Hw.h" />
+diff --git a/pcsx2/GS/GSPresentView.h b/pcsx2/GS/GSPresentView.h
+new file mode 100644
+index 0000000..0d2d9e2
+--- /dev/null
++++ b/pcsx2/GS/GSPresentView.h
+@@ -0,0 +1,69 @@
++// SPDX-License-Identifier: GPL-3.0+
++// PS2Net own-screen view: what THIS PC shows of the game's picture. Not part of upstream PCSX2.
++// Used when a game (with a patch) draws one view per player: each PC then shows only its own player's view.
++// Display only: nothing in the emulated machine changes, so it cannot affect the sync between the PCs.
++
++#pragma once
++
++#include "common/Pcsx2Types.h"
++
++class GSTexture;
++
++namespace GSPresentView
++{
++	struct State
++	{
++		// 0 the whole picture; 1 a part of the picture; 2 the copy taken at a marker; 3 alternate video frames
++		u8 kind = 0;
++		// kind 1: the part, as fractions (0..1) of the game picture; it is stretched over the normal display area
++		float left = 0.0f, top = 0.0f, right = 1.0f, bottom = 1.0f;
++		// The next two are set whenever the game has a full-size layout, also while another layout is shown,
++		// because a marker can arrive before the layout it belongs to is known here.
++		// kind 2: this PC shows the copy taken at the marker instead of the final picture
++		bool show_copy = false;
++		// kind 2: low 32 bits of the LABEL register write (GS register 0x62) that marks the moment
++		// (this PC's own marker: each player can have its own id)
++		u32 marker_id = 0;
++		// kind 2: a second id that every PC with an own marker obeys too (0 = none). The game sends it just before
++		// it starts to use the display buffer's memory for something else, while a finished picture is still there.
++		u32 marker_all_id = 0;
++		// Any layout: "keep" markers (0 = none). At keep_save_id the frame buffer being drawn to is copied at the
++		// renderer's resolution; at keep_restore_id the copy is put into the frame buffer at block keep_restore_bp
++		// (the game has just loaded the same picture there at native resolution). Every PC does this.
++		u32 keep_save_id = 0;
++		u32 keep_restore_id = 0;
++		u32 keep_restore_bp = 0;
++		// kind 2: at the marker, copy the frame buffer that is on display instead of the one being drawn to
++		bool marker_shown_buffer = false;
++		// kind 2: the copy is shown for at most this many video frames after its marker (0 = until the next one)
++		u32 marker_hold = 8;
++		// kind 2, tests only: act as if a marker for the frame buffer on display came after this many draws of a
++		// video frame
++		u32 fake_after_draws = 0;
++		// kind 2, tests only: the test marker comes only in every Nth video frame
++		u32 fake_every = 1;
++		// kind 3: the picture of the video frame pushed next belongs to this PC's player (or to everybody)
++		bool mine = true;
++		// screenshots show what this PC shows instead of the unchanged picture
++		bool in_screenshots = false;
++	};
++
++	// GS thread only: post it with MTGS::RunOnGSThread BEFORE the video frame it applies to is pushed.
++	void Apply(const State& state);
++	// GS thread only: the next picture is merged and shown unchanged (for a test snapshot of the real picture).
++	void FullPictureOnce();
++
++	// ---- used inside the GS code (GS thread) ----
++	bool NoDeinterlace(); // kind 3: consecutive video frames must not be mixed
++	bool MarkerWanted(u32 label_id);
++	int KeepWanted(u32 label_id, u32* restore_bp); // 0 no, 1 keep a copy now, 2 put the copy back
++	// test: counts one draw; true once per video frame when the test threshold is reached
++	bool FakeMarkerDue(u32 frame_block);
++	bool MarkerOfShownBuffer();
++	bool ShownFrameBuffer(u32* bp, u32* psm); // kind 2: the frame buffer that was shown last
++	extern bool g_count_draws;
++	void OnLabel(u32 label_id); // a LABEL register write arrived in the draw stream
++	void OnDraw(); // one draw was done (only does something in the marker test)
++	void StoreMarkerCopy(u32 bp, GSTexture* tex);
++	GSTexture* MarkerCopyFor(u32 bp, u32 psm, GSTexture* tex); // nullptr = show tex itself
++} // namespace GSPresentView

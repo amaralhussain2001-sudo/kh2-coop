@@ -1,0 +1,4 @@
+# roam disc: P2 comes near at 5000 but stops outside the door volume (about 195 units from P1)
+5000 36 LY=0
+5060 25 LX=0
+5600 1 

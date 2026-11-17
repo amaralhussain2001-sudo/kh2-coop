@@ -1,0 +1,11 @@
+# roam disc + test kit: P2 casts Fire three times from 4700
+4700 20 L1
+4720 4 L1 O
+4724 36 L1
+4780 20 L1
+4800 4 L1 O
+4804 36 L1
+4860 20 L1
+4880 4 L1 O
+4884 36 L1
+5400 1 

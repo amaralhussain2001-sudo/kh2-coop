@@ -1,0 +1,39 @@
+# TEST ONLY (2026-11-13): Pride Lands + Drive kit: P2 goes to Drive at 6400 (Down x3), opens it at 6500 (picture
+# 6530 = the Drive list), picks the first row at 6560, attacks; Revert try at 7600
+6400 4 DOWN
+6430 4 DOWN
+6460 4 DOWN
+6500 4 O
+6560 4 O
+6800 4 O
+6860 4 O
+6920 4 O
+6980 4 O
+7040 4 O
+7100 4 O
+7160 4 O
+7220 4 O
+7280 4 O
+7340 4 O
+7400 4 O
+7460 4 O
+7600 4 DOWN
+7630 4 DOWN
+7660 4 DOWN
+7700 4 O
+7900 4 O
+7960 4 O
+8020 4 O
+8080 4 O
+8140 4 O
+8200 4 O
+8260 4 O
+8320 4 O
+8380 4 O
+8440 4 O
+8500 4 O
+8560 4 O
+8620 4 O
+8680 4 O
+8740 4 O
+999999 1 

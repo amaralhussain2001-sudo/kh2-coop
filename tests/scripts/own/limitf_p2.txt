@@ -1,0 +1,9 @@
+# TEST (eighth round, plan row 44): player 2 ALONE takes the form in row 3 of his Drive list (0 Valor, 1 Wisdom, 2 Limit, 3 Master, 4 Final).
+5400 4 DOWN
+5430 4 DOWN
+5460 4 DOWN
+5500 4 O
+5515 4 DOWN
+5527 4 DOWN
+5570 4 O
+999999 1

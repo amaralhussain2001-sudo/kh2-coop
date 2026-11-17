@@ -1,0 +1,2 @@
+# nothing until play, then the bot
+3700 1 

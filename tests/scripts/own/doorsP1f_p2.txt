@@ -1,0 +1,8 @@
+# TEST (tenth round, glue 75 doors): player 2 (no form) follows player 1 (finaldoorP1_p2), then down 40 at 6600, 7600, 8600, 9600.
+5300 36 LY=0
+5400 60 LX=0
+6600 40 LY=255
+7600 40 LY=255
+8600 40 LY=255
+9600 40 LY=255
+999999 1

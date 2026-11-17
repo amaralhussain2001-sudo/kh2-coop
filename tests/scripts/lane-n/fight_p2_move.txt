@@ -1,0 +1,11 @@
+# pad 2 on the fight disc: while the twin is down (about 5095-5695 with the 10 s test timer) stick and attack must do nothing;
+# after it is up again: run, jump, attack must work
+5200 60 LX=255
+5300 4 O
+5340 4 X
+5770 50 LX=255
+5850 4 X
+5910 4 O
+5930 4 O
+5950 4 O
+9000 1 

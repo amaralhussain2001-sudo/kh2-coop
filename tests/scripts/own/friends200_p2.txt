@@ -1,0 +1,21 @@
+# TEST (tenth round, the shop girl, take 2): PLAYER 2 walks up 200 frames at 6300 toward the three people, Triangle at 6500 and 6530, Circle every 80 frames 6600 .. 7800.
+6300 200 LY=0
+6500 4 TRI
+6530 4 TRI
+6600 4 O
+6680 4 O
+6760 4 O
+6840 4 O
+6920 4 O
+7000 4 O
+7080 4 O
+7160 4 O
+7240 4 O
+7320 4 O
+7400 4 O
+7480 4 O
+7560 4 O
+7640 4 O
+7720 4 O
+7800 4 O
+9500 1 

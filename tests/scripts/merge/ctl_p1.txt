@@ -1,0 +1,10 @@
+# roam disc: New Game; P1 runs up 40 frames at 4700; P1 jumps at 5200
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 40 LY=0
+5200 4 X
+5600 1 

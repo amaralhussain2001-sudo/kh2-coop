@@ -1,0 +1,4 @@
+# TEST (tenth round, glue 75 control): player 2 follows into the west door (no form).
+5300 36 LY=0
+5400 60 LX=0
+999999 1

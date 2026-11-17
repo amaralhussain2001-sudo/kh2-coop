@@ -1,0 +1,23 @@
+# TEST (tenth round, glue 75 doors, the control): disc test-s1-hb13s. PLAYER 1 takes Final Form and walks into the west door (finaldoorP1_p1), then down 40 at 6600, 7600, 8600, 9600 (back, west, back, west). AIM VARIANT 4: the walk to the west door is "5400 80 LX=20 LY=0" (the one-hero camera differs).
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 36 LY=0
+4800 4 DOWN
+4830 4 DOWN
+4860 4 DOWN
+4900 4 O
+4930 4 DOWN
+4945 4 DOWN
+4960 4 DOWN
+4975 4 DOWN
+5000 4 O
+5400 80 LX=20 LY=0
+6600 40 LY=255
+7600 40 LY=255
+8600 40 LY=255
+9600 40 LY=255
+999999 1

@@ -1,0 +1,25 @@
+# TEST (eighth round, register G5): disc test-s1-hb13s. Player 2 picks Drive > 5th form (Final), walks up 31 frames and
+# left 80 frames into the west door (run ex13: up = +Z, left = -X, 8 units a frame; the door's box is at -645 / -550),
+# then jumps and glides (Cross, Cross held) and attacks in the next room.
+4700 4 DOWN
+4730 4 DOWN
+4760 4 DOWN
+4800 4 O
+4830 4 DOWN
+4845 4 DOWN
+4860 4 DOWN
+4875 4 DOWN
+4900 4 O
+5300 31 LY=0
+5360 80 LX=0
+6200 4 X
+6220 60 X
+6400 4 O
+6430 4 O
+6600 4 X
+6620 60 X
+6800 4 O
+6830 4 O
+7000 4 X
+7015 80 X
+999999 1

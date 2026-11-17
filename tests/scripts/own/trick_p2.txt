@@ -1,0 +1,15 @@
+# skate challenge: player 2 closes the rules screen, rides forward, jumps and does air tricks
+4800 4 O
+4900 4 O
+5000 500 LY=0
+5100 4 X
+5112 4 O
+5180 4 X
+5192 4 SQ
+5260 4 X
+5272 4 O
+5340 4 X
+5352 4 SQ
+5420 4 X
+5432 4 O
+999999 1 

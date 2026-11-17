@@ -1,0 +1,7 @@
+# player 2 in the flight: START 8200 (pause), START 8600 (back), START 9200, Circle 9500, stick left 10300
+8200 4 START
+8600 4 START
+9200 4 START
+9500 4 O
+10300 200 LX=0
+12000 1 

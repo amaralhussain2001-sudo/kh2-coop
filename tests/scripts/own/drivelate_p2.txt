@@ -1,0 +1,8 @@
+# TEST (eighth round, plan row 44): player 2 goes to row 4 (Drive) at 5400 and presses Circle twice,
+# AFTER player 1 took a form at 4700-4860 (drive1_p1.txt).
+5400 4 DOWN
+5430 4 DOWN
+5460 4 DOWN
+5500 4 O
+5560 4 O
+999999 1

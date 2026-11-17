@@ -1,0 +1,13 @@
+# Marketplace disc, P2 held in front of a shop: turn (LY=255), Triangle, then menu buttons
+5030 50 LY=255
+5100 4 TRI
+5200 4 TRI
+5400 4 DOWN
+5480 4 O
+5580 4 DOWN
+5660 4 O
+5760 4 X
+5840 4 X
+5920 4 X
+6000 4 X
+6300 1

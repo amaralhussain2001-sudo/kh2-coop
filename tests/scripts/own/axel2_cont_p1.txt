@@ -1,0 +1,16 @@
+# Axel II disc (tt137): New Game, two Circles for the boxes, then Circle every 250 frames from 9000 (picks Continue at the Game Over menu)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4560 4 O
+4640 4 O
+9000 4 O
+9250 4 O
+9500 4 O
+9750 4 O
+10000 4 O
+10250 4 O
+999999 1 

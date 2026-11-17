@@ -1,0 +1,5 @@
+# equal-picture test: the same stick moves as eq_p1, without the New Game presses (for the other pad)
+4700 30 LY=0
+4800 30 RX=255
+4900 20 LX=255
+5600 1 

@@ -1,0 +1,4 @@
+# hb9g disc: P2 only walks back into the door with P1 at 6000 and back out of the house at 6900
+6000 60 LY=255
+6900 60 LY=255
+7800 1 

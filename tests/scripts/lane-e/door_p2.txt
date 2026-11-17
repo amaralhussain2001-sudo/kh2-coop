@@ -1,0 +1,4 @@
+# door disc: P2 walks the twin forward (toward the door) from frame 5200; after a room change runs up
+5200 100 LY=0
+6200 60 LY=0
+6600 1 

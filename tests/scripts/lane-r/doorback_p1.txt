@@ -1,0 +1,11 @@
+# jump disc in front of a door: P1 walks back into the door at 4900 (alone), later both walk back twice
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4900 45 LY=255
+5700 60 LY=255
+6500 60 LY=255
+7300 1 

@@ -1,0 +1,20 @@
+# TEST (tenth round, TWO FORMS through SEVERAL doors): as formdoor3_p1 (player 1 Limit Form, the west door), then down 40 at 6600, 7600, 8600 (back, west, back).
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 4 DOWN
+4730 4 DOWN
+4760 4 DOWN
+4800 4 O
+4815 4 DOWN
+4827 4 DOWN
+4870 4 O
+5500 36 LY=0
+5600 60 LX=0
+6600 40 LY=255
+7600 40 LY=255
+8600 40 LY=255
+999999 1

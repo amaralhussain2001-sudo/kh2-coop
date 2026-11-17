@@ -1,0 +1,4 @@
+# real start: P2 runs right at 6500 and jumps at 6700; the bot takes over after 7100
+6500 60 LX=255
+6700 4 X
+7100 1 

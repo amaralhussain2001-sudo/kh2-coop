@@ -1,0 +1,25 @@
+KINGDOM HEARTS II TWO-PLAYER TEST - SET-UP FOR THE FRIEND
+=========================================================
+
+This zip has no game, no BIOS and no memory card. You use your own, as always.
+Your normal PS2-ONLINE folder stays as it is. The test gets its own folder.
+
+1. Make a COPY of your whole PS2-ONLINE folder (the one you already play with) and name the copy
+       PS2-ONLINE-KH2-TEST
+   To save space you may then delete the game files inside the COPY's "MY-GAMES (never share)".
+2. Unzip this zip INTO the copy, so that its folders "emulator", "launcher" and "link" land on the folders of the
+   same name. Windows asks "Replace or skip files": choose "Replace the files in the destination".
+3. In the COPY, delete the file emulator\memcards\Mcd001.ps2 if it is there.
+   (Both players start the test with a new empty memory card. Your normal folder keeps its card.)
+4. In the COPY, the folder emulator\patches must hold exactly these three files (plus, later, one small file
+   the launcher writes itself, game-file-check.pnach):
+       SLPM-66675_F266B00B.pnach      SLPM-66675_F266B00B.view      SLUS-21067_568A5C78.pnach
+   If you put other .pnach files there yourself, take them out of the copy.
+5. Your BIOS files stay in emulator\bios of the copy, the same ones as in your normal folder.
+6. Open "1-READ-ME-FIRST (KH2 TEST).txt" in the copy and follow it: make the NEW disc file (STEP 1; the
+   "TEST v2" / "TEST v3" / "TEST v4" files of the older builds are not used any more, delete them), then start with START-KH2-TEST.bat (STEP 3).
+7. In the launcher choose Picture quality "4x High". Both players must use the same value.
+If you had the test folder of build 1 or 2: unzip this zip into it in the same way (step 2). It replaces the
+emulator program too.
+
+package-id.txt in the copy must now say: PS2 Online KH2 TEST package 98dad91e6e9e

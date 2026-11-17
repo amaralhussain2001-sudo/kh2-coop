@@ -1,0 +1,92 @@
+# Hand-written notes for docs\PARITY-SWEEP.md (read by tools\own\sweep_doc.py).
+# One line: room program | class (empty = keep the automatic class) | note
+# The automatic class comes from the sweep on the PLAIN jump disc (no second special objects). Where a class is
+# given here, it is the result of the special tests named in the note (docs\STATE.md, seventh round, part 7e).
+#
+# --- Agrabah: the Magic Carpet (disc v5 gives player 2 his own rider; no carpet under him) ---
+al05 62 | OK-V5 | Jafar: two riders, two views, own HP, lane N's down-and-rescue (sp-5-al62: 0 fault lines)
+al14 86 | OK-V5 | carpet fight A: two riders (sp-5-al86: 0 fault lines)
+al14 87 | OK-V5 | carpet fight B: two riders (sp-5-al87: 0 fault lines)
+al14 100 | OK-V5 | race to the tower: two riders, each flies by his own stick (sp-5-al100: 0 fault lines)
+al14 101 | OK-V5 | race to the tower (sp-5-al101: 0 fault lines)
+al14 102 | OK-V5 | race to the tower (sp-5-al102: 0 fault lines)
+al14 10 | OK-V5 | carpet phase "Head towards Jafar's shadow!": two riders after the scene (sp-5-al10; jump by room)
+al14 11 | OK-V5 | carpet phase (sp-5-al11; jump by room)
+al14 12 | OK-V5 | carpet phase (sp-5-al12; jump by room)
+al14 14 | OK-V5 | carpet phase "Examine the monument!" (sp-5-al14; jump by room)
+al14 18 | OK-V5 | carpet phase (sp-5-al18; jump by room)
+# --- Agrabah: the carpet escape (one hero by the game's design; both controllers drive him) ---
+al14 61 | SHARED | the escape: one hero, player 2 alone starts the game and plays it (nt-al61, sp-5-al61: 0 fault lines)
+al14 105 | SHARED | the escape, another program: 50 fault lines WITH NO PATCH TOO (sp-c-al106 is its sister): the game's own in this test start
+al14 106 | SHARED | as 105 (no-patch control sp-c-al106: 50 lines)
+al14 111 | SHARED | the escape as a replay mission (see the note on replay missions in STATE part 7e)
+# --- Space Paranoids: the Light Cycle (disc v5: own cycle, own steering, own Attack / Charge / Guard) ---
+tr02 61 | OK-V5 | two cycles; player 2's Circle and Square work on his own cycle (lc33-p2), 0 fault lines (sp-5-tr61)
+tr02 62 | OK-V5 | the escape part: each stick steers its own cycle (sp-5-tr62: 0 fault lines)
+tr02 72 | TEST-LIMIT | a later phase of the ride: this program places no rider (its spawn groups are b_9b, b_96, b_9c, b_9f), so a jump test shows no hero; 22 fault lines, 25 with no patch at all (sp-c-tr72)
+tr02 73 | TEST-LIMIT | as 72
+# --- 100 Acre Wood: the balloon flight (disc v5: a second flying Sora in the one picture) ---
+po06 54 | OK-V5 | two flyers, each by his own stick (sp-5-po54). 17 fault lines: the no-patch run has 15 of the same places (sp-c-po54: the mission's data file is not loaded after a jump start)
+po06 55 | OK-V5 | two flyers (sp-5-po55: 0 fault lines)
+po06 66 | OK-V5 | two flyers (sp-5-po66: 0 fault lines)
+# --- one hero or one vehicle by the game's design: both controllers (twenty-eighth glue) ---
+eh22 72 | SHARED | the sidecar: it moves with player 2's stick while player 1 presses nothing (nt-eh72: 0 fault lines)
+eh22 90 | SHARED | a TEST_ mission of the same ride (35 fault lines of the "mission data not loaded" kind)
+nm10 63 | SHARED | the toy cannon: turns with player 2's stick, shoots with his Circle (nt-nm63: score 1 -> 3, 0 fault lines)
+# --- fault lines that the game has by itself in this kind of test start (no-patch controls) ---
+nm09 68 | OK-GAME | Oogie Boogie: both heroes fight on the belt, two views. 50 fault lines, the same places WITH NO PATCH (sp-c-nm68: the script attaches Oogie to an object that is not there after a jump start)
+po01 51 | OK-GAME | 17 fault lines of the "mission data file not loaded" kind, as PO06_MS100 with no patch (sp-c-po54)
+# --- the replay missions of the special rides (run with scripts that never answer a Game Over menu) ---
+tr02 63 | OK-V5 | the Light Cycle as a replay mission: two cycles (sp-5-tr63 in v5free.log: 0 fault lines). With "Continue" pressed a jump test stops (STATE part 7e)
+tr02 74 | TEST-LIMIT | a later phase of the replay ride, no rider placement of its own (22 fault lines, as programs 72 and 73)
+po06 69 | OK-V5 | the balloon flight as a replay mission: two flyers (sp-5-po69: 0 fault lines)
+nm10 72 | SHARED | the toy cannon as a replay mission (sp-5-nm72: 0 fault lines)
+# --- small games without any hero object: both controllers (twenty-eighth glue) ---
+po07 57 | SHARED | Hunny Slider: the slider goes left when player 2 pushes left, player 1 pressing nothing (nt-po57: 0 fault lines)
+po07 70 | SHARED | Hunny Slider as a replay mission (the same game as program 57)
+po08 59 | SHARED | Hunny Pot: no hero object; both controllers (nt-po59: in sync, 0 fault lines)
+lm01 51 | SHARED | the musical "Part of Your World": player 2's taps give byte for byte the pictures of player 1's taps (mus-p1 / mus-p2), 0 fault lines
+lm03 53 | SHARED | a musical: no hero object; both controllers (nt-lm53: in sync, 0 fault lines)
+lm04 55 | SHARED | a musical: no hero object; both controllers (the same glue as lm01 51; not run with player 2 alone)
+lm04 64 | SHARED | a musical: no hero object; both controllers (not run with player 2 alone)
+lm09 65 | SHARED | a musical: no hero object; both controllers (not run with player 2 alone)
+nm09 69 | OK-GAME | Oogie Boogie, second program: as program 68 (50 fault lines that the no-patch run has too)
+eh14 58 | OK | Luxord: both heroes, two views. The 5 fault lines of the sweep's patch (v28) were player 2's gauge without a unit slot for one frame; FIXED by the gauge guard: the same run on the final patch has 0 (sp-q-eh58)
+po07 56 | SHARED | Hunny Slider, story version: a rider object without a unit slot, no hero for player 2; both controllers. 14 fault lines of the "mission data file not loaded" kind
+po07 67 | SHARED | Hunny Slider (another program of the same game)
+po08 58 | SHARED | Hunny Pot, story version: as po07 56 (14 fault lines of the "mission data" kind)
+po08 68 | SHARED | a TEST_ entry of the Hunny Pot (14 fault lines of the "mission data" kind)
+po08 71 | SHARED | Hunny Pot as a replay mission
+lm01 67 | SHARED | the musical as a replay mission: no hero object; both controllers
+lm03 68 | SHARED | a musical as a replay mission
+lm04 66 | SHARED | a musical as a replay mission
+lm04 70 | SHARED | a musical as a replay mission
+lm09 69 | SHARED | a musical as a replay mission
+lm02 63 | SHARED | a musical scene with the ring prompts: no hero object; both controllers (not run with player 2 alone)
+# --- the Olympus cups: the round was over before the first probe point (level 1 heroes, 20 HP); at frames 7000 and
+#     8900 both heroes stand in the cup lobby (room 0306 or 0606) with two views, in sync (logs c0..c3) ---
+he09 192e7 | CUP-LOBBY | round over; both heroes in the lobby 0306 with two views at 7000 and 8900, 0 fault lines
+he09 192e6 | CUP-LOBBY | round over; both heroes in the lobby 0306 with two views, 0 fault lines
+he09 192e1 | CUP-LOBBY | round over; both heroes in the lobby 0306 with two views. 2 fault lines at pc 0x001D69EC when the round goes back to the lobby (a control object's field +0xAF4 is already 0; the same place once in the no-patch control sp-c-eh58: HYPOTHESIS the game's own)
+he09 192e2 | CUP-LOBBY | as 192e1 (2 fault lines at pc 0x001D69EC)
+he09 196e1 | CUP-LOBBY | both heroes 0/20 at 5200, then in the lobby 0606 with two views. 2 fault lines at pc 0x001D69EC (as 192e1)
+he09 195e5 | CUP-LOBBY | round over; both heroes in the lobby 0606 with two views, 0 fault lines
+he09 196e16 | CUP-LOBBY | round over; both heroes in the lobby 0606 with two views, 0 fault lines
+he09 196e44 | CUP-LOBBY | round over; both heroes in the lobby 0606 with two views, 0 fault lines
+he09 196e45 | CUP-LOBBY | round over; both heroes in the lobby 0606 with two views, 0 fault lines
+he09 196e10 | CUP-LOBBY | round over at once; both heroes in the lobby 0606 with two views at all three points, 0 fault lines
+he09 196e25 | CUP-LOBBY | as 196e10
+he09 196e40 | CUP-LOBBY | as 196e10
+he09 196e49 | CUP-LOBBY | as 196e10
+# --- the fourth pass (lists q0..q3, map program 0 or the mission's own; logs zq0..zq3, patch test-own-v33-snapB) ---
+bb05 81 | OK | Dark Thorn, second program, with map program 79: both heroes, two views, 0 fault lines (zq1). The 6 lines of the earlier pass came from the test start (all three programs 81)
+bb12 94 | TEST-LIMIT | the Beast's Castle puzzle: no hero and 50 fault lines; the NO-PATCH control has the same (sp-c-bb94: no hero, 50 lines at the same six places, pc 0x00172574 ...). The game's own in this test start
+bb12 22 | TEST-LIMIT | as bb12 94
+po09 60 | OK-GAME | both heroes, two views (zq0). 17 fault lines, all of the "mission data file not loaded after a jump start" kind (the no-patch control sp-c-po54 has them)
+# --- the no-patch controls of 2026-11-13 (logs local\sweep\ctl\ctl.log; one hero, player 2 idle) ---
+mu01 100 | OK-GAME | both heroes, two views, the mission runs. Its 50 fault lines are there WITH NO PATCH, the same places and counts (swc-MU01_MS103C-100): the game's own in this test start
+hb33 148 | TEST-LIMIT | no hero after the jump. With NO PATCH the game stops at Continue (swc-HB33_FM_LAR-148: TIMED OUT, the "Continue on a jump disc" lines); the build does not stop (it goes to the New Game room by test line B)
+hb01 75 | TEST-LIMIT | as hb33 148 (swc-HB01_MS601-75: with no patch the game stops at Continue)
+he09 178e5 | TEST-LIMIT | a TEST_ entry: with NO PATCH the game stops (swc-TEST_HE_COLOSSEUM-178e5: TIMED OUT); the build runs it in sync with 48 fault lines
+he09 178e2 | TEST-LIMIT | a TEST_ entry (no player reaches it); in sync with 50 fault lines; HYPOTHESIS: as its sister 178e5, which stops with no patch
+he09 178e3 | TEST-LIMIT | as 178e2

@@ -1,0 +1,4 @@
+# whirlwind disc (mu8w): player 2 takes 'Ride the Wind' (Triangle 4700), then presses SQ at 5000
+4700 4 TRI
+5000 4 SQ
+999999 1 

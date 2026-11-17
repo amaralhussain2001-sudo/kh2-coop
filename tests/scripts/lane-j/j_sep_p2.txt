@@ -1,0 +1,4 @@
+# lane J: pad 2 runs up (away) and jumps at other moments than pad 1
+5000 80 LY=0
+5500 4 X
+6100 1 

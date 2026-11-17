@@ -1,0 +1,3 @@
+# quiet room: player 2 runs left for 240 frames from 4800, then stands
+4800 240 LX=0
+999999 1 

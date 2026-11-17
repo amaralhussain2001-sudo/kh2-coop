@@ -1,0 +1,13 @@
+# TEST (eighth round, fault F6's control): player 2 ALONE takes Wisdom Form: Drive (three Down, Circle), one Down in the list
+# (Valor is first), Circle; he reverts at 6400.
+5400 4 DOWN
+5430 4 DOWN
+5460 4 DOWN
+5500 4 O
+5530 4 DOWN
+5560 4 O
+6400 4 DOWN
+6430 4 DOWN
+6460 4 DOWN
+6500 4 O
+999999 1

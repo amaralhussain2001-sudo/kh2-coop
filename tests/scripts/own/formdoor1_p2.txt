@@ -1,0 +1,5 @@
+# roam disc + Drive kit: P2 walks to the door at 5100, back at 6100 (P1 is the one in a form)
+5100 36 LY=0
+5160 60 LX=0
+6100 150 LY=255
+999999 1 

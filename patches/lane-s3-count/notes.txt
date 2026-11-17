@@ -1,0 +1,6 @@
+count: site 0x002C3668 -> counter 0x000F5F00
+count: site 0x002C5F08 -> counter 0x000F5F04
+count: site 0x002D0320 -> counter 0x000F5F08
+count: site 0x002D035C -> counter 0x000F5F0C
+count: site 0x002D0390 -> counter 0x000F5F10
+count: site 0x002D053C -> counter 0x000F5F14

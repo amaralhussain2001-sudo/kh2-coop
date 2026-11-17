@@ -1,0 +1,4 @@
+PS2 Online KH2 TEST package 98dad91e6e9e
+built 2026-11-16 16:20
+Every player must have the same package id.
+This is NOT the normal PS2-ONLINE package: it is a separate test folder for Kingdom Hearts II, two players.

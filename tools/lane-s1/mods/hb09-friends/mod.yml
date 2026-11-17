@@ -1,0 +1,11 @@
+title: lane S1 free roam in the Borough WITH Donald and Goofy (tests only)
+game: kh2
+assets:
+  - name: ard/hb09.ard
+    method: binarc
+    source:
+      - name: evt
+        type: AreaDataScript
+        method: areadatascript
+        source:
+          - name: hb09_evt.txt

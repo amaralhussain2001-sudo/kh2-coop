@@ -1,0 +1,23 @@
+# TEST (tenth round, several doors, then REVERT): as doors6_p2 (Final Form, five doors), REVERT at 9800 (Down x3, Circle: the form command menu Attack, Magic, -, Revert), then down 40 at 10200 and 11200.
+4700 36 LY=0
+4800 4 DOWN
+4830 4 DOWN
+4860 4 DOWN
+4900 4 O
+4930 4 DOWN
+4945 4 DOWN
+4960 4 DOWN
+4975 4 DOWN
+5000 4 O
+5400 80 LX=0
+6200 40 LY=255
+7200 40 LY=255
+8200 40 LY=255
+9200 40 LY=255
+9800 4 DOWN
+9830 4 DOWN
+9860 4 DOWN
+9900 4 O
+10200 40 LY=255
+11200 40 LY=255
+999999 1

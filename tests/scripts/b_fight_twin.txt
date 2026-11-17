@@ -1,0 +1,23 @@
+# New Game, then in the fight: run forward, attack (Circle), jump (Cross)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 40 LY=0
+4760 4 O
+4790 4 O
+4820 4 O
+4900 4 X
+5000 4 O
+5030 4 O
+5060 4 O
+5200 60 LX=255
+5300 4 O
+5330 4 O
+5360 4 O
+5500 4 O
+5530 4 O
+5560 4 O
+9000 1 

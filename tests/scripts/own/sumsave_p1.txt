@@ -1,0 +1,29 @@
+# save-point disc with helpers (hb13s) + Summon kit + forced fall at 7000: New Game; player 2 calls a Summon at 5000;
+# player 1 saves to file 01 (Triangle 5400, Circle x3, Left, Circle), leaves the menu (Cross x4);
+# at the Game Over menu: Down (7300), Circle (7360) = Load Game, then Circle every 120 frames (file, yes)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5400 4 TRI
+5520 4 O
+5640 4 O
+5760 4 O
+5880 4 LEFT
+5940 4 O
+6400 4 X
+6460 4 X
+6520 4 X
+6580 4 X
+7300 4 DOWN
+7360 4 O
+7480 4 O
+7600 4 O
+7720 4 O
+7840 4 O
+7960 4 O
+8080 4 O
+8200 4 O
+999999 1 

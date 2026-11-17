@@ -1,0 +1,6 @@
+; PS2 Online: own-screen view settings for Kingdom Hearts II Final Mix (SLPM-66675, CRC F266B00B).
+; DEVELOPMENT file for lane K's demo patch, which draws two views all the time and has no layout byte.
+; Display only: nothing in the emulated PS2 changes.
+LayoutAddress = 0
+Player1 = 0.5 0 1 1      ; right half = player 1's view
+Player2 = 0 0 0.5 1      ; left half = player 2's view

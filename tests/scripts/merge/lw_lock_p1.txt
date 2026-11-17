@@ -1,0 +1,21 @@
+# Lingering Will gauge check, pad 1: New Game (Circle x6), then lock on (R1) and attack for a short time only.
+# No Circle after frame 5400: on a shortcut-start disc "Continue" after a Game Over crashes (also without our mod).
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5000 4 R1
+5030 4 O
+5060 4 O
+5090 4 O
+5120 4 R1
+5150 4 O
+5180 4 O
+5210 4 O
+5240 4 O
+5270 4 O
+5300 4 O
+5330 4 O
+7000 1 

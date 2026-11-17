@@ -1,0 +1,13 @@
+# title -> New Game -> difficulty -> first scenes (JP layout: O = confirm)
+3000 4 O
+3400 4 O
+3800 4 O
+4200 4 O
+5000 4 START
+5400 4 START
+5800 4 O
+6200 4 START
+6600 4 O
+7000 4 START
+7400 4 O
+9000 1 

@@ -1,0 +1,8 @@
+# roam disc: New Game, then nothing (player 2 presses START)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5300 1 

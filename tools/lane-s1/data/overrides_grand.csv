@@ -1,0 +1,21 @@
+room,group,spawnpoint,spawn_type,spawn_arg,player_x,player_y,player_z,twin_x,twin_y,twin_z,status,note
+al13,m_00,5,1,4,-0.0,-1000.0,-240.0,110.0,-1000.0,-240.0,proven-drop,right (90 deg) 110; spawn 1000 above the floor at -0
+eh23,b_97,0,0,0,-0.0,-0.0,-29950.0,110.0,-0.0,-29950.0,proven-free-space,right (90 deg) 110; floor far below at 11910 did not pass
+eh23,b_99,0,0,0,192.9,-7263.0,4511.4,302.9,-7263.0,4511.4,proven-drop,right (90 deg) 110; spawn 22094 above the floor at 14831
+eh23,m_00,0,1,0,-0.0,0.0,-29950.0,0.0,0.0,-30050.0,proven-designer-spot,between the two friends; no ground data under the player; spot taken from the friends' own places; free line to the player; nearest floor below at 11910
+eh25,b_40,0,0,0,33.3,-2300.0,-477.8,33.3,-2300.0,-577.8,proven-designer-spot,between the two friends; no ground data under the player; spot taken from the friends' own places; free line to the player; nearest floor below at -0
+hb21,m_00,0,1,0,2398.9,-800.0,2290.3,2488.0,-850.0,2276.7,proven-designer-spot,between player and a friend; no ground data under the player; spot taken from the friends' own places; free line to the player; nearest floor below at -0
+lm00,m_00,0,1,0,0.0,-800.0,-1000.0,110.0,-800.0,-1000.0,proven-drop,right (90 deg) 110; spawn 620 above the floor at -180
+lm02,b_40,0,0,0,-335.1,-500.0,-484.2,-378.1,-500.0,-585.5,proven-drop,behind left (157 deg) 110; spawn 449 above the floor at -51
+lm02,e_50,0,1,20,6.2,-409.1,-1207.4,116.2,-409.1,-1207.4,proven-drop,right (90 deg) 110; spawn 227 above the floor at -182
+lm02,e_50,0,1,50,15.6,-500.0,295.2,15.6,-500.0,215.2,proven-drop,behind 80; spawn 482 above the floor at -18
+lm02,m_00,1,1,0,0.0,-600.0,1400.0,-110.0,-600.0,1400.0,proven-drop,right (90 deg) 110; spawn 442 above the floor at -158
+lm03,m_00,0,1,0,0.0,-600.0,1250.0,-110.0,-600.0,1250.0,proven-drop,right (90 deg) 110; spawn 488 above the floor at -112
+lm04,m_00,0,1,0,0.0,-1400.0,-2500.0,110.0,-1400.0,-2500.0,proven-drop,right (90 deg) 110; spawn 996 above the floor at -404
+mu08,b_61,0,0,0,-0.0,-1350.0,-300.0,91.5,-1350.0,-238.9,proven-drop,right (90 deg) 110; spawn 1350 above the floor at -0
+nm08,e_50,0,1,51,147.4,0.0,-268.7,123.2,0.0,-192.4,proven-ground,ahead right (67 deg) 80; floor -0
+nm08,e_50,0,1,54,-27.8,-0.0,-83.1,3.0,-0.0,22.4,proven-ground,behind right (157 deg) 110; floor -0
+tr08,m_00,3,1,2,400.0,650.0,-2150.0,400.0,650.0,-2250.0,proven-designer-spot,between the two friends; no ground data under the player; spot taken from the friends' own places; free line to the player
+tt07,b_44,0,0,0,-3164.6,-0.0,-2337.3,-3274.2,-0.0,-2346.5,proven-ground-with-switched-walls,right (90 deg) 110; passes with the collision groups that program 0x63 switches on (mask 0x3F0F / 0x90000000)
+tt36,m_00,1,1,1,0.0,-900.0,1450.0,-110.0,-900.0,1450.0,proven-ground-with-switched-walls,right (90 deg) 110; passes with the groups of masks 0x1 and 0x3; the wall of group 20 (program 0x9F only) is left out
+tt06,b_42,0,0,0,734.6,550.0,-2014.7,1074.4,550.0,-1597.6,manual,lane S1 test only: twin 60 units from the ball

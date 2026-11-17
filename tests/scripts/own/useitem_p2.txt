@@ -1,0 +1,13 @@
+# TEST (eighth round, plan row 39): PLAYER 2 goes down to "Items" in his command menu, opens it, takes the first item
+# (a Potion) and confirms the target; twice (5000 and 5600).
+5000 4 DOWN
+5040 4 DOWN
+5080 4 O
+5160 4 O
+5240 4 O
+5320 4 O
+5600 4 O
+5680 4 O
+5760 4 O
+5840 4 O
+9000 1 

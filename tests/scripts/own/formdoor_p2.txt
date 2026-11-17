@@ -1,0 +1,12 @@
+# roam disc + Drive kit: P2 picks Drive > Limit Form, walks to the door at 5100; in the Borough attacks; walks back at 6100
+4700 4 DOWN
+4730 4 DOWN
+4760 4 DOWN
+4800 4 O
+4860 4 O
+5100 36 LY=0
+5160 60 LX=0
+5800 4 O
+5830 4 O
+6100 150 LY=255
+999999 1 

@@ -1,0 +1,61 @@
+# KH2 co-op: what stays OFF GitHub
+# Game discs, BIOS, emulator programs and test output never go online.
+
+# Game and console files (copyrighted, never share)
+*.iso
+*.ISO
+*.kh2patch
+*.ROM0
+*.ROM1
+*.MEC
+*.NVM
+*.ps2
+*.p2s
+*.mcd
+*.zip
+
+# Programs and build output
+*.exe
+*.dll
+*.pdb
+*.pyc
+__pycache__/
+obj/
+bin/
+*.log
+
+# Test sandboxes, ISOs, extracted game files, logs, backups (huge, game data)
+# Only the hand-written scripts and notes in local/analysis go up,
+# plus the disc-patch recipe in local/package.
+/local/*
+!/local/analysis/
+/local/analysis/**
+!/local/analysis/**/
+!/local/analysis/**/*.py
+!/local/analysis/**/*.sh
+!/local/analysis/**/*.ps1
+!/local/analysis/**/*.cs
+!/local/analysis/**/*.md
+!/local/package/
+/local/package/*
+!/local/package/make_disc_patch.txt
+
+# Test candidate patches (about 1 GB); the finished builds are in patches/merged-*
+/patches/test-*/
+
+# Emulator: full PCSX2 clone and its builds stay out;
+# emulator-src/patches/ holds every change as a patch file
+/emulator-src/pcsx2/
+/emulator-src/builds/
+/emulator-src/logs/
+
+# Test package: only its own text files go up (read-mes, launcher, disc scripts)
+/dist/*
+!/dist/*.txt
+!/dist/PS2-ONLINE-KH2-TEST/
+/dist/PS2-ONLINE-KH2-TEST/*
+!/dist/PS2-ONLINE-KH2-TEST/*.txt
+!/dist/PS2-ONLINE-KH2-TEST/*.bat
+!/dist/PS2-ONLINE-KH2-TEST/launcher/
+!/dist/PS2-ONLINE-KH2-TEST/MAKE-KH2-DISC/
+!/dist/PS2-ONLINE-KH2-TEST/SHARED-SCREEN-FALLBACK/

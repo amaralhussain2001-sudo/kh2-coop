@@ -1,0 +1,4 @@
+# P2: walk the twin away, later turn camera 2 with the right stick
+4700 50 LY=0
+5200 40 RX=0
+5600 1 

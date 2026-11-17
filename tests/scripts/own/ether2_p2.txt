@@ -1,0 +1,30 @@
+# TEST (eighth round, register G5): player 2 casts Fire five times (L1 + Circle), then tries the Ether
+# (L1 + Triangle) four times, 150 frames apart (the first try of run eth was broken off by a hit).
+4700 14 L1
+4714 4 L1 O
+4718 32 L1
+4780 14 L1
+4794 4 L1 O
+4798 32 L1
+4860 14 L1
+4874 4 L1 O
+4878 32 L1
+4940 14 L1
+4954 4 L1 O
+4958 32 L1
+5020 14 L1
+5034 4 L1 O
+5038 32 L1
+5300 14 L1
+5314 4 L1 TRI
+5318 32 L1
+5450 14 L1
+5464 4 L1 TRI
+5468 32 L1
+5600 14 L1
+5614 4 L1 TRI
+5618 32 L1
+5750 14 L1
+5764 4 L1 TRI
+5768 32 L1
+999999 1

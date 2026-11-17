@@ -1,0 +1,8 @@
+# TEST (tenth round, several doors, NO FORM): as doors6_p2 without the Final Form presses (player 2 walks with player 1 through five doors).
+4700 36 LY=0
+5400 80 LX=0
+6200 40 LY=255
+7200 40 LY=255
+8200 40 LY=255
+9200 40 LY=255
+999999 1

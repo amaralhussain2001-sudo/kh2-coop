@@ -1,0 +1,2 @@
+# pad 2: nothing scripted; the bot takes over after 3700
+3700 1 

@@ -1,0 +1,14 @@
+# TEST (tenth round, glue 75, SEVERAL DOORS IN A ROW): disc test-s1-hb13s. As finaldoor4_p1 to the west door (Borough hb09), then down 40 frames at 6200 (+x into the door back to hb13), down 40 at 7200 (the west door again: the camera turned on arrival), down 40 at 8200 (back), down 40 at 9200 (west again).
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5300 36 LY=0
+5400 60 LX=0
+6200 40 LY=255
+7200 40 LY=255
+8200 40 LY=255
+9200 40 LY=255
+999999 1

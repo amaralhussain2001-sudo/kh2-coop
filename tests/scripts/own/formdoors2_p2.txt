@@ -1,0 +1,16 @@
+# TEST (tenth round, TWO FORMS through SEVERAL doors): as formdoor3_p2 (player 2 Final Form, the west door; without its attacks), then down 40 at 6600, 7600, 8600.
+4700 36 LY=0
+5050 4 DOWN
+5080 4 DOWN
+5110 4 DOWN
+5150 4 O
+5165 4 DOWN
+5177 4 DOWN
+5189 4 DOWN
+5201 4 DOWN
+5220 4 O
+5600 80 LX=0
+6600 40 LY=255
+7600 40 LY=255
+8600 40 LY=255
+999999 1

@@ -1,0 +1,14 @@
+# player 2 presses O on the rules screen, where player 1 did in s1-tt84-p2only
+4600 4 O
+4660 4 O
+4720 4 O
+4780 4 O
+4840 4 O
+4900 4 O
+4960 4 O
+5020 4 O
+5080 4 O
+5140 4 O
+5200 4 O
+5260 4 O
+999999 1 

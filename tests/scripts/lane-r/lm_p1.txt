@@ -1,0 +1,9 @@
+# Atlantica jump disc: P1 swims back toward the exit at 4900 (alone)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4900 95 LY=255
+6200 1 

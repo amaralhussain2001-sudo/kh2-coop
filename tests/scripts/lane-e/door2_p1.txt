@@ -1,0 +1,11 @@
+# door disc: P1 walks into the door at 4700 (alone), then again at 5450 when the twin is there; after the room change runs right
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 60 LY=0
+5450 60 LY=0
+6000 60 LX=255
+6600 1 

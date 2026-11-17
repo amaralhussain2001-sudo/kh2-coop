@@ -1,0 +1,16 @@
+# TEST (tenth round, glue 75): disc test-s1-hb13s. As finaldoor3_p2 (Final Form, the west door), then back and forth with player 1: right 120 frames at 6300, left 120 at 7100, right 120 at 7900.
+4700 36 LY=0
+4800 4 DOWN
+4830 4 DOWN
+4860 4 DOWN
+4900 4 O
+4930 4 DOWN
+4945 4 DOWN
+4960 4 DOWN
+4975 4 DOWN
+5000 4 O
+5400 80 LX=0
+6300 120 LX=255
+7100 120 LX=0
+7900 120 LX=255
+999999 1

@@ -1,0 +1,6 @@
+# roam disc: P2 opens the main menu with START, moves the cursor down twice, closes it with START
+5000 4 START
+5060 4 DOWN
+5100 4 DOWN
+5160 4 START
+5600 1 

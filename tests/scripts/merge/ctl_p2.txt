@@ -1,0 +1,4 @@
+# roam disc: P2 runs right 40 frames at 4900; P2 jumps at 5100
+4900 40 LX=255
+5100 4 X
+5600 1 

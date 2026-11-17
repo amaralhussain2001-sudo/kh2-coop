@@ -1,0 +1,16 @@
+# Marketplace disc, P2 held in front of a shop: turn (LX=255), Triangle (Shop), Circle (the information box's OK),
+# Circle (Buy), Circle (Potion), Circle (x 1), LEFT (Yes), Circle (buy), then Cross four times to leave
+5030 50 LX=255
+5100 4 TRI
+5200 4 TRI
+5400 4 O
+5500 4 O
+5600 4 O
+5700 4 O
+5770 4 LEFT
+5840 4 O
+5980 4 X
+6080 4 X
+6180 4 X
+6280 4 X
+6700 1

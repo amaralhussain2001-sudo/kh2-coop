@@ -1,0 +1,7 @@
+; TEST ONLY: pretend a marker for the frame buffer on display came after 40 draws of each video frame.
+; Player 1 PC then shows the picture as it was at that moment (KH2: the step before); player 2 PC the final one.
+LayoutAddress = 0
+TestLayout = 2
+MarkerId = 56570001
+MarkerPlayer = 1
+MarkerTestDraws = 40

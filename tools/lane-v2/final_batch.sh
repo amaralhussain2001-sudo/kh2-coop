@@ -1,0 +1,32 @@
+#!/bin/bash
+# Lane V2: the final test batch (one run after the other; results in local/tests/v2-f*).
+# usage: final_batch.sh            (prints one block per test)
+P="/c/Users/PC FORCE/Desktop/New folder (3)"
+S="$P/tests/scripts/lane-v2"; SM="$P/tests/scripts/merge"; SB="$P/tests/scripts"
+G="$P/tools/lane-v2/vrun_guard.sh"
+H1="$P/patches/lane-v2-hud1"; PV="$P/patches/lane-v2-perview"
+FR="4700,4810,5000,5400,5500"
+
+echo "=== f1 hud1 roam (2 copies, one view)"
+bash "$G" 300 v2-f1-hud1-roam test-m-roam.iso 5600 2 "$FR" 2 "$S/hud_p1.txt" "$S/hud_p2.txt" idle "$H1"
+echo "=== f2 hud1 hbf random (2 copies, one view)"
+bash "$G" 300 v2-f2-hud1-hbf test-v2-hbf.iso 9000 3 "4600,5200,5800,6400,7000,8900" 2 "$SB/b_newgame.txt" - random "$H1"
+echo "=== f3 hud1 solo (1 copy) + memory range"
+bash "$G" 300 v2-f3-hud1-solo test-v2-solo.iso 5400 3 "600,3000,4700,5000,5300" 1 "$S/hud_p1.txt" - idle "$H1" python -I "$P/tools/lane-v2/cave_v2.py" "$P/local/tests/v2-f3-hud1-solo" 28181 "4700,5300" "$H1/SLPM-66675_F266B00B.pnach"
+cut -c1-200 "$P/local/tests/v2-f3-hud1-solo/probe-console.txt"
+echo "=== f4 perview roam (2 copies, two views)"
+bash "$G" 300 v2-f4-pv-roam test-m-roam.iso 5600 2 "$FR" 2 "$S/hud_p1.txt" "$S/hud_p2.txt" idle "$PV"
+echo "=== f5 perview fight (2 copies, two views)"
+bash "$G" 300 v2-f5-pv-fight test-m-fight.iso 6100 2 "4700,4900,5000,5080,5160,5200,5240,5300,5500,6000" 2 "$S/fight_p1.txt" "$S/fight_p2.txt" idle "$PV"
+echo "=== f6 perview hbf random (2 copies, two views)"
+bash "$G" 300 v2-f6-pv-hbf test-v2-hbf.iso 9000 3 "4600,5200,5800,6400,7000,8900" 2 "$SB/b_newgame.txt" - random "$PV"
+echo "=== f7 perview solo (1 copy) + memory range"
+bash "$G" 300 v2-f7-pv-solo test-v2-solo.iso 5400 3 "600,3000,4700,5000,5300" 1 "$S/hud_p1.txt" - idle "$PV" python -I "$P/tools/lane-v2/cave_v2.py" "$P/local/tests/v2-f7-pv-solo" 28181 "4700,5300" "$PV/SLPM-66675_F266B00B.pnach"
+cut -c1-260 "$P/local/tests/v2-f7-pv-solo/probe-console.txt"
+echo "=== f8 perview roam long random (2 copies, two views)"
+bash "$G" 400 v2-f8-pv-roam-long test-m-roam.iso 14000 3 "4700,7000,9500,12000,13900" 2 "$S/hud_p1.txt" "$S/hud_p2.txt" random "$PV"
+echo "=== f9 hud1 roam long random (2 copies, one view)"
+bash "$G" 400 v2-f9-hud1-roam-long test-m-roam.iso 14000 3 "4700,7000,9500,12000,13900" 2 "$S/hud_p1.txt" "$S/hud_p2.txt" random "$H1"
+echo "=== solo picture hashes (must equal the merged-v2 run v2-s1-merged-v2)"
+cd "$P/local/tests" && sha1sum v2-s1-merged-v2/p1_f00[45]*.png v2-f3-hud1-solo/p1_f00[45]*.png v2-f7-pv-solo/p1_f00[45]*.png | awk '{print substr($1,1,12), $2}'
+echo "=== batch done"

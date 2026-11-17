@@ -1,0 +1,7 @@
+# free roam (boards beside the heroes): player 2 hops on 2 seconds after player 1, rides later
+4800 20 LX=91 LY=6
+4960 4 TRI
+5000 4 TRI
+5040 4 TRI
+5500 90 LY=0
+999999 1 

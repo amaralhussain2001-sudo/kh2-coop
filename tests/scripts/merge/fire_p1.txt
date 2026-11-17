@@ -1,0 +1,18 @@
+# roam disc + test kit: New Game; P1 walks off the save point at 4500; three Fire casts from 5000
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4500 33 LY=0
+5000 20 L1
+5020 4 L1 O
+5024 36 L1
+5080 20 L1
+5100 4 L1 O
+5104 36 L1
+5160 20 L1
+5180 4 L1 O
+5184 36 L1
+5400 1 

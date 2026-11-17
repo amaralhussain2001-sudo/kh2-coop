@@ -1,0 +1,29 @@
+# TEST (eighth round, register G5): hb03 entrance 99. The chest is 335 units BEHIND player 2's start (run chest: stick up took him
+# away from it). He runs 'stick down' for 40 frames and presses Triangle every 30 frames.
+4900 40 LY=255
+4960 4 TRI
+4990 4 TRI
+5020 4 TRI
+5050 4 TRI
+5080 4 TRI
+5110 4 TRI
+5140 4 TRI
+5170 4 TRI
+5200 4 TRI
+5230 4 TRI
+5260 4 TRI
+5290 4 TRI
+5320 4 TRI
+5350 4 TRI
+5380 4 TRI
+5410 4 TRI
+5440 4 TRI
+5470 4 TRI
+5500 4 TRI
+5530 4 TRI
+5560 4 TRI
+5590 4 TRI
+5620 4 TRI
+5650 4 TRI
+5680 4 TRI
+999999 1

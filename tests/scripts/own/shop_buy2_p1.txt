@@ -1,0 +1,21 @@
+# New Game (as newgame_only.txt), then: P1 held in front of a shop: turn, Triangle (Shop), OK, Buy, Potion, x 1, LEFT (Yes), Circle, Cross x4
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5030 50 LX=255
+5100 4 TRI
+5200 4 TRI
+5400 4 O
+5500 4 O
+5600 4 O
+5700 4 O
+5770 4 LEFT
+5840 4 O
+5980 4 X
+6080 4 X
+6180 4 X
+6280 4 X
+6700 1

@@ -1,0 +1,4 @@
+# P2 walks the twin to the door; after Continue runs up
+5200 100 LY=0
+16000 60 LY=0
+17500 1 

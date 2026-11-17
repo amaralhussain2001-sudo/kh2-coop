@@ -1,0 +1,23 @@
+# morale mission: player 2 closes the rules screen and the text boxes (Circle every 150 frames, 4800-6000), nothing until
+# the mission fails, then Circle at 9000 (Continue) and Circle every 150 frames from 9600 (boxes again)
+4800 4 O
+4950 4 O
+5100 4 O
+5250 4 O
+5400 4 O
+5550 4 O
+5700 4 O
+5850 4 O
+6000 4 O
+9000 4 O
+9600 4 O
+9750 4 O
+9900 4 O
+10050 4 O
+10200 4 O
+10350 4 O
+10500 4 O
+10650 4 O
+10800 4 O
+10950 4 O
+999999 1 

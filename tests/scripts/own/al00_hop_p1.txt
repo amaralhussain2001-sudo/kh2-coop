@@ -1,0 +1,12 @@
+# Agrabah free-roam disc (test-v4-al00roam): New Game; player 1 runs on for 16 frames (4800), Triangle at 4880 / 4940 (Hop On), rides on (5100)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4800 16 LY=0
+4880 4 TRI
+4940 4 TRI
+5100 60 LY=0
+999999 1 

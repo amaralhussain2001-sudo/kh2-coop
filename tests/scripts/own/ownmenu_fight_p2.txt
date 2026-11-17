@@ -1,0 +1,28 @@
+# TEST (eighth round, plan row 39 stage 1a): player 2 attacks (Circle every 20 frames from 4700), opens the pause
+# menu in the fight (START 5600), closes it (Cross 6000) and attacks on.
+4700 4 O
+4720 4 O
+4740 4 O
+4760 4 O
+4780 4 O
+4800 4 O
+4900 4 O
+5000 4 O
+5100 4 O
+5200 4 O
+5300 4 O
+5400 4 O
+5500 4 O
+5600 4 START
+6000 4 X
+6100 4 O
+6120 4 O
+6140 4 O
+6200 4 O
+6300 4 O
+6400 4 O
+6500 4 O
+6600 4 O
+6700 4 O
+6800 4 O
+9000 1 

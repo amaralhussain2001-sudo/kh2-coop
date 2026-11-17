@@ -1,0 +1,10 @@
+# lane A input study: P2 holds one thing per window after P1's windows
+11400 500 LX=255
+12000 500 LY=0
+12600 500 X
+13200 500 O
+13800 500 SQ
+14400 500 TRI
+15000 500 L1
+15600 500 R1
+16200 1 

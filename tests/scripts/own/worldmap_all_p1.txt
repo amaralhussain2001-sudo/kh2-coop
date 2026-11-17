@@ -1,0 +1,18 @@
+# control: player 1 does everything (save menu, Yes, the map, Land)
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 4 TRI
+4820 4 DOWN
+4940 4 O
+5600 120 LX=0
+6300 4 O
+7300 150 LY=0
+7800 150 LY=255
+8100 4 TRI
+8300 4 O
+8500 4 O
+999999 1 

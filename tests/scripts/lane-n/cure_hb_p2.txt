@@ -1,0 +1,5 @@
+# pad 2 casts Cure (L1 + Cross) at 4760
+4740 20 L1
+4760 4 L1 X
+4764 36 L1
+9000 1 

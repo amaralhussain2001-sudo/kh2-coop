@@ -1,0 +1,6 @@
+# Mail Delivery: player 2 rides forward from 4800 (200 frames), Heelflip (O) at 5100, Jump (X) at 5200, rides on
+4800 200 LY=0
+5100 4 O
+5200 4 X
+5300 200 LY=0
+999999 1 

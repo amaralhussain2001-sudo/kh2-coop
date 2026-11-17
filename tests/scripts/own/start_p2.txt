@@ -1,0 +1,9 @@
+# roam disc: P2 mirrors the New Game presses (for the bit-coded search), then presses START at 5000
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5000 4 START
+5300 1 

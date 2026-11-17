@@ -1,0 +1,8 @@
+# fight disc + Summon kit: P2 tries a Summon LATE (after P1 went into a Drive Form at about 4900):
+# second menu page (Left), down to Summon, open, pick at 5500
+5200 4 LEFT
+5240 4 DOWN
+5300 4 O
+5370 4 O
+5500 4 O
+6300 1

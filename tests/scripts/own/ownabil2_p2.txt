@@ -1,0 +1,15 @@
+# TEST (eighth round, plan row 39 stage 1b): PLAYER 2 opens the pause menu, goes down to "Abilities", takes Sora,
+# presses Circle on the first ability (a small list "Don't Equip / Equip" opens with the cursor on the present
+# state), goes UP to "Don't Equip" and takes it; then leaves the menu with Cross.
+5000 4 START
+5100 4 DOWN
+5170 4 O
+5270 4 O
+5370 4 O
+5470 4 UP
+5540 4 O
+5640 4 X
+5740 4 X
+5840 4 X
+5940 4 X
+9000 1 

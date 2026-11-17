@@ -1,0 +1,4 @@
+R() { python -I "/c/Users/PC FORCE/Desktop/New folder (3)/tools/lane-s1/run_s1.py" "$@"; }
+R s1-g-thorn-none test-s1-tt157c.iso --frames 9000 --snap 4600,4800,5000,5200,5400,5600,5800,6000,6200,6400,6600,6800,7000,7200,7400,7600,7800,8000,8200,8400,8600,8800,8950 --rc 4600:8950 --speed 2 --cols 6 --width 320 --p1 "ng;press:O:4560;press:O:4640;end:forever" --p2 "end:forever"
+R s1-g-thorn-p1 test-s1-tt157c.iso --frames 9000 --snap 4600,4800,5000,5200,5400,5600,5800,6000,6200,6400,6600,6800,7000,7200,7400,7600,7800,8000,8200,8400,8600,8800,8950 --rc 4600:8950 --speed 2 --cols 6 --width 320 --p1 "ng;press:O:4560;press:O:4640;mash:TRI:4700:9000:6;end:forever" --p2 "end:forever"
+R s1-g-thorn-redir test-s1-tt157c.iso --frames 9000 --snap 4600,4800,5000,5200,5400,5600,5800,6000,6200,6400,6600,6800,7000,7200,7400,7600,7800,8000,8200,8400,8600,8800,8950 --rc 4600:8950 --speed 2 --cols 6 --width 320 --rc-redirect --players 1 --p1 "ng;press:O:4560;press:O:4640;end:forever"

@@ -1,0 +1,11 @@
+# roam disc + Drive kit: P1 starts the game, walks to the door at 5300, back at 6100
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5300 33 LY=0
+5360 50 LX=0
+6100 150 LY=255
+999999 1 

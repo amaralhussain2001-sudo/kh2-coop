@@ -1,0 +1,4 @@
+# P2 swims away at 4700 and comes back at 5200
+4700 70 LY=0
+5200 110 LY=255
+6200 1 
