@@ -1,4 +1,4 @@
-PS2 ONLINE - KINGDOM HEARTS II, TWO PLAYERS - TEST BUILD 24 (OWN SCREENS)
+PS2 ONLINE - KINGDOM HEARTS II, TWO PLAYERS - TEST BUILD 35 (OWN SCREENS)
 =========================================================================
 
 This is a TEST. It lives in its own folder (PS2-ONLINE-KH2-TEST). Your normal PS2-ONLINE folder is not changed
@@ -76,6 +76,111 @@ NEW IN BUILD 20 (the disc file is still the same), six things:
 (5) THE GUMMI SHIP: A SCORE FOR EACH PLAYER, and a digit at the hull gauge that says whose ship it shows. Read
     "THE GUMMI SHIP" further down.
 (6) LUXORD'S TRICKS LET THE LOSER GO IN TIME (he could stand still for a minute). The same paragraph as (2).
+NEW IN BUILD 35 (the disc file, the emulator and the launcher are the same as in build 34), one change in the patch file:
+(1) BOTH GUMMI SHIPS HAVE THEIR OWN HULL GAUGE. In a Gummi Ship flight the round hull gauge at the bottom right is now
+    always player 1's ship (the small "1" beside it), and player 2's ship has the same gauge at the bottom LEFT (with a
+    "2"). Until build 34 there was one gauge that showed whichever ship was weaker.
+    Tested on one PC: Gummi route 8 played through with both gauges on screen: the same points at every check as
+    build 34 and the same end (90,939); a flight where ship 1 was hit hard and ship 2 hardly: gauge 1 nearly empty,
+    gauge 2 full; Game Over and the retry: both gauges come back; never out of sync.
+NEW IN BUILD 34 (the disc file, the emulator and the launcher are the same as in build 33), one change in the patch file:
+(1) YOU SEE YOUR PARTNER'S DRIVE GAUGE. Next to your partner's small round gauge (top right) there is now his DRIVE
+    strip too: the bars, MAX and the number, exactly as on his own screen. When he is in a Drive Form it shows his
+    FORM countdown instead, so you can see how long his form lasts. Your own gauge (bottom right) is as before. Where
+    the game hides the Drive gauge (in a town), the partner's strip keeps the game's own "hidden" too (tried later: in
+    the first town of a New Game neither PC shows a strip).
+    Tested on one PC: a fight in Agrabah (with Donald/Goofy gauges) and a room without them: the strip sits beside the
+    partner's gauge in both; player 2 in Valor Form: player 1 sees his FORM countdown, player 2 sees player 1's DRIVE
+    strip; never out of sync.
+NEW IN BUILD 33 (the disc file, the emulator and the launcher are the same as in build 32), one change in the patch file:
+(1) THE AREA SOUNDS FOLLOW THE NEARER HERO TOO. A few sounds belong to a whole area instead of one spot (in the
+    whole game only two rooms of Hollow Bastion have them). Until build 32 their spot was taken from player 1's
+    camera; now each such sound comes from the spot nearest to whichever camera is closer, so it is as loud as it
+    should be for the player standing near it. With build 32's change every sound in the game now follows the
+    nearer hero.
+    Tested on one PC in both rooms: player 1 standing, player 2 far away: 58 area sounds louder for player 2, none
+    quieter than in build 32; the other sounds as in build 32; never out of sync.
+NEW IN BUILD 32 (the disc file, the emulator and the launcher are the same as in build 31), one change in the patch file:
+(1) SOUND FROM THE NEARER HERO. Until build 31 every sound was heard from player 1's camera: when player 2 fought far
+    away, his own fight sounded faint on both PCs (or not at all when very far). Now every sound that comes from one
+    spot in the room (hits, enemies, attacks, footsteps, ...) is as loud as it is for the camera that is NEARER to it,
+    and comes from that camera's left or right. So each player hears his own fight at full strength, wherever the
+    other one is. Both PCs still play the same sound (that is how the online play works): player 1 also hears player
+    2's fight loudly when player 2 is far away. Music, voices of the story and menu sounds do not change. Sounds that
+    belong to a whole area were only partly better in build 32; build 33 does them too.
+    Tested on one PC: Agrabah fight, player 1 standing, player 2 fighting about 1,900 steps away: his sounds went from
+    25-56 % of full volume (build 31) to about 97 %; sounds near player 1 stayed as before; never out of sync.
+NEW IN BUILD 31 (the disc file, the emulator and the launcher are the same as in build 30), one change in the patch file:
+(1) LOOK AT YOUR PARTNER'S GEAR: HOLD L2 AND PRESS START. The pause menu then opens on the OTHER player's things: his
+    Keyblade, armour, accessories, abilities, items, his munny and his bag, exactly as his own menu shows them. It is only
+    for looking: equipping, switching abilities, using an item, the refill switch and the Customize settings do nothing
+    there, and when the menu closes everything is put back as it was. START without L2 opens your own menu as before.
+    Tested on one PC: player 1 holding L2 + START sees player 2's accessory, player 2 holding L2 + START sees player 1's,
+    both menus close with every byte as before, the world stays paused meanwhile, START alone still opens each player's
+    own menu as in build 30; never out of sync. Tried later: taking an ability off inside the partner view does nothing
+    ("Don't Equip" chosen, the ability stays on); in your own menu the same buttons take it off.
+NEW IN BUILD 30 (the disc file, the emulator and the launcher are the same as in build 29), one change in the patch file:
+(1) A DESTROYED LIGHT CYCLE COMES BACK (Space Paranoids). Until build 29 the ride was over (Game Over or "mission failed") as
+    soon as EITHER cycle was destroyed. Now a destroyed cycle crashes and stays down for about 5 seconds, then it gets up
+    again with full HP and rides on, while the other player keeps riding. The ride is over only when BOTH cycles are down
+    at the same moment (then Game Over / Continue as before). With one hero nothing changes.
+    Tested on one PC: player 2's cycle destroyed and back after 5 seconds (then it steers and attacks), player 1's the
+    same, four comebacks in one ride, both destroyed together (Game Over, Continue brings both back); never out of sync.
+(2) The read-me's notes about the whirlwinds are corrected: since build 21 a whirlwind always lifts BOTH heroes together
+    (one game script moves both), so either player's Cross throws both off. That is how it is meant to work now.
+NEW IN BUILD 29 (the disc file, the emulator and the launcher are the same as in build 28), one change in the patch file:
+(1) PLAYER 2'S SUMMON PLAYS ITS ENTRANCE MOVIE TOO. Until build 28 only player 1's Summon had the movie; when player 2 called,
+    the friend just appeared. Now the movie plays for either player, with the hero who called (both screens show it, both
+    players wait for it, as for player 1's). The game's own Config choice "Summon Effects" still decides whether the movie
+    plays. Tested on one PC: Genie and Peter Pan called by player 2 (the movie, then the friend beside player 2), Dismiss by
+    player 2 after the movie, Genie called by player 1 (as before); never out of sync.
+NEW IN BUILD 28 (the disc file and the emulator are the same as in build 27), one change in the patch file and the launcher:
+(1) HOW STRONG ARE ORDINARY ENEMIES? THE HOST CHOOSES: in the launcher, under "1) HOST A GAME", the box "Enemies:":
+      Normal              as before (the original game's enemies; bosses +75 % HP as since build 1)
+      Hard (+50% HP)      ordinary enemies have half as much HP again
+      Very hard (x2 HP)   ordinary enemies have double HP
+    Bosses keep their +75 % in every choice. The host's choice travels in the join code, so the friend's PC uses the same by
+    itself (the friend's own box is set to it). Joining by IP: both must choose the same, or the join is refused ("Different
+    patch files"). Only with two heroes; a game with one hero is never changed.
+    Tested on one PC: two fights at each choice: ordinary enemies 10 -> 15 -> 20 HP, the bosses of those fights 280 and 420 in
+    all three, never out of sync.
+NEW IN BUILD 27 (the disc file and the emulator are the same as in build 26), one change in the patch file:
+(1) WHO OPENS A SCREEN CONTROLS IT. Up to build 26 both controllers worked in every menu, shop and talk, so the other
+    player's buttons could move your cursor, buy, or close your shop. Now:
+    - THE PAUSE MENU belongs to the player who pressed START: only his buttons move and choose in it (and its pages).
+    - A SHOP, THE MOOGLE, A SAVE POINT (and the world map after it), A TALK WITH ITS CHOICES ("Yes / No", "Make
+      presents? / Let's make it!"), and the rules screen of a small game started there belong to the player who
+      pressed Triangle (the green command). Only his buttons work there until it is over.
+    - EVERYTHING NOBODY OPENED is still for both: story scenes and their text, tutorial boxes, Game Over / Continue,
+      Retry / Quit, the title screen, the Gummi Ship's menus, boss button-mashing. Walking and fighting are as before.
+    There is no time limit: the other player waits until the owner has finished.
+    Tested on one PC (each also against build 26): player 1 opens the pause menu, player 2's Down does nothing, player
+    1's Down works; the same the other way round; player 2 buys a Potion while player 1 presses Cross (in build 26
+    player 1's Cross closed player 2's shop; now the Potion is bought); player 2 talks to the elf and player 1 presses
+    Up in "Make presents?" (in build 26 the hand jumped to "Hold on."; now player 2's "Let's make it!" starts the game).
+NEW IN BUILD 26 (the disc file and the patch files are the same as in build 24), one change in the emulator program:
+(1) THE MEMORY CARD TRAVELS WITH THE GAME. When the friend joins and his memory card is not the same as the host's, the
+    host's card is sent to him before the game starts (usually in under a second; his screen says "receiving the host's
+    card ... %"). His own card is kept as a backup in emulator\memcards (Mcd001-backup-<date>.ps2) and he plays with the
+    host's card, so the saves of your games together end up on both PCs. No more copying the card by hand, and no more
+    "OUT OF SYNC" a few seconds after the start because of two different cards. The card check of the join works again
+    (before build 26 it never noticed a different card).
+    WHOEVER HOSTS DECIDES THE CARD: host on the PC that has your saves.
+    Both PCs need build 26: a PC with build 25 or older is refused ("Different version of the online emulator").
+    Tested on one PC: two different cards (the friend's card became byte for byte the host's, his backup byte for byte
+    his old card, never out of sync), the same cards (nothing sent, no backup), 20 % of the packets lost (the card still
+    arrived in about half a second), and a whole start through both launchers and the connection helper.
+NEW IN BUILD 25 (the disc file and the patch files are the same as in build 24), one change in the emulator program
+(emulator\pcsx2-qtx64.exe):
+(1) SMOOTHER FRAME RATE ONLINE. When one PC is a little slower than the other (or the internet is uneven), the faster PC
+    had to wait for it many times a second and then ran fast to win the time back, so the frame rate jumped up and down
+    (in your first session on two PCs the host waited 55.7 s in 9.5 minutes). Now the faster PC simply follows the slower
+    PC's pace. Only the timing on the PC changes; the game is not changed. Tested on one PC with a copy that runs 1 % slow:
+    1,488 waits (19.3 s in 100 s) with build 24, 119 waits (0.6 s) with build 25, the same game speed, never out of sync.
+    It cannot make the slower PC faster: if one PC cannot hold 60 fps, both players choose the same lower Picture.
+    ALSO FOUND: "OUT OF SYNC" right at the start (about 7 seconds in) comes from TWO DIFFERENT MEMORY CARD FILES. The join
+    check does not notice a different card yet. Before playing, close the game on both PCs and copy the host's
+    emulator\memcards\Mcd001.ps2 to the same place on the other PC.
 NEW IN BUILD 24 (the disc file is still the same), one change:
 (1) THE GUMMI SHIP: the points of weapons OTHER THAN THE CANNONS now go to the ship that fired them (before, they always
     counted for player 1). Tested: two other weapon kinds, each fired by player 1 only, by player 2 only and by both: each
@@ -286,9 +391,9 @@ WHAT WORKS IN THIS BUILD
   to the hero who called him and fights beside that hero. His picture, the SUMMON gauge, "Dismiss" and his own
   commands show on the caller's screen only. Donald and Goofy leave while he is there and come back when he goes
   (Dismiss, or the gauge runs out). While one Summon is out the other player cannot call another one (his list
-  is grey). When player 1 calls, the game shows its entrance movie on player 1's screen and both players wait
-  for it. When player 2 calls there is no movie: the friend just appears. Tried with all four (Chicken Little,
-  Genie, Stitch, Peter Pan).
+  is grey). The game shows its entrance movie and both players wait for it. (Until build 28 only player 1's
+  call had the movie; since build 29 player 2's has it too.) Tried with all four (Chicken Little, Genie,
+  Stitch, Peter Pan).
 - NEW IN BUILD 11: a Summon and a door. The friend comes along into the next room and his gauge goes on, on the
   caller's screen; the other player keeps his own Drive gauge. A Summon is not possible while the other player
   is in a Drive Form that uses up a helper (the names in the list are grey): this is the game's own rule.
@@ -307,7 +412,7 @@ WHAT WORKS IN THIS BUILD
   his shots count for the one score. His START opens the pause menu. The Gummi Menu, the pause menu, the
   results and "Retry" listen to either controller. All nine routes were flown by a script with two ships.
   THE GUMMI SHIP SINCE BUILD 16: THE ENEMIES CAN DAMAGE PLAYER 2'S SHIP, and it has its own hull. The flight is
-  lost when EITHER ship is destroyed (the same rule as on the Light Cycles). There is still one hull gauge: it
+  lost when EITHER ship is destroyed (on the Light Cycles that was so until build 29). There is still one hull gauge: it
   shows the hull of the WEAKER ship, so both players see how near the end is. SINCE BUILD 20 A DIGIT LEFT OF
   THE GAUGE SAYS WHOSE SHIP THAT IS (1 or 2), AND EACH PLAYER HAS HIS OWN SCORE: the number in the "SCORE" frame
   is player 1's points, the number to the right of the frame is player 2's. A cannon shot's points go to the
@@ -320,8 +425,8 @@ WHAT WORKS IN THIS BUILD
   his own flying Sora in the Pooh game with the balloon, and his own rider in the Magic Carpet parts of
   Agrabah (the fights in the ruins, the race to the tower, Jafar). Each is moved by its own controller.
   SINCE BUILD 16 EACH HERO HAS HIS OWN CARPET on the carpet rides (before, player 2's hero flew in the riding
-  pose with nothing under him). One thing to know: on the Light Cycle the ride is over when EITHER cycle is
-  destroyed, as the game does it for one rider; nobody can be picked up there.
+  pose with nothing under him). On the Light Cycle a destroyed cycle comes back after about 5 seconds (since
+  build 30; before, the ride was over when EITHER cycle was destroyed); the ride is over when both are down.
 - THE THREE SMALL GAMES (since build 19). The carpet escape from the ruins, the toy cannon (Gift Wrapping) and
   the sidecar near the end were made for one hero; from build 12 to 16 both controllers drove that one hero.
   NOW PLAYER 2 HAS HIS OWN: the game makes a second hero (or cannon) beside the first when the small game
@@ -349,7 +454,8 @@ WHAT WORKS IN THIS BUILD
 - NEW IN BUILD 10: the dark form (it can come by itself when a player starts a Drive Form) was tried with
   player 2: his hero turns dark, both helpers leave, his FORM gauge counts down, then everything is back.
 - Known small thing: Stitch walks on the screen glass. He shows on BOTH screens, whoever called him.
-- Known small thing: the sound is one sound for both PCs. You hear the game from player 1's camera.
+- The sound is one sound for both PCs. Since build 32 every sound is heard from the camera NEARER to it, so
+  each player hears his own fight at full strength (before: always from player 1's camera).
 
 ------------------------------------------------------------------
 KNOWN PROBLEMS (no need to report these)
@@ -370,8 +476,8 @@ KNOWN PROBLEMS (no need to report these)
 - While a hero is down there is no countdown, only the red face in the gauge.
 - The item shop, the Moogle's workshop, the main menu with its pages, the save menu, the world map, the Gummi
   Menu, the Game Over menu and the "Retry / Quit" menus work with either controller.
-- Some small games listen for a button on EITHER controller where the game means "the rider" (the whirlwinds
-  in the Land of Dragons, for example): a press by one player can count for the other's ride.
+- The whirlwinds (Land of Dragons, the Storm Rider fight) always lift BOTH heroes together (a shared move since
+  build 21: one game script moves both), so either player's Cross throws both off. Meant so.
 - A boss move that grabs or carries a hero: up to build 19 it took one hero; build 20 took both heroes; SINCE
   BUILD 21 AN ENEMY'S GRAB TAKES THE HERO IT IS AIMED AT AGAIN (shared moves take both): read "BOSSES
   THAT HOLD A HERO" further down. Since build 13 the move's green command is in the menu of the player whose

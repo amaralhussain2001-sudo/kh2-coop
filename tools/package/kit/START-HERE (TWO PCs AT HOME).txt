@@ -2,23 +2,20 @@ KINGDOM HEARTS II FOR TWO PLAYERS - YOUR TWO PCs AT HOME
 ========================================================
 Package: {PACKAGE}
 
-Everything is ready on the FIRST PC (the PC this folder was made on; it is the host, player 1).
-The folder there is
+THIS ONE FOLDER IS THE WHOLE GAME. On the FIRST PC (the host, player 1) it is
     {FOLDER}
-It already holds the emulator, your BIOS, the patches and the two-player disc file ("TEST v5", new in build 12).
-You do NOT need the friend zip. You do NOT need to make the disc file again.
+It holds the emulator, your BIOS, the patches, the two-player disc file ("TEST v5"), the memory card with your saves
+and your settings. Every new build goes straight into this folder: there are no separate update files any more.
 
 ------------------------------------------------------------------
-ONCE: PUT THE SAME FOLDER ON THE SECOND PC
+PUT THE SAME FOLDER ON THE SECOND PC (now, and after every new build)
 ------------------------------------------------------------------
-1. Copy the WHOLE folder PS2-ONLINE-KH2-TEST to the second PC (USB drive or network share, about 4.5 GB).
-   Put it anywhere, for example on the Desktop. Change nothing inside.
-2. That is all. Both PCs now have the same program, the same disc file and the same memory card.
-   (Copy the folder again whenever I give you a new build. Your saves are in emulator\memcards\Mcd001.ps2;
-   keep that file if you want to keep them.)
-   BUILD 12 HAS A NEW DISC FILE ("TEST v5"). Delete the old folder on the second PC and copy this one.
-   BUILDS 13 TO 24 KEEP THAT DISC FILE; only small files changed. Copy the whole folder to the second PC again all the
-   same (it is the sure way: both PCs must have exactly the same patch files).
+1. Close the game on both PCs.
+2. On the second PC delete the old KH2 test folder (PS2-ONLINE-KH2-TEST-b24 or an older PS2-ONLINE-KH2).
+3. Copy the WHOLE folder PS2-ONLINE-KH2 from the first PC to the second PC (USB drive or network share, about
+   4.3 GB). Put it anywhere, for example on the Desktop. Change nothing inside.
+4. That is all. Both PCs now have the same program, the same disc file and the same memory card.
+   package-id.txt shows the same number on both PCs.
 
 ------------------------------------------------------------------
 EVERY TIME: START

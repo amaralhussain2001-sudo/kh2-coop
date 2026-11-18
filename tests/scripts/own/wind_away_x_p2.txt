@@ -1,0 +1,4 @@
+# whirlwind disc (mu8w), part 145: player 2 walks away (stick up 4700..5000), presses X at 5400
+4700 300 LY=0
+5400 4 X
+999999 1

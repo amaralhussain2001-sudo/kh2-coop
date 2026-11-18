@@ -29,9 +29,9 @@ OUT = DIST / "PS2-ONLINE-KH2-TEST"
 ZIP = DIST / "KH2-TEST-FRIEND-KIT.zip"
 KH2_PNACH = ROOT / "patches" / "test-package-v3" / "SLPM-66675_F266B00B.pnach"
 KH2_PNACH_SHARED = ROOT / "patches" / "test-package-v3" / "shared" / "SLPM-66675_F266B00B.pnach"
-MERGED = ROOT / "patches" / "merged-v18-own" / "SLPM-66675_F266B00B.pnach"
-SHARED = ROOT / "patches" / "merged-v18" / "SLPM-66675_F266B00B.pnach"          # the fallback: one shared screen
-VIEW_EXE = ROOT / "emulator-src" / "builds" / "view12" / "pcsx2-qtx64.exe"   # own-view emulator build
+MERGED = ROOT / "patches" / "merged-v27-own" / "SLPM-66675_F266B00B.pnach"
+SHARED = ROOT / "patches" / "merged-v27" / "SLPM-66675_F266B00B.pnach"          # the fallback: one shared screen
+VIEW_EXE = ROOT / "emulator-src" / "builds" / "card1" / "pcsx2-qtx64.exe"    # own view + pacing + card transfer (build 26)
 VIEW_FILE = ROOT / "patches" / "own-view" / "SLPM-66675_F266B00B.view"
 FALLBACK_DIR = "SHARED-SCREEN-FALLBACK"
 QUALITY = "4"                     # both players must use the same picture quality with this game
@@ -123,6 +123,44 @@ EDITS = [
      'if ($Test -like "ip:*") { $form.Add_Shown({ $ipBox.Text = $Test.Substring(3); $ipButton.PerformClick() }) } # test only\n'),
 ]
 
+EDITS += [
+    # BUILD 28 (edit_package_v28.py): the co-op difficulty (glue 80). Settings, the box, Set-Busy, the join code, the patch line.
+    ('Fullscreen = "False"; Buffer = "smooth" }', 'Fullscreen = "False"; Buffer = "smooth"; Difficulty = "0" }'),
+    ('    $script:Settings.Buffer = @("smooth", "fast")[$bufferBox.SelectedIndex]\n',
+     '    $script:Settings.Buffer = @("smooth", "fast")[$bufferBox.SelectedIndex]\n'
+     '    $script:Settings.Difficulty = [string]$diffBox.SelectedIndex\n'),
+    ('if ($script:Settings.Buffer -eq "fast") { $bufferBox.SelectedIndex = 1 } else { $bufferBox.SelectedIndex = 0 }\n',
+     'if ($script:Settings.Buffer -eq "fast") { $bufferBox.SelectedIndex = 1 } else { $bufferBox.SelectedIndex = 0 }\n'
+     '# TEST PACKAGE (build 28): how strong ordinary enemies are; the host\'s choice travels in the join code\n'
+     'Add-Label "Enemies:" 140 260 60 | Out-Null\n'
+     '$diffBox = Add-Combo 200 257 124\n'
+     '[void]$diffBox.Items.Add("Normal"); [void]$diffBox.Items.Add("Hard (+50% HP)"); [void]$diffBox.Items.Add("Very hard (x2 HP)")\n'
+     '$diffSet = 0; [void][int]::TryParse([string]$script:Settings.Difficulty, [ref]$diffSet); $diffBox.SelectedIndex = [Math]::Max(0, [Math]::Min(2, $diffSet))\n'),
+    ('$screenBox, $qualityBox, $fullBox, $bufferBox)) { $c.Enabled = -not $busy }',
+     '$screenBox, $qualityBox, $fullBox, $bufferBox, $diffBox)) { $c.Enabled = -not $busy }'),
+    ('    $tag = Make-Tag $layout.Id (Screen-Flag) (Get-Item -LiteralPath $game).Length (Game-Check $game)\n',
+     '    $tag = Make-Tag $layout.Id ((Screen-Flag) -bor ($diffBox.SelectedIndex -shl 1)) (Get-Item -LiteralPath $game).Length (Game-Check $game)\n'),
+    ('    if ($flags -band 1) { $screenBox.SelectedIndex = 0 } else { $screenBox.SelectedIndex = 1 }\n',
+     '    if ($flags -band 1) { $screenBox.SelectedIndex = 0 } else { $screenBox.SelectedIndex = 1 }\n'
+     '    $diffBox.SelectedIndex = [Math]::Min(2, (($flags -shr 1) -band 3))   # TEST PACKAGE (build 28): the host\'s enemies\n'),
+    ('    Write-CheckFile $check\n',
+     '    Write-CheckFile $check\n'
+     '    Write-Difficulty $diffBox.SelectedIndex\n'),
+    ('function Show-Check([string]$hash) {\n',
+     '# TEST PACKAGE (build 28): the co-op difficulty word of the KH2 patch (glue 80): 0 normal, 1 hard, 2 very hard. The line is in the\n'
+     '# shipped patch file; the launcher only sets its value. The patch files are compared at the join, so both PCs must agree.\n'
+     'function Write-Difficulty([int]$d) {\n'
+     '    $file = Join-Path (Split-Path $EmuExe) "patches\\SLPM-66675_F266B00B.pnach"\n'
+     '    if (-not (Test-Path -LiteralPath $file)) { return }\n'
+     '    $text = [System.IO.File]::ReadAllText($file, [System.Text.Encoding]::ASCII)\n'
+     '    $line = "patch=1,EE,000DE810,word,{0:X8}" -f $d\n'
+     '    $new = [regex]::Replace($text, "(?m)^patch=1,EE,000DE810,word,[0-9A-Fa-f]{8}", $line)\n'
+     '    if ($new -ne $text) { [System.IO.File]::WriteAllText($file, $new, [System.Text.Encoding]::ASCII) }\n'
+     '    if ($text -match "(?m)^patch=1,EE,000DE810,word,") { Say ("Enemies: " + @("Normal", "Hard (+50% HP)", "Very hard (x2 HP)")[$d] + " (bosses +75 % HP in every choice).") }\n'
+     '}\n'
+     'function Show-Check([string]$hash) {\n'),
+]
+
 
 def patch_launcher(text):
     crlf = "\r\n" in text
@@ -177,12 +215,12 @@ def main():
     # the shipped KH2 patch must be the merged build plus only the official widescreen group
     kh2 = KH2_PNACH.read_text(encoding="ascii")
     head = kh2.split("[Widescreen 16:9]")[0]
-    ours = [l.strip() for l in head.splitlines() if l.startswith("patch=")]
+    ours = [l.strip() for l in head.splitlines() if l.startswith("patch=") and not l.startswith("patch=1,EE,000DE810,")]  # (build 28: the launcher's difficulty line)
     if ours != patch_lines(MERGED):
-        sys.exit("the test package's KH2 patch does not start with exactly the merged-v18-own lines")
+        sys.exit("the test package's KH2 patch does not start with exactly the merged-v27-own lines")
     head2 = KH2_PNACH_SHARED.read_text(encoding="ascii").split("[Widescreen 16:9]")[0]
-    if [l.strip() for l in head2.splitlines() if l.startswith("patch=")] != patch_lines(SHARED):
-        sys.exit("the fallback patch does not start with exactly the merged-v18 lines")
+    if [l.strip() for l in head2.splitlines() if l.startswith("patch=") and not l.startswith("patch=1,EE,000DE810,")] != patch_lines(SHARED):
+        sys.exit("the fallback patch does not start with exactly the merged-v27 lines")
     keep = None
     if OUT.exists():
         if not rebuild:

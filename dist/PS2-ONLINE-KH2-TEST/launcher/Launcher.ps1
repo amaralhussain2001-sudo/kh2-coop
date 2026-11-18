@@ -118,7 +118,7 @@ function Get-Games {
 }
 
 function Load-Settings {
-    $s = @{ Name = $env:COMPUTERNAME; Layout = "1"; Game = ""; Quality = "auto"; Screen = "4:3"; Fullscreen = "False"; Buffer = "smooth" }
+    $s = @{ Name = $env:COMPUTERNAME; Layout = "1"; Game = ""; Quality = "auto"; Screen = "4:3"; Fullscreen = "False"; Buffer = "smooth"; Difficulty = "0" }
     if (Test-Path $SettingsFile) {
         foreach ($line in Get-Content $SettingsFile) { if ($line -match '^(\w+)=(.*)$') { $s[$Matches[1]] = $Matches[2] } }
     }
@@ -134,6 +134,7 @@ function Save-Settings {
     $script:Settings.Screen = $Screens[$screenBox.SelectedIndex].Key
     $script:Settings.Fullscreen = [string]$fullBox.Checked
     $script:Settings.Buffer = @("smooth", "fast")[$bufferBox.SelectedIndex]
+    $script:Settings.Difficulty = [string]$diffBox.SelectedIndex
     $lines = @(); foreach ($k in $script:Settings.Keys) { $lines += "$k=$($script:Settings[$k])" }
     Set-Content -Path $SettingsFile -Value $lines -Encoding UTF8
 }
@@ -211,6 +212,11 @@ Add-Label "Connection:" 330 260 80 | Out-Null
 $bufferBox = Add-Combo 412 257 194
 [void]$bufferBox.Items.Add("Smooth (fewer pauses)"); [void]$bufferBox.Items.Add("Fast (quickest buttons)")
 if ($script:Settings.Buffer -eq "fast") { $bufferBox.SelectedIndex = 1 } else { $bufferBox.SelectedIndex = 0 }
+# TEST PACKAGE (build 28): how strong ordinary enemies are; the host's choice travels in the join code
+Add-Label "Enemies:" 140 260 60 | Out-Null
+$diffBox = Add-Combo 200 257 124
+[void]$diffBox.Items.Add("Normal"); [void]$diffBox.Items.Add("Hard (+50% HP)"); [void]$diffBox.Items.Add("Very hard (x2 HP)")
+$diffSet = 0; [void][int]::TryParse([string]$script:Settings.Difficulty, [ref]$diffSet); $diffBox.SelectedIndex = [Math]::Max(0, [Math]::Min(2, $diffSet))
 $playersBox = Add-Combo 80 257 50
 $hostButton = Add-Button "Host a game" 150 255 160
 
@@ -286,7 +292,7 @@ if ($script:Gpu) { $gpuLabel.Text = "Graphics card: $($script:Gpu.Name) ($($scri
 else { $gpuLabel.Text = "Graphics card not found - Auto picks 2x" }
 
 function Set-Busy([bool]$busy) {
-    foreach ($c in @($hostButton, $joinButton, $ipButton, $padButton, $gameBox, $layoutBox, $playersBox, $refreshButton, $screenBox, $qualityBox, $fullBox, $bufferBox)) { $c.Enabled = -not $busy }
+    foreach ($c in @($hostButton, $joinButton, $ipButton, $padButton, $gameBox, $layoutBox, $playersBox, $refreshButton, $screenBox, $qualityBox, $fullBox, $bufferBox, $diffBox)) { $c.Enabled = -not $busy }
     $stopButton.Enabled = $busy
 }
 
@@ -312,6 +318,17 @@ function Game-Check([string]$path) {
     $hash = (Get-FileHash -Algorithm SHA1 -LiteralPath $path).Hash.ToLower()
     Add-Content -LiteralPath $CheckCache -Value "$key|$hash" -Encoding UTF8
     return $hash
+}
+# TEST PACKAGE (build 28): the co-op difficulty word of the KH2 patch (glue 80): 0 normal, 1 hard, 2 very hard. The line is in the
+# shipped patch file; the launcher only sets its value. The patch files are compared at the join, so both PCs must agree.
+function Write-Difficulty([int]$d) {
+    $file = Join-Path (Split-Path $EmuExe) "patches\SLPM-66675_F266B00B.pnach"
+    if (-not (Test-Path -LiteralPath $file)) { return }
+    $text = [System.IO.File]::ReadAllText($file, [System.Text.Encoding]::ASCII)
+    $line = "patch=1,EE,000DE810,word,{0:X8}" -f $d
+    $new = [regex]::Replace($text, "(?m)^patch=1,EE,000DE810,word,[0-9A-Fa-f]{8}", $line)
+    if ($new -ne $text) { [System.IO.File]::WriteAllText($file, $new, [System.Text.Encoding]::ASCII) }
+    if ($text -match "(?m)^patch=1,EE,000DE810,word,") { Say ("Enemies: " + @("Normal", "Hard (+50% HP)", "Very hard (x2 HP)")[$d] + " (bosses +75 % HP in every choice).") }
 }
 function Show-Check([string]$hash) {
     $h = $hash.Substring(0, 16).ToUpper()
@@ -352,6 +369,7 @@ function Start-Emulator([string]$gamePath, [hashtable]$session) {
     if (-not $gamePath -or -not (Test-Path $gamePath)) { Say "No game file. Put your game (.iso, .chd, .cso or .cue) into the folder 'MY-GAMES (never share)' and press Refresh."; return $false }
     $check = Game-Check $gamePath
     Write-CheckFile $check
+    Write-Difficulty $diffBox.SelectedIndex
     $picture = Apply-Picture
     $stamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
     $ini = Join-Path $LogDir "session.ini"
@@ -406,6 +424,7 @@ function Start-JoinedGame([string]$tagHex) {
     $gameBox.SelectedItem = $game.Name
     $layoutBox.SelectedIndex = [array]::IndexOf(($Layouts | ForEach-Object { $_.Id }), $layoutId)
     if ($flags -band 1) { $screenBox.SelectedIndex = 0 } else { $screenBox.SelectedIndex = 1 }
+    $diffBox.SelectedIndex = [Math]::Min(2, (($flags -shr 1) -band 3))   # TEST PACKAGE (build 28): the host's enemies
     Save-Settings
     $ok = Start-Emulator $game.FullName @{ Role = "client"; Host = "127.0.0.1"; Port = $JoinLocalPort; Name = $nameBox.Text; Slots = $layout.Slots; LayoutName = $layout.Name; Screen = $Screens[$screenBox.SelectedIndex].Key }
     if (-not $ok) { Stop-All }
@@ -461,7 +480,7 @@ $hostButton.Add_Click({
     if (-not $game) { Say "Choose a game first (put it into 'MY-GAMES (never share)' and press Refresh)."; return }
     $layout = Selected-Layout
     $players = [int]$playersBox.SelectedItem
-    $tag = Make-Tag $layout.Id (Screen-Flag) (Get-Item -LiteralPath $game).Length (Game-Check $game)
+    $tag = Make-Tag $layout.Id ((Screen-Flag) -bor ($diffBox.SelectedIndex -shl 1)) (Get-Item -LiteralPath $game).Length (Game-Check $game)
     Set-Busy $true; $codeBox.Text = ""; $script:Mode = "host"
     Say "Hosting $players players. Getting your join code..."
     Start-Helper @("host", "--players", $players, "--emu-port", $GamePort, "--tag", $tag)

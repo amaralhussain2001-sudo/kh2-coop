@@ -1,0 +1,11 @@
+# build 34 leak test: player 2 L2+START (partner view), Circle Abilities / Sora / Guard, UP = Don't Equip, Circle
+6200 4 L2 START
+6450 4 O
+6600 4 O
+6900 4 O
+7000 4 UP
+7100 4 O
+7250 4 TRI
+7350 4 TRI
+7450 4 START
+8000 1

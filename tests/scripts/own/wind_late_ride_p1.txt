@@ -1,0 +1,10 @@
+# whirlwind disc (mu8w), part 145: New Game; player 1 takes Ride the Wind at 5100, presses X at 5700
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+5100 4 TRI
+5700 4 X
+999999 1

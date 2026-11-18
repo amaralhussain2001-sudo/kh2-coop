@@ -74,8 +74,8 @@ def running(name_part):
     return res
 
 
-def write_settings(copy, name, game, layout, screen):
-    lines = ["Quality=1", f"Name={name}", f"Layout={layout}", f"Game={game}", f"Screen={screen}", "Fullscreen=False", "Buffer=smooth"]
+def write_settings(copy, name, game, layout, screen, quality="1", difficulty="0"):
+    lines = [f"Difficulty={difficulty}", f"Quality={quality}", f"Name={name}", f"Layout={layout}", f"Game={game}", f"Screen={screen}", "Fullscreen=False", "Buffer=smooth"]
     (copy / "my-settings.txt").write_bytes(b"\xef\xbb\xbf" + "\r\n".join(lines).encode("utf-8") + b"\r\n")
     ini = copy / "emulator" / "inis" / "PCSX2.ini"
     text = ini.read_text(encoding="utf-8-sig")
@@ -99,6 +99,10 @@ def main():
     ap.add_argument("--script-b", default="")
     ap.add_argument("--snap", default="")
     ap.add_argument("--timeout", type=int, default=900)
+    ap.add_argument("--difficulty-a", default="0", help="the host launcher's Enemies choice (0 .. 2)")
+    ap.add_argument("--difficulty-b", default="0", help="the friend launcher's own Enemies choice (the join code overrides it)")
+    ap.add_argument("--quality-a", default="1", help="the host launcher's Picture (1 .. 8)")
+    ap.add_argument("--quality-b", default="1", help="the friend launcher's Picture (1 .. 8)")
     ap.add_argument("--snapview", action="store_true", help="snapshots show what each PC shows (own screens)")
     a = ap.parse_args()
     out = ROOT / "local" / "tests" / a.name
@@ -109,8 +113,8 @@ def main():
     for c in (A, B):
         if not (c / "MY-GAMES (never share)" / a.game).exists():
             sys.exit(f"{a.game} is missing in {c}")
-    write_settings(A, "HostTest", a.game, a.layout, a.screen)
-    write_settings(B, "FriendTest", a.game, a.layout, a.screen)
+    write_settings(A, "HostTest", a.game, a.layout, a.screen, a.quality_a, a.difficulty_a)
+    write_settings(B, "FriendTest", a.game, a.layout, a.screen, a.quality_b, a.difficulty_b)
     extras = {}
     for tag, script, seed in (("A", a.script_a, 1007), ("B", a.script_b, 2007)):
         lines = [f"BotSeed = {seed}", f"SnapDir = {out / tag}", "SnapEvery = 0", f"SnapFrames = {a.snap}", f"ExitAtFrame = {a.frames}"]

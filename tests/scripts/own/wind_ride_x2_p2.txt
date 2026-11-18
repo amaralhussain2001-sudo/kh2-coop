@@ -1,0 +1,4 @@
+# whirlwind disc (mu8w), part 145: player 2 takes Ride the Wind (Triangle 4700), then presses X at 5300
+4700 4 TRI
+5300 4 X
+999999 1

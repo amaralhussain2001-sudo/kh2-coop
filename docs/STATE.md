@@ -9,6 +9,39 @@ evidence), then "Ninth round" (parts 87 to 118), then `..\KH2-COOP-PLAN.md` (row
 build 12") holds the register of build 12 as it was, the test habits T1 to T5 and the old job list; "Older pick-up note"
 after it holds the sandboxes and "How to repeat".
 
+BUILD 35 IS IN Desktop (part 152: glue 86 --hullgauges, both Gummi hull gauges, id 90a012af165f; rar = build 35). BEFORE: BUILD 34 (part 150: make_own --partnerdrive, id 355aa4e576dd). BEFORE THAT: BUILD 33 (part 149: + --sound2area). BEFORE THAT: BUILD 32 IN Desktop\PS2-ONLINE-KH2 (part 148: --sound2, every 3D sound from the nearer camera; id 92a2fbdb75c5; second-PC rar
+Desktop\KH2-UPDATE-FOR-SECOND-PC.rar). Read part 148 first. NOTHING of his list is unbuilt now (11b done in build 35, part 152); open are only HIS decisions: item 10 (Team Strike or combo bonus), boss HP on Hard / Very hard, separate whirlwind rides.
+ONE FOLDER FROM NOW ON (2026-11-18 17:50, his words: "in my desktop i have a lot of kh2 files just give me one folder contain the
+full game insted of doing that"): THE FULL GAME IS `Desktop\PS2-ONLINE-KH2` (build 31, package id 9edd72c299d3 = dist's; copied
+from Desktop\PS2-ONLINE-KH2-TEST-b24 with his memory card, inis, settings, BIOS and disc; the update read-me left out). NO MORE
+Desktop update folders / update zips: after make_package_patch.py + make_test_package.py --rebuild run
+`python -I tools/package/update_desktop_folder.py` (copies dist's changed program files in, keeps his saves/settings, writes
+package-id.txt and START-HERE from the kit; kit START-HERE now says "copy the whole folder PS2-ONLINE-KH2 to the second PC").
+Edit scripts no longer need to touch the kit START-HERE's old "BUILDS 13 TO NN" line (it is gone). net_pace_test.py reads the new
+folder. Old KH2 items on the Desktop (b24 folder/rar, b25-b31 zips, b26-b31 folders) DELETED on his word (the b24 folder is
+empty; the empty folder itself stayed because Claude Code was running in it). Memory files copied to the new folder's project. SECOND PC (unknown build 23/24): tools/package/make_second_pc_rar.py -> Desktop\KH2-UPDATE-FOR-SECOND-PC.rar, 4.5 MB, id 9edd72c299d3.
+
+NEWEST OF ALL (2026-11-17 22:30): BUILD 27 IS ON THE DESKTOP (part 141: --menuowner, who opens a screen controls it; part 140:
+build 26 = the host's memory card travels to the friend, exe builds\card1; dist = build 27, Desktop folder id 88939deacad8, zip
+Desktop\PS2-ONLINE-KH2-TEST-b27-UPDATE.zip; FINAL ids: dist 5400cf9bf480, Desktop 3ba400605f2e, patch 2844d347...). BUILD 31 ON THE DESKTOP (part 143: --difficulty = build 28; part 144: --sumscene2 = build 29; part 146: --lcrevive =
+build 30; part 147: --partnerview = build 31, zip PS2-ONLINE-KH2-TEST-b31-UPDATE.zip, id 9a6b18d15b7d; part 145: --windrider
+NOT shipped). Read parts 139-147 first. PART 142 (different picture quality per PC) WAS STOPPED, NOT SHIPPED: the SOURCE emulator now has kProtocol 6 +
+SyncSkip / SyncSkipWhile / TestPoke (builds\pic2); the shipped exe is still builds\card1 (protocol 5). Build from source = protocol 6. OWED: his logs of a real session on build 27.
+OLDER (2026-11-17 20:00, PART 139): HE PLAYED BUILD 24 ON HIS TWO PCs OVER THE INTERNET AND SAID THE FPS IS NOT
+STABLE. Cause found (the faster PC waited and then rushed to win the wait back); fixed in the EMULATOR ONLY (`emulator-src\builds\pace1`,
+VMManager::Internal::RebaseFrameLimiterAfterWait + PS2Net kWaitSlackMs). DELIVERED AS AN UPDATE, NOT A NEW FOLDER:
+`Desktop\PS2-ONLINE-KH2-TEST-b25-UPDATE.zip` (exe + package-id 21d226082015 + read-me; `tools\package\make_b25_update.py`).
+UPDATE 20:50 (his words "update the ...-b24 to the new batch"): `tools\package\edit_package_v25.py` HAS RUN (make_test_package.py
+VIEW_EXE = builds\pace1; kit + Desktop read-me "TEST BUILD 25" with a NEW IN BUILD 25 paragraph incl. the memory card cause; START-HERE
+"BUILDS 13 TO 25"); then `tools\package\make_b25_update2.py` made the Desktop b24 folder a complete build 25: PACKAGE ID 7a4567ea10c7
+(replaces 21d226082015), and wrote the zip again (exe + package-id + both read-mes + START-HERE). `dist\` itself is still build 24
+(not rebuilt). OWED: (1) his next logs of both PCs: pass = host time waited about equal to time lost (b24:
+55.7 s waited, 27.0 s lost, 28.7 s won back) and quiet 10 s windows with about a dozen host waits or fewer (b24: median 23);
+(2) the JOINT FREEZES (both PCs wait together, 2 to 3 s lost per 10 s window at about t=150, 270, 400, 480 s; single waits 444 /
+571 ms): build 25 does not touch them; HYPOTHESIS packets held up on the way (second PC's connection: asked); (3) the OUT OF SYNC
+from frame 384: SOLVED (part 139 (e): two different memory cards; build 26 sends the host's card, part 140); (4) not run: a long run into gameplay on pace1, mixed old host + new friend, the launcher rehearsal.
+Test tool: `tools\own\net_pace_test.py` (b24 baseline exe = builds\view12).
+
 STILL OWED (state of 2026-11-16 16:30, after part 137; rewrite this block when a line is done): TEST BUILD 24 IS IN `dist\` AND AT
 `Desktop\PS2-ONLINE-KH2-TEST-b24` (package 98dad91e6e9e = candidate v138, `patches\merged-v18` / `merged-v18-own`: build 23 + glue 78
 --gummitag, part 134; regression b33 clean, 40 fights rs8 as build 22, rehearsal p30 clean, part 137). His -b22 and -b23 folders are
@@ -8182,6 +8215,397 @@ NOT playing: several hidden test lanes at once. No two-PC logs came. The parts g
   fork's code reading (part 136): the null store comes from the Fortuneteller's own script, which sets its effect's place each step
   without checking that the effect still lives; nothing in that path concerns the second hero: HYPOTHESIS, the game's own fault. Glue
   76's guard is right either way. ITEM 10 IS CLOSED: nothing in the build changes.
+
+### 139. FRAME PACING ONLINE: THE FASTER PC WON BACK EVERY WAIT AND RAN INTO THE NEXT ONE; BUILD 25 UPDATE = ONE NEW EXE  (2026-11-17, 19:20 to 20:00)  [VERIFIED where named]
+- HIS REPORT: "the fps not stable because the packets i believe not equal or need to be bigger". His first real two-PC session of
+  build 24 (2026-11-17 19:06, host = this PC `Desktop\PS2-ONLINE-KH2-TEST-b24\logs`, player 2 = his second PC 'HUSSAIN' at
+  `D:\Games\PS2-ONLINE`, logs copied to `Desktop\New folder (4)`): over the internet (link "direct 124 ms"), delay 10 frames (smooth).
+- PACKETS ARE FINE (VERIFIED from both link logs): host out 83,324 / friend in about the same, friend out 33,035 / host in about the
+  same, no measurable loss. The 2.5 : 1 ratio is the design (the host sends SETs twice a frame + every 15 ms while waiting; the
+  friend one IN a frame); every packet already repeats all unconfirmed frames (up to 30). Bigger packets would change nothing.
+- THE STUTTER (VERIFIED arithmetic, game logs): 32,848 frames in 575.4 s = 27.4 s lost against 59.94 Hz; the host waited 55.7 s
+  (2,511 waits), the friend 26.4 s (553). So the host waited about 28 s MORE than the session lost: it won those waits back. Cause
+  in `VMManager::Internal::Throttle`: a wait shorter than a frame is caught up (the next frames run without sleeping), which brings
+  the PC that is ahead straight to the next wait (wait, rush, wait). Typical window (t=200 s): host 73 waits / 834 ms, friend 1 wait
+  / 0 ms, both 595 frames: the friend's PC itself was a little slow and set the pace; the host stuttered following it.
+- REPRODUCED ON ONE PC (`tools\own\net_pace_test.py`: two copies of the b24 emulator folder in `local\run-net`, the emulator's own
+  ImpairDelay 35 + ImpairJitter 60 ms each way, random bots, 6000 frames; the friend copy at NominalScalar 0.99 = a PC that cannot
+  quite hold 60 Hz; Framerate is not in the settings check): np-base1 (equal speeds): 0 waits either side. np-base2 (friend 0.99,
+  b24 exe): host 1,488 waits, 19.3 s waited, 1.0 s lost (18.3 s won back), longest 46 ms; friend 0 waits; in sync.
+- THE FIX (emulator only, timing only, wire format and kProtocol 4 unchanged): `VMManager::Internal::RebaseFrameLimiterAfterWait`
+  (VMManager.h / .cpp): after PS2Net waited inside the vsync, the limiter's frame start moves so this vsync ends as if it began now,
+  plus kWaitSlackMs = 3 ms (PS2Net.cpp, called right after the wait statistics in OnVsync). Built `emulator-src\builds\pace1`
+  (SHA-1 372a6624d981e5684998c30f29facf15d50c36a0; build log `emulator-src\logs\build_pace1.log`, 0.9 min).
+  np-pace1-slow (same as np-base2, new exe): host 119 waits, 0.6 s waited, longest 17 ms, same 5,938 frames; in sync. VERIFIED.
+  np-base-d6 (b24 exe, delay forced to 6, equal speeds): friend 626 waits / 1.8 s waited / 1.7 s won back (the same pattern).
+- DELIVERED AT HIS REQUEST ("don't test a lot just put the files"): `Desktop\PS2-ONLINE-KH2-TEST-b25-UPDATE\` and
+  `Desktop\PS2-ONLINE-KH2-TEST-b25-UPDATE.zip` (5.2 MB): emulator\pcsx2-qtx64.exe (pace1), package-id.txt (21d226082015 = build 24's
+  263 program files with the new exe, same method as make_test_package.py; that method leaves out START-HERE, which finish_two_pcs.py
+  writes after the id), and a read-me. The b24 folder itself is untouched. dist\ and make_test_package.py still say build 24 / view12.
+- OPEN (a) THE SESSION WAS "OUT OF SYNC" FROM BLOCK 6 (frames 384-447) TO THE END, on both logs. Settings lists identical, view
+  switches on identical frames on both PCs through frame 30120 (so the game itself probably ran the same: HYPOTHESIS). Differing
+  chunks 45, 49, 59, 60, 62, 63 (EE 0x1680000.., 0x1880000.., 0x1D80000-0x1E7FFFF, 0x1F00000-0x1FFFFFF and the same chunks of IOP
+  RAM); NOT the known picture read-back area (0x00457584-0x004F3580). The same two PCs played Digimon 22,503 frames in sync on
+  2026-11-05. Asked him for the second PC's emulator\logs\emulog.txt (its graphics card) in the update read-me.
+  (b) MORE RUNS OF pace1 (VERIFIED, each 6000 frames, `local\tests\<name>\summary.txt`): np-pace1-d6 (delay forced to 6, equal
+  speeds; b24 gave friend 626 waits / 1.8 s): host 7 waits, friend 11, 0.1 s each side, in sync. np-pace1-fast (Fast buffer,
+  delay 6 chosen): 12 / 11 waits, 0.1 s, in sync. np-mix-newhost (host pace1, friend the b24 exe, friend 0.99): host 132 waits /
+  0.5 s, in sync: mixed versions play together. NOT RUN (he asked for few tests): a long run into gameplay (all runs end in the
+  opening), mixed the other way round (old host, new friend), the launcher rehearsal. The change is real-time only.
+  (c) NOT COVERED BY THE FIX: the second PC's own 26.4 s of waiting sits mostly in windows where BOTH PCs wait together (b24 session:
+  worst 10 s windows host 460 frames / 112 waits / 3.4 s, 490 / 81 / 2.9 s; second PC 490 / 24 / 2.1 s, 496 / 27 / 2.1 s; single
+  waits 444 and 571 ms). A PC that is only slow does not wait, so HYPOTHESIS: packets held up on the way (Wi-Fi or the line). No
+  one-PC run reproduced it. Asked him how the second PC is connected.
+  (e) THE OUT OF SYNC IS FOUND (VERIFIED 2026-11-17 20:30): DIFFERENT MEMORY CARD FILES ON THE TWO PCs, AND THE JOIN CHECK DOES NOT
+  SEE CARD CONTENTS. Every log reports "memory card eec1891f7a9b71c5" for every card (7 of 7 lobby lines, also for this PC's two
+  different cards: PS2-ONLINE 2c39b9bb.., KH2 b24 eac18874..; part V3 noted it already). Test np-card-diff (two copies, view12, card
+  A = KH2 b24 card, card B = PS2-ONLINE card, no impairment): OUT OF SYNC in frames 384-447 with EXACTLY the real session's differing
+  chunks 45 49 59 60 62 63. His new Digimon session (Desktop\PS2-ONLINE\logs 20:23, this PC as player 2) went out of sync at block 7
+  the same way. HYPOTHESIS for the blind check: MemcardHash() reads the card file while the emulator holds it open (or the path is
+  not set yet) and falls to Mix(h, 0xDEAD). TO DO: fix MemcardHash in the exe; meanwhile both PCs need the same Mcd001.ps2.
+  `Desktop\New folder (4)\PS2-ONLINE-KH2-TEST-b24` is NOT the second PC's folder: a copy run on THIS PC (its emulog: 9950X3D + RTX
+  5090, paths under New folder (4)).
+  (d) Baseline of the real b24 session in net_pace_test.py's format: host 32,589 frames in 570.7 s, 2,511 waits, 55.7 s waited,
+  27.0 s lost, 28.7 s won back, median 23 waits in the 19 windows with >= 590 frames; second PC 553 waits, 26.4 s waited, 27.4 s
+  lost, median 2 waits in its quiet windows.
+
+### 140. BUILD 26: THE HOST'S MEMORY CARD TRAVELS TO THE FRIEND IN THE LOBBY; THE CARD CHECK WORKS AGAIN  (2026-11-17, 20:35 to 21:00)  [VERIFIED where named]
+- HIS WORDS: "why not send the memory also in KH2? so not be different?" then "yes but that verion of the emu only will be playing
+  Kh2". So: emulator change for the KH2 test folder only; Desktop\PS2-ONLINE stays untouched (his rule).
+- CAUSE OF THE BLIND CHECK (code reading, VERIFIED by the new values below): MemcardHash read the card with ReadBinaryFile =
+  _wfopen_s, refused while the emulator holds the card open with DenyWrite sharing, so every card hashed to Mix(h, 0xDEAD).
+  Now ReadCardFile = OpenManagedSharedCFile(..., DenyNone). New values: digimon card eafa7e16.., KH2 test card 97050567...
+- THE TRANSFER (PS2Net.cpp, kProtocol 5; PKT_CARD 9 / PKT_CARDACK 10; build `emulator-src\builds\card1`, SHA-1 77e4138f..., log
+  `emulator-src\logs\build_card1.log`, 0 PS2Net warnings): the host no longer refuses another card; every HELLO carries the
+  friend's card value; for a friend with another card the host zstd-compresses its slot 1 card (8,650,752 -> 69,524 bytes = 70
+  pieces of 1000) and sends pieces (16 per 5 ms, a piece again only after 250 ms unconfirmed; everything again if the friend still
+  reports another card 3 s after confirming all); START (and the input delay) only when every friend reports the host's card;
+  the round trips measured during the transfer are thrown away (host and friend). Friend: checks size + hash, writes a backup
+  `Mcd001-backup-<date>.ps2` and reads it back, FileMcd_EmuClose, writes `.new` and renames it over the card, FileMcd_EmuOpen,
+  compares the card value with the host's; on failure restores its card and ends with a message. No eject simulation.
+  Backups are never deleted automatically.
+- TESTS (each in sync, `local\tests\<name>`): np-card1-diff (host = digimon card, friend = KH2 card, 35+0..60 ms): transfer 0.4 s,
+  1,195 frames in sync; friend card == host card, backup == friend's old card, host card unchanged (SHA-1). np-card1-same: no card
+  line, no backup. np-card1-loss (ImpairLoss 20): card arrived in about 0.55 s, in sync, files right. p31-card = rehearse.py through
+  both launchers and ps2net-link (A = dist build 26, B = Desktop\PS2-ONLINE + friend kit, different cards): transfer under 0.1 s,
+  1,500 frames, 23 digests, never out of sync, files right.
+- PACKAGE: `tools\package\edit_package_v26.py` HAS RUN (VIEW_EXE = builds\card1, kit read-me "TEST BUILD 26" + NEW IN BUILD 26, START-HERE
+  13 TO 26); `make_test_package.py --rebuild` HAS RUN: dist = build 26, id 6bae553d2eca (friend kit 22.6 MB); `make_b26_update.py`
+  HAS RUN: Desktop\PS2-ONLINE-KH2-TEST-b24 = build 26, id 7c81dc0feb52 (differs from dist's id only by the update read-me file),
+  `Desktop\PS2-ONLINE-KH2-TEST-b26-UPDATE.zip` (5.3 MB) for the second PC. The b25 zip on the Desktop is outdated.
+- NEXT (HIS IDEA, 20:40): "when i open the menu i should click the buttons and if he open it he should controll ... same for npc".
+  Today the pause menu's CONTENTS belong to the opener, but either controller moves in it (also "Buy how many?", text boxes).
+  Plan proposed to him: the opener alone controls menus, shops and talk choices; plain text boxes stay "either player"; a fall-back
+  after about 30 s without input. A game-patch (glue) change: plan first, his go.
+
+### 141. BUILD 27: THE SEVENTY-NINTH GLUE --menuowner: WHO OPENS A SCREEN ALONE CONTROLS IT  (2026-11-17, 21:05 to 22:30)  [VERIFIED where named]
+- HIS WORDS: "now do the menu control plan for kh2, also for the npc when i talk to shop ... he can miss it up", "go", and "we
+  don't need to do the safety because both going play toghther always" (so NO fall-back time).
+- THE GLUE (`tools\merge\edit_merge_v7_menuowner.py`, `..._menuowner2.py`, `..._menuowner3.py`, each run once; option --menuowner,
+  needs --ownmenu --ownwallet; builder copy before it `local\merge_v7-before-menuowner.py`; without the option the builder still
+  writes merged-v18 bit for bit, VERIFIED b99fb1c3...). pad_both's first word jumps to po_pad: with an owner (V_OWNER 0x000DE800)
+  the record is that player's logical controller alone; the field's START look-out (return 0x00138540) and the command menu's
+  first button (0x0013C7A0) always hear both. po_open (0x00138574) = START's player (glue 49's rule); po_cmd (entry 0x00178AE8,
+  before ww_cmd) = the green command's player; po_pad notes the counter when a message window asks (return 0x001ACBDC,
+  V_MSGSTEP 0x000DE808); po_tick (0x00138538) lets go when the owner is >= 90 steps old AND no box asked for 30 steps. Code at
+  0x000DE000 .., values 0x000DE800 .. 0x000DE80B (0x000D0000 .. 0x000DEFFF: no patch word, zero in z0 and part 137).
+  po_cmd uses t4 .. t7 only (t0 .. t3 may carry arguments at a routine's entry).
+- FOUND ON THE WAY: (1) IN A TALK THE FIELD GOES ON (its START look-out runs every step; START would give the skip menu via
+  0x001C1218 / 0x00253410), so the first form let the owner go 34 steps after the Talk (run r11mo1e, probe `tools\own\mo_probe.py`);
+  0x0034D840 ("no pause menu", 0x001688B8) is no talk signal (0 during the talk). (2) The elf's "Make presents?" choice reads
+  through the message window's call (return 0x001ACBDC; test-only recorder `tools\own\make_mo_dbg.py`, run r11mo2dbg). (3) My
+  second form compared with 0x001BCBDC (lui 0x001B): fixed by menuowner3.
+- TESTS (all in sync, "TLB misses 0"; chains `tools\own\r11_chain1.sh` .. `r11_chain4.sh`, logs `local\sweep\r11`):
+  * TALK (nm10 elf, kit -snapB-tw2, player 2 talks, player 1 UP at 7500; scripts walkin_talk_p2 / walkin_up7500_p1): build 24
+    (mo0) and the first form (mo1): the hand jumps to "Hold on.", no game. FINAL (mo3a, candidate test-own-mo3): the hand stays
+    on "Let's make it!" at 7550, player 2's Circle starts Gift Wrapping (rules screen at 8000; it belongs to player 2 too).
+  * SHOP (disc test-s1-hb10s, kit -shop-w, player 2 buys a Potion, player 1 Cross at 5450 .. 5800; scripts shop_buy2_p2 /
+    shop_xjam_p1): build 24 (sx0): player 1's Cross closes player 2's shop, his wallet stays 3,000. Candidate (sx1 first form,
+    sx3 final): the Potion is bought, player 2's wallet 2,960.
+  * PAUSE MENU (nm10 -snapB): pm1 player 1 opens, player 2's DOWN x3 do nothing (cursor on Abilities), player 1's DOWN -> Status;
+    pm2 the other way round, the same; pm0 build 24: player 2's DOWN x3 move player 1's cursor to Config.
+  * fx3: an ordinary fight run (nm10, sweep_p1 / mash_long_p2, 9,000 frames): in sync, owner 0 in the field.
+  * REHEARSAL p32-b27 (dist build 27 through both launchers and ps2net-link, different cards): join code after 8 s, card sent,
+    1,500 frames never out of sync, both cards 2c39b9bb.
+  NOT RUN: the whole regression (b34 / w34) and the 40 fights (his wish: few tests); the world map, the Moogle, a save point and
+  the Gummi menu with an owner (by the code they follow pad_both / gm_pad as the read-me says).
+- AFTER A REVIEW, THIRD AND FOURTH FORM (`edit_merge_v7_menuowner4.py`, `..._menuowner5.py`, run once): (3) the script's two
+  button tests (returns 0x0016DBB0 / 0x0016DBF8: boss button-mashing) always hear both; an owner whose box is open right now
+  (V_MSGSTEP less than 4 steps old) is not replaced by the other player's START / green command. (4) Run r11tk4: player 1's
+  START during player 2's talk PAUSED it ("PAUSE" over the box, only player 2 could resume): now the field's START look-out hears
+  only the owner while his box is open right now. Tests on the third form (chain r11_chain5): tk4 owner stays 2 through player 1's
+  START + UP (but the pause, see above); rl4 player 2 opens and closes the menu, owner 2 -> 0 (released at counter 6272) -> 1 when
+  player 1 opens, his DOWN moves his cursor; pm4 as pm1; sx4 the shop as sx3. On the fourth form (chain r11_chain6, candidate
+  test-own-mo5): tk5 player 1's START + UP do nothing, player 2's "Let's make it!" starts Gift Wrapping; tw5 the plain talk;
+  pm5 as pm1. All in sync, "TLB misses 0". Rehearsal p33-b27 on the final package: join after 8 s, card sent, never out of sync.
+- FINAL PACKAGE (the earlier v19 / dist / zip of this part were made from the second form and are REPLACED): patches\merged-v19
+  (= test-v29-mo5, af4e56f7...) and merged-v19-own (= test-own-mo5, b3d6a6e1..., 10,263 words); dist = build 27, id 5400cf9bf480,
+  shipped patch SHA-1 2844d347...; Desktop\PS2-ONLINE-KH2-TEST-b24 = build 27, id 3ba400605f2e; the zip rewritten (5.4 MB).
+- PACKAGE (first made from the second form): patches\merged-v19 and merged-v19-own; `tools\package\edit_package_v27.py`
+  HAS RUN (make_package_patch.py / make_test_package.py -> v19, read-me NEW IN BUILD 27, START-HERE 13 TO 27); make_package_patch.py
+  and `make_test_package.py --rebuild` HAVE RUN: dist = build 27, id 7e97f3af679e, shipped patch SHA-1 ee3ca70f..., exe still
+  builds\card1. `tools\package\make_b27_update.py` HAS RUN: Desktop\PS2-ONLINE-KH2-TEST-b24 = build 27, id 88939deacad8;
+  `Desktop\PS2-ONLINE-KH2-TEST-b27-UPDATE.zip` (5.4 MB: exe, both patch files, read-mes, START-HERE, package-id). The b25 / b26
+  zips on the Desktop are outdated.
+
+### 142. DIFFERENT PICTURE QUALITY ON THE TWO PCs: BUILT, MEASURED, AND STOPPED (NOT SHIPPED)  (2026-11-17, 22:40 to 00:40)  [VERIFIED where named]
+- HIS WORDS: "i have good pc and want to put it at x8 someone wants to put it x3", then "do 2 but make sure full safe" (2 = let the
+  sync check leave out KH2's picture copies). NOTHING OF THIS PART IS IN THE DESKTOP FOLDER OR dist (still build 27).
+- MEASURED (tools `tools\own\pic_sweep.sh` + `tools\own\ramdiff.py`: two copies, player 1 8x, player 2 3x, EE dumps at the same session
+  frame compared and deleted; logs `local\sweep\r12\*.log`): 16 fights of the rs6 list, talk, pause menu, shop, the save point ->
+  world map -> landing (worldmap_land_all_p1: since build 27 the save point belongs to its opener, the old p2 scripts stay at "No"),
+  title: EVERY difference lies in 0x00457580-0x004F3580 (0x9C000 = 512 x 416 x 3, one picture; "OUTSIDE IT: 0 ranges" in every
+  new-format line). The Gummi Menu (module 62B0 at 0x01F18014): also 00E9FB48-00EA5748 and 00F5FC74-00F7556C (heap), and up to 200
+  frames into a flight; the flights themselves identical (40,000-frame run pl).
+- BUILT (in the source, not shipped): kProtocol 6; .view keys SyncSkip (EE ranges left out of the sync check) and SyncSkipWhile
+  (ranges left out while a 16-bit value holds, and N frames after); both mixed into the patch value of the join; test-only session
+  key TestPoke = frame:addr:value; exe `emulator-src\builds\pic2` (0F181F28...), view `patches\own-view3` (SyncSkip 00457580-004F3580;
+  SyncSkipWhile 01F18014=62B0 00E9F000-00EA6000,00F5F000-00F76000 600). Session tools: v3_session.py --extra1/--extra2 and env
+  PIC_EXE / PIC_VIEW / PIC_UP1 / PIC_UP2 (also kh2_session.py); rehearse.py --quality-a / --quality-b.
+- VERIFIED ON pic2 + own-view3 (8x / 3x): a fight, talk, pause menu, shop, save point world map + landing, Gummi Menu + flight:
+  never out of sync; TestPoke outside the ranges (0x000D1000 at 6000) and INSIDE the Gummi block after its window (0x00E9F800 at
+  9000): OUT OF SYNC at once (so the check still works and the time window closes). A save to the card (roam disc, save_cont): both
+  card files byte-identical.
+- WHY STOPPED: the same save run (cs1, roam disc) went OUT OF SYNC at block 101 after the door at 6200: a THIRD picture copy, in HEAP
+  memory of that room, 0x0092FEBC-0x00947356 (rows of 0x400; run cs2 with dumps). So rooms have their own picture copies at heap
+  addresses; a fixed list cannot be proven complete, and leaving out heap ranges weakens the check. Told him: different picture
+  quality is not "fully safe"; the safe rule stays: the same Picture on both PCs.
+- NOT RUN: the whole regression at 8x / 3x, the launcher rehearsal with Quality 8 / 3.
+
+### 143. BUILD 28: THE EIGHTIETH GLUE --difficulty: THE HOST CHOOSES HOW STRONG ORDINARY ENEMIES ARE  (2026-11-18)  [VERIFIED where named]
+- HIS WORDS: "okay do 5 8 9 11 2 explain 10" (the gameplay list of docs\IMPROVEMENT-PLAN.md section G). Told him: 5 (sound from each
+  PC's own camera) cannot be done in lockstep (the sound's volumes and pans are computed by the emulated PS2 itself; offered "both
+  hear from the middle between the heroes"); 10 explained (a real team Limit needs new animation data; offered a "Team Strike"
+  reaction command or a "combo bonus"). Order: 2 (this part), then 11, 8, 9.
+- THE GLUE (`tools\merge\edit_merge_v7_difficulty.py`, run once; option --difficulty; builder copy before it
+  `local\merge_v7-before-difficulty.py`; without the option the builder writes merged-v19 bit for bit, VERIFIED): the word after the
+  HP loop of 0x001A0EE0 (0x001A0F54, lhu t7,2(v0)) jumps to dh_hp (0x000DE200, 95 words incl. a 256-byte boss table from lane B75's
+  boss_entries.csv: 91 ids): with a twin and V_DIFF (0x000DE810) not 0 and a non-boss entry, the slot's 32 HP values become x 1.5
+  (rounded up; V_DIFF 1) or x 2 (V_DIFF 2) before the damage limits are taken. V_DIFF is written by ONE patch line that the LAUNCHER
+  sets; the shipped files carry it with 0.
+- TESTS (`tools\own\r13_chain1.sh`, probe `tools\own\hp_probe.py`, candidate test-own-dh1 = merged-v20-own, kits -snapB-d0/-d1/-d2):
+  AL03_MS103 and CA10_MS107 at 0 / 1 / 2: ordinary entries 5, 6, 98: 10 / 15 / 20 HP; boss entries 122, 123, 99: 280 / 280 / 420 in
+  all three; all six in sync, "TLB misses 0".
+- LAUNCHER (edit_package_v28.py's EDITS): "Enemies:" box on the host row (Normal / Hard (+50% HP) / Very hard (x2 HP)); setting
+  Difficulty; the join code's flags byte carries it in bits 1-2 (bit 0 = screen); the friend's launcher takes it; Write-Difficulty
+  sets the line before every start and logs "Enemies: ...". Rehearsal p34-b28 (rehearse.py --difficulty-a 2 --difficulty-b 0): the
+  friend's settings, log line and patch line all became 2 like the host's; never out of sync.
+- PACKAGE: patches\merged-v20 / merged-v20-own; `edit_package_v28.py`, make_package_patch.py, `make_test_package.py --rebuild` HAVE RUN:
+  dist = build 28, id ee0df8b74288; `make_b28_update.py` HAS RUN: Desktop\PS2-ONLINE-KH2-TEST-b24 = build 28, id 8db8bb9e55d0,
+  `Desktop\PS2-ONLINE-KH2-TEST-b28-UPDATE.zip` (5.4 MB: exe, both patch files, LAUNCHER, read-mes, START-HERE, package-id).
+- NEXT: item 11 (whirlwinds per rider, both Gummi hulls, Light Cycle comeback), then 8 (player 2's Summon movie, both form gauges),
+  then 9 (partner's gear page).
+
+### 144. BUILD 29: THE EIGHTY-FIRST GLUE --sumscene2: PLAYER 2'S SUMMON PLAYS ITS ENTRANCE MOVIE  (2026-11-18)  [VERIFIED where named]
+- HIS WORDS: "finish the 11 9 8 for now". Three READ-ONLY research agents (notes in local\analysis\agent-summon, agent-rides,
+  agent-gear) first; this part is item 8 (a).
+- WHY THE BASE PATCH SKIPPED IT: sm_skip (0x001C8444) gave the twin's summon the "Summon Effects: None" path, because the friend's
+  start entry (run at once by 0x00188120 from 0x001C8540, inside the summon task, outside near_think) asks trap_sysobj_player
+  (0x00171074) and captures / attaches to / films THAT hero (old --sum-scene test i10-sumB-p2: player 1's hero got motion 252).
+- THE GLUE (`tools\merge\edit_merge_v7_sumscene2.py`, run once; builder copy before it `local\merge_v7-before-sumscene2.py`; without
+  the option the builder writes merged-v20 bit for bit, VERIFIED): su_player (0x000DE400, 26 words; note: the debug kit make_mo_dbg.py also writes at 0x000DE400: do not use it on v21+) sits in front of glue 45's
+  tp_player at 0x00171074: for a script whose object has the summon friends' class 0x00351E18, while a summon is out (0x01D49968
+  not 0) and the twin called it (V_SUMTW 0x000F47F4), the answer is the twin; else tp_player. 0x001C8444 = the game's jal 0x001C8788
+  again. Player 1's call is unchanged (V_SUMTW 0 -> tp_player; 0x001C8788 is what sm_skip jumped to for him).
+- TESTS (dusk_one.sh, test-g-friends.iso, kit test-own-su1-summon = make_kit2 -summon options): s14-su2 (P2 Genie): scene at
+  5060..5450 (layout 0 = both screens show it, both heroes action 0xFC like player 1's call), then Genie beside player 2 (Dismiss,
+  SUMMON gauge on his screen); s14-su1 (P1 Genie, as before); s14-su3 (P2 Peter Pan: scene, Peter + Tinker Bell beside player 2);
+  s14-su5 (new script summon_dismiss2_p2.txt: Dismiss after the scene: Donald and Goofy back, DRIVE gauge); all never out of sync,
+  "TLB Miss" 0. (s14-su4 = the old dismiss script: its presses come during the scene now, so no Dismiss: expected.)
+- PACKAGE: patches\merged-v21 / merged-v21-own (patch lines == tested test-own-su1); edit_package_v29.py, make_package_patch.py,
+  make_test_package.py --rebuild, make_b29_update.py HAVE RUN: Desktop folder = build 29, id 30868d0db6b4,
+  Desktop\PS2-ONLINE-KH2-TEST-b29-UPDATE.zip (exe, both patch files, launcher, read-mes, START-HERE, package-id).
+- NEXT: item 8 (b) partner's FORM gauge (agent design: pf_filter in front of own_filter at 0x0013935C, draw the partner gauge's
+  kind-dependent parts shifted, display-only), item 11 (a) whirlwinds per rider (agent: hook the pressed/held tests at 0x0016DBA8 /
+  0x0016DBF0 for objects 0x0151 / 0x0457), (c) Light Cycle comeback (class table words 0x003521EC / 0x0035223C), (b) Gummi second
+  gauge (medium-hard), item 9 (agent still researching).
+
+### 145. ITEM 11 (a) WHIRLWINDS PER RIDER: NO CHANGE SHIPPED; THE EIGHTY-SECOND GLUE --windrider EXISTS, UNSHIPPED  (2026-11-18)  [VERIFIED]
+- `tools\merge\edit_merge_v7_windrider.py` (run once; builder copy before it `local\merge_v7-before-windrider.py`; without the
+  option = merged-v21 bit for bit, VERIFIED): rw_pad (0x000DE480..) at the script button tests 0x0016DBA8 / 0x0016DBF0: for a
+  whirlwind object (0x0151 / 0x0457) piece that is one hero's hooked context (hero+0xAEC), that hero's controller record only,
+  unless glue 65's pair holds the other hero in the same whirlwind (then pad_both). Candidate test-v32-rw1 / test-own-rw1.
+- RUNS (disc test-s1-mu8w.iso, pos_probe): s15-rwA/B/C (heroes 220 apart): BOTH heroes ride (FC both), either Cross throws both
+  (FD both). s15-rwD / s15-rwE (one hero first walks to z -320, about 2400 units away; new scripts wind_away_x_p1/p2,
+  wind_late_ride_p1/p2): the far hero is STILL pulled into the whirlwind (FC both) - on the shipped merged-v21-own too (s15-rwD0).
+  So since build 21 every whirlwind ride is a glue-65 shared pair, whatever the distance (this contradicts the "within 500 units"
+  words of glue 65's header for a non-enemy captor: not investigated). rw_pad's own-controller branch never ran.
+- DECISION: not shipped (nothing to fix: one script moves both heroes; separate rides would mean changing glue 65's pairing, which
+  regressed before; the user's decision). Read-me line "Some small games listen for a button on EITHER controller ... whirlwinds"
+  is stale: fix in the next package edit (both heroes ride together; either player's Cross throws both off).
+
+### 146. BUILD 30: THE EIGHTY-THIRD GLUE --lcrevive: A DESTROYED LIGHT CYCLE COMES BACK  (2026-11-18)  [VERIFIED where named]
+- ITEM 11 (c). `tools\merge\edit_merge_v7_lcrevive.py` (run once; builder copy before it `local\merge_v7-before-lcrevive.py`; then
+  edited in merge_v7.py: LC_DOWN 300 -> 150 and the "other rider down too" guard in lc_tick; without the option = merged-v21 bit for
+  bit, VERIFIED). Light Cycle class table 0x003521E0 (Light Cycle only; the twin's cycle IS the twin object [0x000F05CC]):
+  +0x5C (0x0035223C, was 0x001CF4F8) -> lc_die 0x000DE580; +0x0C (0x003521EC, was 0x00178758) -> lc_tick 0x000DE630.
+  V_LC1 0x000DE820 (the non-twin rider, noted each step), V_LCT1 0x000DE824 / V_LCT2 0x000DE828 (down timers, in cycle steps).
+  The cycle's step runs every OTHER frame (timer 300 = 600 frames in s16-lcM), so LC_DOWN 150 = 5 s. The rise copies the game's
+  revive 0x00179F80 (flag +0x7F8 bit 4 off, 0x001852B8, the control word only when +0xB44 is not 0, 0x001D6AB0, class +0x78 HP
+  + max) with action state 23 and motion 44 then 0 (the cycle's init); at the timer's end it waits (timer 1) while the other rider
+  is down too (the end has begun).
+- TESTS (disc test-v5-tt137.iso, jump kit make_snaptest B + make_jumpkit 11 61, scripts sp_p1/sp_p2, sp_probe):
+  s16-lcA/M (LC_DOWN 300): P2 0/20 at 6400, timer counted, up at ~7000; four comebacks to 11600, no "go 1".
+  s16-lcB (150, = merged-v22-own): P2 down 6400, up 20/20 a2C at 6700, then moves (a10) and attacks (aB8); P1 down ~7900, up 8000.
+  s16-lcC (make_once: P1's unit slot 0x01C6C750 HP = 1 at 6420 while P2 is down): P1 destroyed ~6620 -> "go 1" (Game Over), P2
+  NOT raised during it, Continue at ~7400 rebuilt both 20/20, the ride went on. All never out of sync, "TLB Miss" 0.
+  NOT RUN: the ride's end (clear / fail) while one rider is down; the shared-screen fallback.
+- ITEM 8 (a) completed: kit test-own-su1-summon4 (make_kit2 --forms=5F): s14-su8 = Chicken Little ("FPS Mode") and s14-su9 = Stitch
+  ("Ohana!") called by player 2: entrance scene (layout 0 at 5100-5300), friend beside player 2; in sync. (s14-su6/7 on the
+  two-summon kit only repeated Genie / Peter Pan.)
+- PACKAGE: patches\merged-v22 / merged-v22-own (patch lines == tested test-own-lc2); edit_package_v30.py (also corrects the read-me's
+  Light Cycle paragraph and the stale whirlwind "known problem", part 145), make_package_patch.py, make_test_package.py --rebuild,
+  make_b30_update.py HAVE RUN: Desktop folder = build 30, id 8e14ff47a99a, Desktop\PS2-ONLINE-KH2-TEST-b30-UPDATE.zip.
+- NEXT: item 8 (b) partner's FORM gauge; item 9 partner gear view (agent design local\analysis\agent-gear\design-partnerview.txt:
+  "hold L2 + START" opens the menu on the partner's gear, edits gated; its code room 0x000DD000-0x000DD1FF, V 0x000DD800..);
+  item 11 (b) Gummi second hull gauge (medium-hard; agent design in rides-design.txt).
+
+### 147. BUILD 31: THE EIGHTY-FOURTH GLUE --partnerview: HOLD L2 + START = THE PARTNER'S GEAR, READ-ONLY  (2026-11-18)  [VERIFIED where named]
+- ITEM 9. Design: local\analysis\agent-gear\design-partnerview.txt (read-only agent). `tools\merge\edit_merge_v7_partnerview.py` (run
+  once; builder copy before it `local\merge_v7-before-partnerview.py`; then PV_END 0x000DD200 -> 0x000DD400 (code 137 words) in
+  merge_v7.py; without the option = merged-v22 bit for bit, VERIFIED). Code 0x000DD000.., V_VIEW 0x000DD800, NET 0x000DD840..0x000DD88B.
+  pv_open = po_open's last word (j mo_open -> j pv_open); pv_tick = 0x00138538 (before po_tick); pv_load / pv_new before or_load /
+  or_new; gates at 0x002690A4, 0x0027874C, 0x00278F8C, 0x002614DC, 0x002682F4, 0x0026932C (jal sites), 0x00373234 (data: "Yes" ->
+  "No"), entries 0x00273818 / 0x00273C40 (2 words each). NOTE: 0x00273818 has FOUR callers (0x0026FDD4, 0x002700A0, 0x00270994,
+  0x00273648) and 0x00273C40 two (0x0026FD98, 0x00273650), not one as the agent wrote; the gate sits at the entry, so all are
+  covered; none of them uses v0 right after.
+- TESTS (`tools\own\r14_chain1.sh`, `r14_chain2.sh`; disc test-v5-tt137 nm10, kits test-own-pv1-acc / merged-v22-own-acc = snapB +
+  make_once 4300: Medal 0x35 at 0x0032E044 (the hero's accessory 1), Soldier Earring 0x28 at 0x0032E04C (player 2's), memdump):
+  pvA (P1 "L2 START"): during the menu V_VIEW 1, V_MENU2 1, accessories exchanged (P2's earring in Sora's place 1); at 7000 every byte
+  as before; P2 held the stick right meanwhile: his place unchanged (THE WORLD IS PAUSED: the NET is safe). pvB (P2 "L2 START"):
+  V_VIEW 2, nothing swapped, back to 0. pvN (P2 START alone): V_MENU2 1 and the swap as build 30, V_VIEW 0. pv0 (build 30, P1
+  "L2 START"): his own menu. lkA2 / lkB2 / lk02 (Circle on the Abilities page): no byte changed in any - but the control lk02 did
+  not switch either: Sora's only ability there (Damage Control) is a Keyblade ("Weapons") ability, not switchable. So the GATES ARE
+  NOT SHOWN BY A RUN (only by code); the read-me says so. All runs never out of sync, "TLB Miss" 0.
+- PACKAGE: patches\merged-v23 / merged-v23-own (== tested test-own-pv1); edit_package_v31.py, make_package_patch.py,
+  make_test_package.py --rebuild, make_b31_update.py HAVE RUN: Desktop folder = build 31, id 9a6b18d15b7d,
+  Desktop\PS2-ONLINE-KH2-TEST-b31-UPDATE.zip.
+- NEXT: item 8 (b) partner's FORM gauge (agent notes local\analysis\agent-summon\notes.txt "(b)"); item 11 (b) Gummi second hull
+  gauge (agent design rides-design.txt "(b)"; medium-hard; route parity is the risk). A better leak test for the partner view needs a
+  save with an equippable spare accessory and a switchable ability (make_kit2 --byte=239E:FF --short=36E8:0001 for the Items row).
+
+### 148. BUILD 32: THE EIGHTY-FIFTH GLUE --sound2: EVERY 3D SOUND FROM THE NEARER CAMERA  (2026-11-18)  [VERIFIED where named]
+- HIS WORDS: "is there a way to fix the sounds?" -> told him (1) each PC its own sound mix (the game computes both, the emulator
+  of each PC plays its own: three layers, days, unsure) and (2) the nearer camera for every sound (safe, same on both PCs); he: "okay
+  go aheed with your suggestion" = find the routine, build (2). Part 5e's "not found" is now found; its HYPOTHESIS is VERIFIED.
+- RESEARCH (local\analysis\sound\notes.txt, edis2.py = the ELF disassembler with COP1/VU0): 3D routine 0x002BB5F8 takes view block
+  0x00106A60(0) (= view 0, camera 1, 0x003A7F70 with two views), matrix at +16, volume +40 = 16383 - d^2/K (K ~500 measured),
+  pan +44. Sound list head 0x01E2AA80 (next +28, kind +49: 0/5/6 point, 4 area via 0x0014EE28 = the area's point nearest to
+  view(0)+0x50, the eye). View 1 = 0x003A8000 (camera 2), eye at +0x50.
+- THE GLUE (`tools\merge\edit_merge_v7_sound2.py`, run once; builder copy before it `local\merge_v7-before-sound2.py`; without the
+  option the builder writes merged-v23 bit for bit, VERIFIED): sn_view at 0x000DE900 (hook 0x002BB630, was jal 0x00106A60):
+  with V_ON (0x000F6F04) and a twin and the game's answer = 0x003A7F70: the eye nearer to the sound (squared distances, view
+  block +0x50 / +0xE0) gives the block -> volume AND pan from that camera. sn_area / sn_get (hooks 0x002BB968 / 0x0014EE64,
+  V_SNFORCE 0x000DE830) are in the room but HOOKED ONLY WITH --sound2area (added after the advisor: no run met a kind-4 sound;
+  sn_area got the same "game's view = 0x003A7F70" guard). Room 0x000DE900 .. 0x000DEB80.
+- CHECKS: V_ON is 1 only while our two-view tasks are installed (views.py v_camtask / v_dualoff clear it); one view -> the getter
+  answers 0x003A8090.. -> sn_view does nothing; nothing in merge_v7 writes 0x000F6xxx, so the shared fallback never acts.
+- TESTS (`tools\own\r15_chain1.sh`, AL03_MS103, player 1 still (snd_still_p1), player 2 runs ~1900 away and attacks
+  (snd_far_mash_p2); probe `tools\own\snd_probe.py`, check `tools\own\snd_check.py`): CONTROL r15sc (build 31): 89 sounds = camera
+  1, 0 = camera 2, 76 quieter than the nearer camera would give (player 2's sounds 4041..9458 instead of ~15900). CANDIDATE r15sn
+  (test-own-sn1, all three hooks): 78 = camera 2, 13 = camera 1 (camera 1 nearer), 0 quieter; 134 digests, never out of sync;
+  hero/twin positions as the control except 2 of 20 snapshots off by a few units on the MOVING twin (read timing of the probe;
+  they match again after). r15pc / r15pn (CA01_MS101, chain 2): one view, no twin there - only the fall-through path, in sync;
+  their snd_check counts mean nothing (eye1 stale). FINAL r15sv on merged-v24-own (sn_view only, the shipped file): 75 = camera 2,
+  15 = camera 1, 0 quieter, 134 digests, never out of sync, TLB misses 0.
+- PACKAGE (ALL HAVE RUN): patches\merged-v24 / merged-v24-own (merge_v7 build 31 options + --sound2; make_own --base merged-v24
+  --cannon2view); edit_package_v32.py, make_package_patch.py, make_test_package.py --rebuild (dist = build 32, id 92a2fbdb75c5),
+  update_desktop_folder.py (Desktop\PS2-ONLINE-KH2 = build 32, id 92a2fbdb75c5, his memory card untouched),
+  make_second_pc_rar.py (Desktop\KH2-UPDATE-FOR-SECOND-PC.rar, 4.5 MB, build 32; reads the build number from the read-me now).
+  BUILDER OPTIONS OF BUILD 32 = build 31's + --sound2.
+- NEXT for sound: find a room with kind-4 (area) sounds (snd_probe in the next sweep, or trace who stores 4 into +49) and run
+  --sound2area there before shipping it. (DONE: part 149.)
+
+### 149. BUILD 33: --sound2area, THE AREA SOUNDS FROM THE NEARER CAMERA TOO  (2026-11-18)  [VERIFIED where named]
+- HIS WORDS: "okay fix both the area open" (read as: the area sounds, then the open items 8b and 11b).
+- WHERE AREA SOUNDS COME FROM: node kind 4 is made only by 0x002BB310 <- 0x002BC2E8 <- 0x0014ED28 <- 0x00142BF8 (room load: for
+  every COCT collision face whose surface flags have bits 0x60000, kind (flags >> 17) & 3; the sound number from [0x01C9408C]+10;
+  handles at 0x0034A408, count 0x0034A400). `tools\sound-areas` (C#, OpenKh.Kh2 Coct, built to local\build\sound-areas) over all
+  278 maps: ONLY hb23 (6 faces) and hb25 (4) have such faces (local\analysis\sound\areas.txt). Runs: hb23 6 area sounds, hb25 4.
+- BUG FOUND BY THE FIRST RUN (test-own-sn3, chain 3): the view check added to sn_area left a0 = 0 for the camera-2 call, so 4 area
+  sounds got area 0's point (quieter in 20 cases). Fixed with "move a0,s0" before that call (merge_v7.py). (The unhooked area code
+  inside build 32's patch is the old one; never called there.)
+- TESTS (`tools\own\r15_chain3.sh` controls r15ac23 / r15ac25 on build 32; `r15_chain4.sh` candidates r15bn23 / r15bn25 on
+  test-own-sn4; `tools\own\snd_area_cmp.py`): hb23 louder 20, same 100, quieter 0; hb25 louder 38, same 42, quieter 0; all 134
+  digests in sync, TLB misses 0. Point sounds as build 32 (hb25's falloff K is ~300, not 500: snd_check.py <probe> 300 -> 28 camera
+  2, 0 quieter).
+- PACKAGE (ALL HAVE RUN): merged-v25 / merged-v25-own (build 32 options + --sound2area; = test-sn4 / test-own-sn4);
+  edit_package_v33.py, make_package_patch.py, make_test_package.py --rebuild, update_desktop_folder.py (Desktop\PS2-ONLINE-KH2 =
+  build 33, id b48437672a14), make_second_pc_rar.py. BUILDER OPTIONS OF BUILD 33 = build 32's + --sound2area.
+
+### 150. BUILD 34: make_own STEP 10 --partnerdrive: THE PARTNER'S DRIVE / FORM STRIP BESIDE HIS SMALL GAUGE  (2026-11-18)  [VERIFIED where named]
+- ITEM 8 (b) of his list (plan G8 proposal 2 "each player sees both form gauges").
+- FOUND (tools\own\gauge_probe.py, run r16g): both big gauges (player 1's [0x003485EC], player 2's [0x000F7F20], class 0x0034A920 /
+  lane V2's pg_class) hold their parts inline; every part is a HUD object of its own (class 0x0034A958 draw 0x001580E0 -> 0x00138988,
+  digit class 0x00347E60), group 3 (player 1) / 0x32 (player 2), flags +12 (0x40 hidden, 0x02 not drawn), absolute place +0x170/+0x174
+  = parent's (+0x18C) place + layout offset (rel +0x178/+0x17C added at draw). Tree: root +0x1A30; the DRIVE / FORM strip = +0x2D80
+  with children +0x2F1C, +0x30B8, +0x0394 (MP bar = +0x2710 with +0x28AC/+0x2A48/+0x2BE4). The HUD draw list is rebuilt every step
+  (empty between steps: hudlist_probe found nothing). Small gauges: lane V2's tg_place puts the row offset (row height x friends
+  present) into gauge +0x508 (twin's small gauge V_TG 0x000F7F00 in player 1's picture, player 1's O_TG2 0x000F7F1C in player 2's).
+- THE CODE (tools\own\make_own.py add_partner_drive, only with --partnerdrive; without it make_own writes merged-v25-own bit for bit,
+  VERIFIED): pd_filter at 0x000DD400 in front of own_filter (hook 0x0013935C re-aimed): in a view picture an object inside the
+  partner's gauge (range check, then parent / grandparent = gauge+0x2D80, each parent word range-checked) returns its own flags
+  only. pd_pos (hook 0x00138A0C, was sw t6,368(s0)): the partner's +0x2D80 gets x + PD_DX (16), y + PD_DY (-84) + the partner small
+  gauge's +0x508. Room 0x000DD400..0x000DD600.
+- TESTS (r16_chain3/4/5.sh; AL03 snd scripts; roam disc test-m-roam + make_kit2 --magic --forms=56 --limit --formkeys --drive=5,
+  drivelate_p1 / drive_p2): pd1 showed the strip but 50 TLB misses (pc 0x000DD460: a non-part object's "+0x18C" = 1.0f taken as a
+  pointer) -> range check (pd2: 0). pd3 (row offset): AL03 strip beside the partner's face at the top (2 friends), roam (no friends)
+  beside it lower down; player 2 in Valor: player 1 sees "FORM 3" countdown, player 2 sees "DRIVE MAX 5"; both in forms: each sees the
+  other's FORM bar. All runs: never out of sync, TLB misses 0. NOT TRIED: a town (the game's hidden flag should carry over).
+- PACKAGE (ALL HAVE RUN): merged-v26 (= merged-v25) / merged-v26-own (make_own --base merged-v26 --cannon2view --partnerdrive, patch
+  lines = test-own-pd3); edit_package_v34.py, make_package_patch.py, make_test_package.py --rebuild, update_desktop_folder.py
+  (Desktop\PS2-ONLINE-KH2 = build 34, id 355aa4e576dd), make_second_pc_rar.py. FROM NOW ON make_own NEEDS --partnerdrive.
+
+### 151. THE TWO UNTRIED BUILD 34 CHECKS, RUN  (2026-11-18)  [VERIFIED]
+- HIS WORDS: "okay test themn why u are waiting?" (the two "not tried yet" points of my report).
+- (1) EQUIP INSIDE THE PARTNER'S GEAR PAGE (glue 84's gates). Kit `patches\test-own-b34-lk` = merged-v26-own + snapB line +
+  make_once 4300 0032E074=8052 (Guard, equipped, in Sora's ability place 1). nm10. FIRST TRY (`tools\own\r17_chain1.sh`, lkA4/B4/N4):
+  no lane switched, the control neither: Circle on Guard opens a "Don't Equip / Equip" choice with the cursor on Equip. SECOND
+  (`r17_chain2.sh`, scripts pv_leak5_p1 / pv_leak5own_p1 / pv_leak5_p2: Circle Abilities, Sora, Guard, UP, Circle): CONTROL lkN5
+  (player 1 START alone, own menu): 52 80 -> 52 00 (Guard taken off). lkA5 (player 1 L2+START, V_VIEW 1) and lkB5 (player 2,
+  V_VIEW 2): "Don't Equip" chosen on screen, Guard stays 52 80, AP 2/2. All 125 digests, never out of sync, TLB misses 0.
+  So the ability gate (E2) is SHOWN BY A RUN now. Weapon / accessory equip (E1), item use (E3), refill (E4) and Customize are still shown only by the code (same gate kind).
+- (2) THE PARTNER'S DRIVE STRIP IN THE FIRST TOWN (`r17_chain3.sh`, run r17-town2: kh2-coop-v5 New Game with lane T's movie-skip
+  script `tests\scripts\own\town_new_p1.txt`, merged-v26-own, gauge_probe): both gauges' +0x2D80 / +0x2F1C / +0x30B8 flags 0x84C
+  (0x40 hidden) at 6340..7550; pictures 7300 of both PCs: partner's small gauge = face only, NO strip. 118 digests, never out of
+  sync, TLB misses 0. (r17-town, the first try with mash_new_p1, was still in the opening movie at 7550.)
+- READ-ME: build 34's "(built so, not tried in a town yet)" and part 147's "the gates are shown only by code" can be corrected in
+  the next build's read-me (not worth a package of its own).
+
+### 152. BUILD 35: THE EIGHTY-SIXTH GLUE --hullgauges: BOTH GUMMI SHIPS' HULL GAUGES  (2026-11-18)  [VERIFIED where named]
+- ITEM 11 (b) of his list. Design base: local\analysis\agent-rides\rides-design.txt "(b)"; my reading of the flight module in
+  local\analysis\gummi-gauge\gauge-dis.txt (ovl_dis.py 0x01F69098..0x01F69F00). CORRECTIONS to the agent's design: 0x01F47C30
+  DOES allocate (8-byte link block from the module's heap at 0x01F47C5C, kept at picture +376) and the picture's destroy-only
+  method 0x01F47540 itself deletes [pic+376] through the module's heap (so G2's link blocks come from pool B and +376 is cleared
+  before the destroy). G2 cannot sit at 0x000DD800 (V_VIEW).
+- READ: HUD manager (0x01F66CF0 step-all, 0x01F66B40/BA8 free-all, 0x01F66BE8/C30 start-all, 0x01F66D58/DA0 end-all) treats the
+  gauge (+140) exactly as the score row glue 66 already doubles. The gauge's place: every part except +4/+8/+12/+168 is placed
+  each show from 0x01F47690(+8 picture) (its animation's place, not +356); a new picture has +356/+360 = 0 and joins the list
+  0x01F91FA0 (no cap). Every ship routine on the show path (0x01F23158, 0x01F22E58, 0x01F21108, 0x01F21710, 0x01F20E80,
+  0x01F38xxx, 0x01F21148, 0x01F20E48/E60, 0x01F23BF8/BE8, 0x01F23400/408) stores nothing outside the stack; 0x0014CE78 = frame time
+  read; getter 0x01F21CF8 = lw [0x01F7DE44].
+- THE GLUE (`tools\merge\edit_merge_v7_hullgauges.py`, run once; builder copy before it `local\merge_v7-before-hullgauges.py`;
+  without the option the builder writes merged-v26 bit for bit, VERIFIED): code 0x000D5000.. (332 words, room to 0x000D5800), G2
+  0x000D4B00 (232 bytes), V_WORK / V_POOLN / V_DIG2 0x000D4C00/04/08, pool B 0x000D0000..0x000D4B00 (48 x 400). gb_inst first at
+  0x00167E90 writes into a fresh flight module: j gb_start / gb_end / gb_free at 0x01F693B0 / 0x01F693C0 / 0x01F69210, jal gb_step
+  at 0x01F66D10, jal gb_raw at 0x01F69440 / 0x01F6948C / 0x01F47C5C, jal gb_place at 0x01F699F8; clears G2. gq_inst's call at
+  0x01F47164 goes to gb_new (= GB_AT; pool while V_WORK, else j gq_new). gb_step: game's step, then G2's step only with ship 2 and
+  [0x01F7DE44] == ship 1, with [0x01F7DE44] = ship 2 and V_WORK = 1 meanwhile; gb_after: +4/+8/+12/+168 get +356/+360 = (GB_DX
+  -384, GB_DY 0), the digit "2" (pool picture, sheet 8/72, frame 56) at (124, 396). gs_low's two writes become nops; glue 66's
+  gauge digit is always "1".
+- TESTS (`tools\own\r18_chain1.sh`, probe `tools\own\hg_probe.py`, kits <own>-wm / -gum8 / -gum0 by make_jumpkit + make_gumlaunch):
+  pool B / 0x000C0000.. all zero before the flight (free memory). r18-hgH0 (route 0, P1 fight, P2 idle, 16000): G2 built, pool 16
+  (13 pictures + 2 link blocks + digit), G2 places = G1's - 384 (no double shift), pictures: gauge 1 hull 22 red / gauge 2 177 green
+  at 13000; Game Over at 14000: both freed (pool 0), the retry rebuilds both (pool 16); 250 digests in sync, TLB 0. ROUTE 8:
+  r18-hgR8 (candidate) vs r18-ctR8 (merged-v26-own control, same probe): 18 of 19 snapshots equal in score and both hulls (f28000
+  71,549 vs 71,419, hulls equal, equal again after: READ TIMING, VERIFIED by the pictures taken at that frame: both p1_f028000 show score 37,167 and every ship, enemy and shot in the same place), both END WITH 90,939; 625 / 624 digests in sync, TLB 0. p2's
+  picture shows both gauges too. Gauge 2's corner (bottom left) SEEN on routes 0 and 8 only; older v138 pictures of route 6 show it empty; NOT CHECKED: whether gauge 2 hides with gauge 1 under a "Gummi Battle Tips" page (route 3 shows one).
+- PACKAGE (ALL HAVE RUN): patches\merged-v27 (= test-hg1) / merged-v27-own (patch lines = test-own-hg1); edit_package_v35.py (also
+  the read-me's two "not tried yet" lines of builds 34 / 31, part 151), make_package_patch.py, make_test_package.py --rebuild,
+  update_desktop_folder.py (Desktop\PS2-ONLINE-KH2 = build 35, id 90a012af165f), make_second_pc_rar.py (rar = build 35).
+  BUILDER OPTIONS OF BUILD 35 = build 34's + --hullgauges; make_own as build 34 (--cannon2view --partnerdrive).
+- NOTE to part 151: in lkN5 the ability word read 52 80 again at 7300 (mid-menu; cause not shown - HYPOTHESIS: the menu's own record swap) before settling at
+  52 00; the partner-view lanes never left 52 80.
 
 ## Open items
 

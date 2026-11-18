@@ -1,0 +1,2 @@
+# idle player 2 for the first-town run
+9000 1

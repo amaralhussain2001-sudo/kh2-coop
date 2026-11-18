@@ -159,7 +159,16 @@ def run(a):
         if a.ee_rate:
             # emulated CPU speed step: 1 = 130 %, 2 = 180 %, 3 = 300 % (0 = real PS2). Must be equal on all copies.
             extra = f"\n[EmuCore/Speedhacks]\nEECycleRate = {a.ee_rate}\n"
+        up = os.environ.get("PIC_UP1" if k == 1 else "PIC_UP2")   # TEST ONLY (part 142): picture quality per copy
+        if up:
+            extra += f"\n[EmuCore/GS]\nupscale_multiplier = {int(up)}\nExtendedUpscalingMultipliers = true\n"
         pini.write_text(text.rstrip() + f"\n\n[Framerate]\nNominalScalar = {a.speed}\n" + extra)
+        if os.environ.get("PIC_EXE"):                                     # TEST ONLY (part 142): another emulator build
+            shutil.copy2(os.environ["PIC_EXE"], d / "pcsx2-qtx64.exe")
+        for f in pdir.glob("*.view"):
+            f.unlink()
+        if os.environ.get("PIC_VIEW"):                                    # TEST ONLY (part 142): the game's .view file
+            shutil.copy2(os.environ["PIC_VIEW"], pdir / pathlib.Path(os.environ["PIC_VIEW"]).name)
         lines = [
             f"Role = {'host' if k == 1 else 'client'}",
             "Host = 127.0.0.1",

@@ -1,0 +1,10 @@
+# whirlwind disc (mu8w), part 145: New Game; player 1 walks away (stick up 4700..5000), presses X at 5400
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+4700 300 LY=0
+5400 4 X
+999999 1

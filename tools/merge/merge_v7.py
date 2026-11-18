@@ -566,7 +566,79 @@ special weapon's fire (0x01F49B38, 0x01F4A6E8) writes the firing ship as a tag 0
 (0x01F27A40) hits take the tag for the credit. gq_hit's first word jumps to gt_hit: the cannon shots' call keeps glue 66's table
 (as build 23), every other call takes the tag (none: player 1's, as before). Room 0x000EF000 .. 0x000EF400 (glue 77's).
 
-  python -I tools/merge/merge_v7.py [outDir] [--no-eitherspawn] [--no-revenge] [--no-getup] [--no-keychange] [--no-twoforms] [--no-formfiles] [--no-nearcb] [--no-mickey | --mickey1] [--no-reactheld] [--no-thinkheld] [--no-helperform] [--no-formbase] [--no-helperback] [--no-heroscript] [--no-captureform] [--no-scriptplayer] [--playernear] [--no-sender] [--ownrec [--ownmenu]] [--together [--together-far]] [--ship2hit [--ship2first]] [--carpet2] [--norec] [--escape2] [--sidecar2] [--twinmake] [--hudowner] [--ownabil] [--onevictim] [--holdwatch] [--itemsync] [--ownitems] [--ownkey] [--bindname] [--holdpair] [--gummitag]
+SEVENTY-NINTH GLUE (built only with the option --menuowner, needs --ownmenu and --ownwallet): THE PLAYER WHO OPENS A SCREEN
+ALONE CONTROLS IT. The second glue's pad_both (0x000F4740) gave every screen that asks it (text boxes, the main menu and its 49
+pages' routine, the rules screens, the world map, the shop's quantity box, the script's button tests) both controllers OR-ed,
+so while one player was in a shop or a talk the other's buttons moved his cursor, bought or closed it. Now pad_both's first
+word jumps to po_pad: when a player OWNS the screen (V_OWNER 0x000DE800: 1 = player 1, 2 = player 2), the record is that
+player's logical controller alone; nobody (0) = both, as before. The field's START look-out (the call at 0x00138538), the
+command menu's first button (0x0013C798) and the script's two button tests (0x0016DBA8 / 0x0016DBF0: boss button-mashing)
+always hear both (the START look-out only the owner while his box is open: fourth form, edit_merge_v7_menuowner5.py). While the owner's box is open (a message window asked less than 4 steps ago) the OTHER player's START or
+green command does not take the screen over (third form, edit_merge_v7_menuowner4.py). The owner is set by po_open (START opens the main menu: player 2
+when only his START was pressed, the forty-ninth glue's rule; else player 1) and by po_cmd (the entry of 0x00178AE8: a hero
+runs a green command, so a talk, a shop, the Moogle, a save point: the player of that hero), each with the game's counter
+(V_OWNSTEP 0x000DE804). po_tick (the field's START look-out, each field step) sets nobody again once the owner is 90 steps old
+AND no message window asked for its controller for 30 steps (V_MSGSTEP 0x000DE808, noted by po_pad): in a talk the field goes
+on, so the talk keeps its owner as long as its boxes come (second form, edit_merge_v7_menuowner2.py, after run r11mo1e). Only with a twin; one hero: nobody, as before. No fall-back time
+(the user: both always play together). Room 0x000DE000 .. 0x000DE200 for the routines and 0x000DE800 .. 0x000DE807 for the
+values: 0x000D0000 .. 0x000DEFFF holds no patch word and stayed zero in every run measured (z0, part 137's Gummi runs).
+
+EIGHTIETH GLUE (built only with the option --difficulty): A CO-OP DIFFICULTY FOR ORDINARY ENEMIES. The game fills an enemy's unit
+slot from its entry of the enemy table (0x001A0EE0, lane B75): 32 HP values = (level percentage x value + 99) / 100, current =
+maximum; then the damage limits from the maximum. The word after that loop (0x001A0F54) jumps to dh_hp: WITH A TWIN, when the
+difficulty value V_DIFF (0x000DE810; 0 normal, 1 hard, 2 very hard; one patch line the LAUNCHER sets from the host's choice) is not 0
+and the entry is NOT one of lane B75's 91 boss entries (a 256-byte table in the glue; bosses keep the disc's +75 %), the 32 values
+become x 1.5 (rounded up) or x 2 before the damage limits are taken from them. One hero, or V_DIFF 0: nothing changes. The HP gauge
+above 3400 is lane B75's gauge patch (in the build). Room 0x000DE200 .. 0x000DE400 (0x000D0000 .. 0x000DEFFF: no patch word).
+
+EIGHTY-FIRST GLUE (built only with the option --sumscene2): PLAYER 2'S SUMMON PLAYS ITS ENTRANCE SCENE. The base patch's sm_skip
+(0x001C8444) is replaced by the game's own call again (0x001C8788: the Config's "Summon Effects"), and su_player (in front of glue
+45's tp_player at 0x00171074) answers "the player" with the twin for a SUMMON FRIEND's script (class 0x00351E18) while a summon the
+twin called is out (V_SUMTW 0x000F47F4, state 0x01D49968 not 0). So the friend's entrance captures, attaches to and films the hero
+who called him. Room 0x000DE400 .. 0x000DE480.
+
+EIGHTY-SECOND GLUE (built only with the option --windrider): EACH WHIRLWIND RIDER'S OWN BUTTON. rw_pad (the script button tests
+0x0016DBA8 'held' and 0x0016DBF0 'pressed', were jal pad_both): when the running script piece (0x0034D8A4) has a whirlwind object
+(0x0151 F_MU070, 0x0457 F_MU070_BOSS) and is one hero's hooked context (hero + 0xAEC: the piece of "Ride the Wind"), only that hero's
+controller record answers; when the sixty-fifth glue's pair holds the other hero in the same whirlwind (0x000E7EA0/A4/A8 and his
++0x160 bit 0x4000), both controllers (one script drives both). Everything else goes on to pad_both. Room 0x000DE480 .. 0x000DE580.
+
+EIGHTY-THIRD GLUE (built only with the option --lcrevive): A DESTROYED LIGHT CYCLE COMES BACK. The Light Cycle's class table
+(0x003521E0, Light Cycle only): +0x5C (HP 0; the game's 0x001CF4F8 ends the ride) -> lc_die: while the other rider's cycle is up,
+only the crash part (0x00179E18, motion 30) and a down timer (LC_DOWN steps); both destroyed, or no twin: the game's own end.
++0x0C (the cycle's step, 0x00178758) -> lc_tick: notes the non-twin rider (V_LC1 0x000DE820), counts the timers (V_LCT1 0x000DE824,
+V_LCT2 0x000DE828 the twin's) and at 0 lifts the rider like the game's revive 0x00179F80 (HP + max) back into riding (state 23,
+motion 44 then 0), unless the other rider is down too (the end has begun). Room 0x000DE580 .. 0x000DE780.
+
+EIGHTY-FOURTH GLUE (built only with the option --partnerview, with --ownmenu and --menuowner): HOLD L2 AND PRESS START = THE PAUSE
+MENU ON THE PARTNER'S GEAR, READ-ONLY. pv_open (in place of po_open's j mo_open): the START presser holds L2 (raw word bit 0x100) ->
+V_VIEW (0x000DD800) = viewer; viewer 1 gets the swap of player 2's own menu (V_MENU2 = 1, ow_swap, ow_load), viewer 2 none; a NET of
+76 bytes (Sora's record +0x00, +0x14..+0x53, the shortcuts) at 0x000DD840. pv_tick (head of the START look-out 0x00138538, before
+po_tick): the NET back, V_VIEW = 0, ow_load for viewer 2. While V_VIEW is set the menu's edit points do nothing (equip commit, ability
+switches, item use and its yes/no "Yes", refill switch, Customize settings). or_load / or_new clear V_VIEW. Room 0x000DD000 ..
+0x000DD400 (code), 0x000DD800 .. 0x000DD88C (values).
+
+EIGHTY-FIFTH GLUE (built only with the option --sound2): EVERY 3D SOUND IS HEARD FROM THE NEARER CAMERA. The game's 3D sound
+routine 0x002BB5F8 took camera 1 (view 0) for every sound. sn_view (0x002BB630): with two views (V_ON) and a twin, the camera whose
+eye (view block +0x50) is nearer to the sound gives its view block (view 1 = 0x003A8000), so volume and pan come from it. sn_area
+(0x002BB968): an area sound's point is taken for both cameras (sn_get 0x0014EE64 answers view 1 while V_SNFORCE 0x000DE830 is 1)
+and the one nearer to its camera is kept. Room 0x000DE900 .. 0x000DEB80. The area part's two hooks (0x002BB968, 0x0014EE64) are
+written only with --sound2area as well (no run has met an area sound yet); --sound2 alone hooks only sn_view.
+
+EIGHTY-SIXTH GLUE (built only with the option --hullgauges, with --ship2hit and --ship2score): BOTH GUMMI SHIPS' HULL GAUGES. The
+flight's HUD has one hull gauge (232 bytes at the HUD manager + 140, steps 0x01F69DD8: 1 make, 2 show, 3 fade); the fifty-first
+glue's gs_low made it show the weaker ship. Now a second gauge object G2 (0x000D4B00) of the same class is built (ctor 0x01F69098),
+started, ended and freed with the game's (gb_start / gb_end / gb_free in place of 0x01F693B0 / 0x01F693C0 / 0x01F69210) and stepped
+after it (gb_step at the call 0x01F66D10) while the game's "player ship" 0x01F7DE44 holds ship 2 (only while ship 1 is the game's).
+All of G2's memory (its pictures, the two direct ones 0x01F69440 / 0x01F6948C, the 8-byte link blocks of 0x01F47C30 at 0x01F47C5C,
+its digit "2") comes from pool B (48 places of 400 bytes, 0x000D0000 .. 0x000D4B00; gb_new in front of gq_new at 0x01F47164, gb_raw
+in front of the module's new), never from the module's heap (the route parity of part 106); its pictures are ended with the
+destroy-only method after their link block word +376 is cleared. G2 stands GB_DX / GB_DY away (gb_place at the show's place call
+0x01F699F8; the four pictures the show does not place get that offset). gs_low's two calls are not written (gauge 1 = ship 1) and
+the sixty-sixth glue's digit beside gauge 1 is always "1". The installer gb_inst (from 0x00167E90, first) writes the module words
+into a fresh flight module and clears G2. Code 0x000D5000 .. 0x000D5800, values 0x000D4C00 (V_WORK, V_POOLN, V_DIG2).
+
+  python -I tools/merge/merge_v7.py [outDir] [--no-eitherspawn] [--no-revenge] [--no-getup] [--no-keychange] [--no-twoforms] [--no-formfiles] [--no-nearcb] [--no-mickey | --mickey1] [--no-reactheld] [--no-thinkheld] [--no-helperform] [--no-formbase] [--no-helperback] [--no-heroscript] [--no-captureform] [--no-scriptplayer] [--playernear] [--no-sender] [--ownrec [--ownmenu]] [--together [--together-far]] [--ship2hit [--ship2first]] [--carpet2] [--norec] [--escape2] [--sidecar2] [--twinmake] [--hudowner] [--ownabil] [--onevictim] [--holdwatch] [--itemsync] [--ownitems] [--ownkey] [--bindname] [--holdpair] [--gummitag] [--hullgauges]
 Writes <outDir>/SLPM-66675_F266B00B.pnach and <outDir>/listing.txt. Default outDir: patches/merged-v7.
 """
 import hashlib
@@ -6283,9 +6355,16 @@ def gq_source(labels):
         checks += ("    lui t7,0x%04X\n    lw t5,%d(t7)                 # 0x%08X: still the game's call?\n    lui t4,0x%04X\n"
                    "    ori t4,t4,0x%04X\n    bne t5,t4,gqi_go\n    nop\n") % (hi, lo, site, word0 >> 16, word0 & 0xFFFF)
         j = ((3 << 26) | ((labels[name] >> 2) & 0x3FFFFFF)) if labels else 0
+        if name == "gq_new" and "--hullgauges" in sys.argv:               # (eighty-sixth glue: gb_new first, then gq_new)
+            j = (3 << 26) | ((GB_AT >> 2) & 0x3FFFFFF)
         writes += ("    lui t7,0x%04X\n    lui t4,0x%04X\n    ori t4,t4,0x%04X\n    sw t4,%d(t7)                 # 0x%08X: jal %s\n"
                    ) % (hi, j >> 16, j & 0xFFFF, lo, site, name)
-    src = GQ_SRC.replace("@OWN_LO@", "0x%04X" % (GQ_OWN_AT & 0xFFFF)).replace("@OWN_HI@", "0x%04X" % (GQ_OWN_END & 0xFFFF)).replace("@OWN_LAST@", "0x%04X" % (GQ_OWN_LAST & 0xFFFF))
+    src = GQ_SRC
+    if "--hullgauges" in sys.argv:                                         # (eighty-sixth glue: gauge 1's digit is always 1)
+        x = "    addiu t3,zero,56              # the digit 2\n"
+        assert src.count(x) == 1
+        src = src.replace(x, "    addiu t3,zero,54              # (--hullgauges: gauge 1 is ship 1's)\n")
+    src = src.replace("@OWN_LO@", "0x%04X" % (GQ_OWN_AT & 0xFFFF)).replace("@OWN_HI@", "0x%04X" % (GQ_OWN_END & 0xFFFF)).replace("@OWN_LAST@", "0x%04X" % (GQ_OWN_LAST & 0xFFFF))
     src = src.replace("@ROW_DX@", str(GQ_ROW_DX)).replace("@ROW_DY@", str(GQ_ROW_DY)).replace("@MARK_X@", str(GQ_MARK_X)).replace("@MARK_Y@", str(GQ_MARK_Y))
     return src.replace("@CHECKS@", checks.rstrip("\n")).replace("@WRITES@", writes.rstrip("\n"))
 
@@ -7118,6 +7197,1167 @@ def hp_stubs():
     return stubs
 
 
+# ---- seventy-ninth glue (only with --menuowner) ---------------------------------------------------------------
+MO_AT = 0x000DE000                                 # outside the cave: 0x000D0000 .. 0x000DEFFF holds no patch word and
+MO_END = 0x000DE200                                # stayed zero in every run measured (z0; part 137's Gummi runs)
+V_OWNER = 0x000DE800                               # who owns the screen: 0 nobody (both controllers), 1 player 1, 2 player 2
+V_OWNSTEP = 0x000DE804                             # the game's counter (0x0034D4BC) when the owner was set
+V_MSGSTEP = 0x000DE808                             # the game's counter when a message window last asked for its controller
+MO_HOLD = 90                                       # steps the owner outlives the field's START look-out (the screen comes)
+MO_MSGHOLD = 30                                    # and steps after the last message window's question (a talk goes on)
+MO_SRC = """
+po_pad:                           # the second glue's pad_both (0x000F4740) jumps here first. Out: v0 = the record. t2-t7
+    lui t7,0x001A
+    ori t7,t7,0xCBDC              # a message window asks (the call at 0x001ACBD4): note the counter (a talk goes on)
+    bne ra,t7,pp_who
+    lui t7,0x0035
+    lw t6,-11076(t7)              # the game's counter (0x0034D4BC)
+    lui t7,0x000E
+    sw t6,-6136(t7)               # V_MSGSTEP
+pp_who:
+    lui t7,0x0013
+    ori t7,t7,0x8540              # the field's START look-out (the call at 0x00138538) hears both controllers,
+    bne ra,t7,pp_cmdmenu
+    lui t7,0x000E
+    lw t6,-6144(t7)               # unless a player's box is open right now: then only he can pause his talk
+    beq t6,zero,po_both
+    lui t5,0x0035
+    lw t5,-11076(t5)              # the game's counter
+    lw t4,-6136(t7)               # V_MSGSTEP
+    subu t4,t5,t4
+    sltiu t4,t4,4
+    beq t4,zero,po_both
+    nop
+    beq zero,zero,po_own          # (t6 = the owner)
+    nop
+pp_cmdmenu:
+    lui t7,0x0013
+    ori t7,t7,0xC7A0              # and so does the command menu's first button (the call at 0x0013C798)
+    beq ra,t7,po_both
+    lui t7,0x0016
+pp_mash:                          # and the script's two button tests (boss button-mashing; calls 0x0016DBA8 / 0x0016DBF0)
+    ori t7,t7,0xDBB0
+    beq ra,t7,po_both
+    lui t7,0x0016
+    ori t7,t7,0xDBF8
+    beq ra,t7,po_both
+    lui t7,0x000E
+    lw t6,-6144(t7)               # V_OWNER (0x000DE800)
+    beq t6,zero,po_both           # nobody owns the screen: both controllers, as before
+    nop
+po_own:                           # t6 = the owner (1 or 2)
+    addiu t6,t6,-1                # 0 = player 1, 1 = player 2
+    sll t4,t6,6
+    sll t3,t6,5
+    addu t4,t4,t3                 # times 0x60 (one logical controller record)
+    lui t5,0x0035
+    addiu t5,t5,-10560            # 0x0034D6C0: logical controller 0
+    addu t5,t5,t4                 # the owner's record
+    lui v0,0x000F
+    addiu v0,v0,0x4800            # pad_both's record (0x000F4800)
+    move t2,v0
+    addiu t3,t5,0x60
+po_copy:                          # the owner's whole record, nothing of the other controller
+    ld t4,0(t5)
+    sd t4,0(t2)
+    addiu t5,t5,8
+    bne t5,t3,po_copy
+    addiu t2,t2,8
+    jr ra
+    nop
+po_both:
+    lui t7,0x0035                 # the two instructions that sat at 0x000F4740
+    j 0x000F4748
+    addiu t6,t7,-10560
+
+po_open:                          # from 0x00138574 (was jal OPEN_NEXT = mo_open): START opens the main menu. a0, a1 kept
+    lui t7,0x000F
+    lw t6,0x05CC(t7)              # the twin
+    beq t6,zero,poo_go            # one hero: nobody owns menus
+    move t3,zero
+    lui t5,0x0035
+    addiu t5,t5,-10560            # 0x0034D6C0: logical controller 0; controller 1 is 0x60 further
+    ld t4,8(t5)                   # pressed, player 1's
+    andi t4,t4,0x2
+    bne t4,zero,poo_set           # player 1 pressed START (or both did): his menu (the forty-ninth glue's rule)
+    addiu t3,zero,1
+    ld t4,0x68(t5)                # pressed, player 2's
+    andi t4,t4,0x2
+    beq t4,zero,poo_set           # nobody pressed START (opened another way): nobody's
+    move t3,zero
+    addiu t3,zero,2               # only player 2 pressed START: his menu
+poo_set:
+    lui t7,0x000E
+    lui t5,0x0035
+    lw t5,-11076(t5)              # the game's counter (0x0034D4BC)
+    lw t6,-6144(t7)               # the owner now
+    beq t6,zero,poo_take
+    nop
+    beq t6,t3,poo_take
+    lw t4,-6136(t7)               # V_MSGSTEP
+    subu t4,t5,t4
+    sltiu t4,t4,4                 # the other player's box is open right now (an open box asks every second step):
+    bne t4,zero,poo_go            # he keeps it
+    nop
+poo_take:
+    sw t5,-6140(t7)               # V_OWNSTEP
+    sw t3,-6144(t7)               # V_OWNER
+poo_go:
+    j OPEN_NEXT
+    nop
+
+po_cmd:                           # the entry of 0x00178AE8 (was j CMD_NEXT = ww_cmd; a0 = a hero): he runs a green command
+    lui t7,0x000F
+    lw t6,0x05CC(t7)              # the twin
+    beq t6,zero,poc_go            # one hero: nobody owns
+    addiu t4,zero,1               # player 1's hero: player 1 owns what it opens (a talk, a shop, the Moogle, a save point)
+    bne a0,t6,poc_set             # (t4 .. t7 only: t0 .. t3 may carry arguments at a routine's entry)
+    nop
+    addiu t4,zero,2               # the twin: player 2
+poc_set:
+    lui t7,0x000E
+    lui t5,0x0035
+    lw t5,-11076(t5)              # the game's counter
+    lw t6,-6144(t7)               # the owner now
+    beq t6,zero,poc_take
+    nop
+    beq t6,t4,poc_take
+    lw t8,-6136(t7)               # V_MSGSTEP
+    subu t8,t5,t8
+    sltiu t8,t8,4                 # the other player's box is open right now: he keeps it
+    bne t8,zero,poc_go
+    nop
+poc_take:
+    sw t5,-6140(t7)               # V_OWNSTEP
+    sw t4,-6144(t7)               # V_OWNER
+poc_go:
+    j CMD_NEXT
+    nop
+
+po_tick:                          # from 0x00138538 (was jal TICK_NEXT): each step the field looks for START
+    lui t7,0x000E
+    lw t6,-6144(t7)               # V_OWNER
+    beq t6,zero,pt_go
+    lui t5,0x0035
+    lw t5,-11076(t5)              # the game's counter
+    lw t4,-6140(t7)               # V_OWNSTEP
+    subu t4,t5,t4
+    sltiu t4,t4,MO_HOLD           # set less than MO_HOLD steps ago: what it opens is still coming
+    bne t4,zero,pt_go
+    lw t4,-6136(t7)               # V_MSGSTEP
+    subu t4,t5,t4
+    sltiu t4,t4,MO_MSGHOLD        # a message window asked less than MO_MSGHOLD steps ago: the talk goes on
+    bne t4,zero,pt_go
+    nop
+    sw zero,-6144(t7)             # the field runs again and no box is open: nobody owns the screen
+pt_go:
+    j TICK_NEXT
+    nop
+"""
+
+# ---- eightieth glue (only with --difficulty) ------------------------------------------------------------------
+DH_AT = 0x000DE200
+DH_END = 0x000DE400
+V_DIFF = 0x000DE810                                # 0 normal, 1 hard (x 1.5), 2 very hard (x 2): set by the launcher's patch line
+DH_HOOK = (0x001A0F54, 0x944F0002)                 # lhu t7,2(v0), the first word after the HP loop of 0x001A0EE0
+DH_BOSS_WORDS = [0, 0, 0, 16777216, 16843009, 16842753, 65793, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16777216, 16843009, 16842752, 0, 16842752, 16843009, 16842752, 16777216, 65537, 65536, 0, 16843008, 16777216, 16842753, 16777217, 16842753, 65792, 16842752, 16843009, 0, 1, 65792, 0, 1, 0, 0, 1, 16843008, 16843009, 16843009, 16843009, 16777217, 16843009, 1, 0, 0, 16843008, 257, 0, 0, 0, 0, 16777216, 16842753, 65793, 0, 257]
+DH_SRC = """
+dh_hp:                            # from 0x001A0F54 (j; its delay slot set t3 = 10000): s0 = the fresh unit slot, s1 = its entry
+    lui t9,0x000F
+    lw t8,0x05CC(t9)              # the twin: only with two heroes
+    beq t8,zero,dh_out
+    lui t9,0x000E
+    lw t8,-6128(t9)               # V_DIFF (0x000DE810)
+    beq t8,zero,dh_out
+    lhu t0,0(s1)                  # the entry's id
+    sltiu t1,t0,256
+    beq t1,zero,dh_out
+    lui t2,%hi(DH_BOSS)
+    addiu t2,t2,%lo(DH_BOSS)
+    addu t2,t2,t0
+    lbu t2,0(t2)
+    bne t2,zero,dh_out            # a boss entry: it has the disc's own +75 %, nothing more
+    move t0,s0
+    addiu t4,s0,384               # 32 values of 12 bytes: current, maximum, 0
+dh_loop:
+    lw t5,4(t0)                   # the maximum
+    addiu t6,zero,2
+    beq t8,t6,dh_set              # very hard: x 2
+    sll t6,t5,1
+    addiu t6,t5,1                 # hard: x 1.5, rounded up
+    srl t6,t6,1
+    addu t6,t5,t6
+dh_set:
+    sw t6,4(t0)                   # maximum
+    sw t6,0(t0)                   # current (a fresh slot is full)
+    addiu t0,t0,12
+    bne t0,t4,dh_loop
+    nop
+dh_out:
+    lhu t7,2(v0)                  # the instruction that sat at 0x001A0F54
+    j 0x001A0F5C
+    nop
+DH_BOSS:
+""" + "".join("    .word 0x%08X\n" % w for w in DH_BOSS_WORDS)
+
+# ---- eighty-first glue (only with --sumscene2) -------------------------------------------------------------------
+SU_AT = 0x000DE400
+SU_END = 0x000DE480
+SU_SRC = """
+su_player:                        # from 0x00171074 (was jal TP_NEXT = glue 45's tp_player): a script asks for "the player"
+    lui t7,0x000F
+    lw t6,0x05CC(t7)              # the twin
+    beq t6,zero,su_go
+    lw t5,0x47F4(t7)              # V_SUMTW: the summon now out was called by the twin
+    beq t5,zero,su_go
+    lui t5,0x01D5
+    lw t5,-26264(t5)              # 0x01D49968: the summon's state (0 = none out)
+    beq t5,zero,su_go
+    lui t5,0x0035
+    lw t5,-10076(t5)              # the running script (0x0034D8A4)
+    beq t5,zero,su_go
+    nop
+    lw t5,56(t5)                  # its object
+    srl t4,t5,22
+    addiu t4,t4,-6
+    bne t4,zero,su_go             # not an object (the same test as tp_player's)
+    nop
+    lw t5,0(t5)                   # its class
+    lui t4,0x0035
+    ori t4,t4,0x1E18              # the summon friends' class (0x00351E18)
+    bne t5,t4,su_go
+    nop
+    jr ra
+    move v0,t6                    # a summon friend the twin called asks: the twin
+su_go:
+    j TP_NEXT
+    nop
+"""
+
+# ---- eighty-second glue (only with --windrider) ------------------------------------------------------------------
+RW_AT = 0x000DE480
+RW_END = 0x000DE580
+RW_HOOKS = (0x0016DBA8, 0x0016DBF0)               # the script tests 'held' / 'pressed' (jal pad_both since the sixteenth glue)
+RW_SRC = """
+rw_pad:                           # a script's button test (a0 = 0 in the delay slot); returns v0 = a controller record
+    lui t7,0x000F
+    lw t6,0x05CC(t7)              # the twin
+    beq t6,zero,rw_both
+    lui t5,0x0035
+    lw t5,-10076(t5)              # the running script piece (0x0034D8A4)
+    beq t5,zero,rw_both
+    nop
+    lw t4,56(t5)                  # its object
+    srl t3,t4,22
+    addiu t3,t3,-6
+    bne t3,zero,rw_both           # not an object
+    nop
+    lw t3,8(t4)
+    lw t3,0(t3)                   # the object's number
+    addiu t2,zero,0x0151          # F_MU070, the whirlwind of the Land of Dragons square
+    beq t3,t2,rw_wind
+    addiu t2,zero,0x0457          # F_MU070_BOSS, the whirlwinds of the Storm Rider fight
+    bne t3,t2,rw_both
+    nop
+rw_wind:
+    lw t2,0xAEC(t6)               # the twin's hooked piece
+    beq t2,t5,rw_twin
+    lui t3,0x0035
+    lw t3,0x2400(t3)              # player 1's hero (0x00352400)
+    beq t3,zero,rw_both
+    nop
+    lw t2,0xAEC(t3)
+    bne t2,t5,rw_both             # the piece of neither hero: as before
+    move t1,t6                    # the other hero: the twin
+    lui v0,0x0035
+    b rw_pair
+    addiu v0,v0,-10560            # player 1's controller record (0x0034D6C0)
+rw_twin:
+    lui t1,0x0035
+    lw t1,0x2400(t1)              # the other hero: player 1's
+    lui v0,0x0035
+    addiu v0,v0,-10464            # player 2's controller record (0x0034D720)
+rw_pair:                          # a shared ride (the sixty-fifth glue's pair in this whirlwind, the other hero held)?
+    beq t1,zero,rw_own
+    lui t9,0x000E
+    lw t8,0x7EA8(t9)              # the pair's captor
+    bne t8,t4,rw_own
+    lw t8,0x7EA0(t9)
+    beq t8,t1,rw_held
+    lw t8,0x7EA4(t9)
+    bne t8,t1,rw_own
+    nop
+rw_held:
+    lw t8,0x160(t1)
+    andi t8,t8,0x4000
+    bne t8,zero,rw_both           # both heroes ride this whirlwind: either controller
+    nop
+rw_own:
+    jr ra
+    nop
+rw_both:
+    j 0x000F4740                  # pad_both (the second glue; po_pad sees ra 0x0016DBB0 / 0x0016DBF8)
+    nop
+"""
+
+# ---- eighty-third glue (only with --lcrevive) --------------------------------------------------------------------
+LC_AT = 0x000DE580
+LC_END = 0x000DE780
+LC_HOOKS = ((0x003521EC, 0x00178758, "lc_tick"), (0x0035223C, 0x001CF4F8, "lc_die"))   # Light Cycle class table +0x0C, +0x5C
+LC_DOWN = 150                                       # steps a destroyed cycle stays down (the cycle steps 30 times a second: 5 s)
+LC_SRC = """
+lc_die:                           # class +0x5C (was 0x001CF4F8), a0 = a cycle whose HP reached 0 (not fallen yet)
+    lui t7,0x000F
+    lw t6,0x05CC(t7)              # the twin (his cycle)
+    beq t6,zero,ld_game           # one hero: the game's end
+    lui t5,0x000E
+    beq a0,t6,ld_chk              # the twin's cycle: the other rider is V_LC1
+    lw t4,-6112(t5)               # V_LC1 (0x000DE820)
+    move t4,t6                    # player 1's cycle: the other rider is the twin
+ld_chk:
+    beq t4,zero,ld_game
+    nop
+    beq t4,a0,ld_game
+    lui t3,0x0035
+    ori t3,t3,0x21E0              # the Light Cycle's class
+    lw t2,0(t4)
+    bne t2,t3,ld_game             # the other rider is not on a cycle
+    nop
+    lw t2,0x7F8(t4)
+    andi t2,t2,4
+    bne t2,zero,ld_game           # the other rider is down too: the ride ends (the game's way)
+    nop
+    addiu sp,sp,-16               # one rider down: the crash, and his timer
+    sd s0,0(sp)
+    sd ra,8(sp)
+    jal 0x00179E18                # commands off, the fallen flag
+    move s0,a0
+    .word 0x44806000              # mtc1 zero,f12
+    .word 0x44806800              # mtc1 zero,f13
+    addiu a0,s0,320
+    jal 0x0017F488                # motion 30 (the crash), as 0x001CF4F8
+    addiu a1,zero,30
+    lui t7,0x000F
+    lw t6,0x05CC(t7)
+    lui t5,0x000E
+    addiu t4,zero,LC_DOWN
+    bne s0,t6,ld_p1
+    nop
+    b ld_done
+    sw t4,-6104(t5)               # V_LCT2 (0x000DE828): the twin's timer
+ld_p1:
+    sw t4,-6108(t5)               # V_LCT1 (0x000DE824)
+ld_done:
+    ld s0,0(sp)
+    ld ra,8(sp)
+    jr ra
+    addiu sp,sp,16
+ld_game:
+    j 0x001CF4F8
+    nop
+lc_tick:                          # class +0x0C (was 0x00178758), a0 = a cycle, every step
+    lui t7,0x000F
+    lw t6,0x05CC(t7)
+    beq t6,zero,lt_game           # one hero: as the game
+    lui t5,0x000E
+    beq a0,t6,lt_tw
+    addiu t3,t5,-6104             # &V_LCT2 (the twin's timer)
+    sw a0,-6112(t5)               # V_LC1 = this (non-twin) rider
+    addiu t3,t5,-6108             # &V_LCT1
+lt_tw:
+    lw t2,0(t3)                   # his down timer
+    beq t2,zero,lt_game
+    lw t1,0x7F8(a0)
+    andi t1,t1,4
+    beq t1,zero,lt_clear          # not fallen (rebuilt by a Continue): forget the timer
+    addiu t2,t2,-1
+    bne t2,zero,lt_game
+    sw t2,0(t3)
+    beq a0,t6,lt_o2               # the time is up. The other rider:
+    lw t4,-6112(t5)               #   the twin's cycle: V_LC1
+    move t4,t6                    #   player 1's cycle: the twin
+lt_o2:
+    beq t4,zero,lt_up
+    lui t1,0x0035
+    ori t1,t1,0x21E0
+    lw t0,0(t4)
+    bne t0,t1,lt_up               # not on a cycle: as up
+    nop
+    lw t1,0x7F8(t4)
+    andi t1,t1,4
+    beq t1,zero,lt_up
+    addiu t2,zero,1
+    b lt_game                     # the other rider is down too: the ride's end has begun, no comeback (the timer waits at 1)
+    sw t2,0(t3)
+lt_up:
+    addiu sp,sp,-16               # he gets up
+    sd s0,0(sp)
+    sd ra,8(sp)
+    move s0,a0
+    lw t7,0x7F8(s0)
+    addiu t6,zero,-5
+    and t7,t7,t6
+    jal 0x001852B8                # (as the game's 0x00179F10)
+    sw t7,0x7F8(s0)               # the fallen flag off
+    move a0,s0
+    jal 0x0016BD60                # the action state of a riding cycle (its init)
+    addiu a1,zero,23
+    lw t7,0xB44(s0)
+    beq t7,zero,lt_nocw           # (0x00179F10 writes the control word; never through a 0 pointer)
+    nop
+    sw s0,0x9E0(t7)
+lt_nocw:
+    jal 0x001D6AB0                # commands on
+    lw a0,0xB3C(s0)
+    lw t7,0x48C(s0)               # the unit slot
+    beq t7,zero,lt_mot
+    move a0,s0
+    lw t6,0(s0)
+    lw a1,4(t7)                   # its maximum HP
+    lw v0,0x78(t6)                # class +0x78: HP + a1 (as the game's revive 0x00179F80)
+    move a2,zero
+    jalr v0
+    move a3,zero
+lt_mot:
+    .word 0x44806000              # mtc1 zero,f12
+    .word 0x44806800              # mtc1 zero,f13
+    addiu a0,s0,320
+    jal 0x0017F488                # motion 44, as the cycle's init
+    addiu a1,zero,44
+    .word 0x44806000
+    .word 0x44806800
+    addiu a0,s0,320
+    move a1,zero
+    jal 0x0017F5E0                # then motion 0, queued
+    move a2,zero
+    move a0,s0
+    ld s0,0(sp)
+    ld ra,8(sp)
+    j 0x00178758
+    addiu sp,sp,16
+lt_clear:
+    sw zero,0(t3)
+lt_game:
+    j 0x00178758
+    nop
+"""
+
+# ---- eighty-fourth glue (only with --partnerview) ----------------------------------------------------------------
+PV_AT = 0x000DD000
+PV_END = 0x000DD400
+V_VIEW = 0x000DD800                                 # 0 = no partner view; 1 / 2 = the viewer (player 1 / player 2)
+PV_NET = 0x000DD840                                 # 19 words: Sora's record +0x00, +0x14..+0x53, the shortcuts 0x0032F228
+PV_GATES = (                                        # (address, game word, label): the menu's edit points, jal sites
+    (0x002690A4, 0x0C09AAC6, "pv_e1"),              # equip commit 0x0026AB18 (weapon, armour, accessory, item place; every member)
+    (0x0027874C, 0x0C09EFDA, "pv_e2a"),             # ability switch 0x0027BF68
+    (0x00278F8C, 0x0C09F070, "pv_e2b"),             # ability switch 0x0027C1C0
+    (0x002614DC, 0x0C098DDE, "pv_e3"),              # use an item 0x00263778
+    (0x002682F4, 0x0C09AC3E, "pv_e4"),              # item refill switch 0x0026B0F8
+    (0x0026932C, 0x0C09AC3E, "pv_e4"),
+)
+PV_SRC = """
+pv_open:                          # from po_open's end (was j MO_OPEN). a0 = 0, a1 = -1: the menu call's arguments
+    lui t7,0x000F
+    lw t6,0x05CC(t7)
+    beq t6,zero,pv_mo             # one hero: as before
+    lui t5,0x0035
+    addiu t5,t5,-10560            # controller 1's logical record (0x0034D6C0)
+    ld t4,8(t5)
+    andi t4,t4,2
+    bne t4,zero,pv_who            # player 1 pressed START (he wins a tie, as mo_open)
+    addiu t3,zero,1
+    ld t4,0x68(t5)
+    andi t4,t4,2
+    beq t4,zero,pv_mo
+    addiu t3,zero,2
+    addiu t5,t5,0x60              # controller 2's logical record
+pv_who:
+    lw t4,0x44(t5)                # its physical record
+    beq t4,zero,pv_mo
+    nop
+    ld t4,0(t4)                   # the raw held word
+    andi t4,t4,0x100              # L2
+    beq t4,zero,pv_mo
+    lui t2,0x000E
+    lw t1,0x7E24(t2)              # V_MENU2: player 2's things already in Sora's record?
+    bne t1,zero,pv_mo
+    lw t1,0x7E28(t2)              # V_HEROREC: Sora's record
+    beq t1,zero,pv_mo
+    lui t0,0x000E
+    sw t3,-10240(t0)              # V_VIEW (0x000DD800) = the viewer
+    addiu sp,sp,-32
+    sd ra,0(sp)
+    sd a0,8(sp)
+    sd a1,16(sp)
+    addiu t9,zero,1
+    bne t3,t9,pv_net              # viewer 2: nothing to swap (Sora's record holds player 1's things)
+    nop
+    jal OW_SWAP                   # viewer 1: player 2's things into Sora's record, as for player 2's own menu
+    sw t9,0x7E24(t2)              # V_MENU2 = 1 (ms_tick swaps back when the field goes on)
+    jal OW_LOAD
+    nop
+pv_net:
+    jal pv_save
+    nop
+    ld a0,8(sp)
+    ld a1,16(sp)
+    ld ra,0(sp)
+    j 0x00253180                  # the menu
+    addiu sp,sp,32
+pv_mo:
+    j MO_OPEN
+    nop
+pv_save:                          # the NET: [V_HEROREC] +0x00, +0x14..+0x53, the shortcuts -> 0x000DD840 (19 words)
+    lui t2,0x000E
+    lw t1,0x7E28(t2)
+    lui t0,0x000E
+    addiu t0,t0,-10176            # 0x000DD840
+    lw t3,0(t1)
+    sw t3,0(t0)
+    addiu t4,t1,0x14
+    addiu t5,zero,16
+ps_l:
+    lw t3,0(t4)
+    sw t3,4(t0)
+    addiu t4,t4,4
+    addiu t5,t5,-1
+    bne t5,zero,ps_l
+    addiu t0,t0,4
+    lui t4,0x0033
+    lw t3,-3544(t4)               # 0x0032F228
+    sw t3,4(t0)
+    lw t3,-3540(t4)
+    jr ra
+    sw t3,8(t0)
+pv_rest:                          # the NET back
+    lui t2,0x000E
+    lw t1,0x7E28(t2)
+    beq t1,zero,pr_out
+    lui t0,0x000E
+    addiu t0,t0,-10176
+    lw t3,0(t0)
+    sw t3,0(t1)
+    addiu t4,t1,0x14
+    addiu t5,zero,16
+pr_l:
+    lw t3,4(t0)
+    sw t3,0(t4)
+    addiu t4,t4,4
+    addiu t5,t5,-1
+    bne t5,zero,pr_l
+    addiu t0,t0,4
+    lui t4,0x0033
+    lw t3,4(t0)
+    sw t3,-3544(t4)
+    lw t3,8(t0)
+    sw t3,-3540(t4)
+pr_out:
+    jr ra
+    nop
+pv_tick:                          # from 0x00138538 (was jal PO_TICK): the field's START look-out, every field step
+    lui t0,0x000E
+    lw t1,-10240(t0)              # V_VIEW
+    beq t1,zero,pt_go
+    nop
+    addiu sp,sp,-16
+    sd ra,0(sp)
+    jal pv_rest                   # a partner view was open: the NET back
+    sw zero,-10240(t0)            # V_VIEW = 0
+    lui t2,0x000E
+    lw t1,0x7E24(t2)
+    bne t1,zero,pt_ret            # viewer 1: ms_tick swaps back (and loads)
+    nop
+    jal OW_LOAD                   # viewer 2: the stats from the record again
+    nop
+pt_ret:
+    ld ra,0(sp)
+    addiu sp,sp,16
+pt_go:
+    j PO_TICK
+    move a0,zero
+pv_e1:
+    lui t8,0x000E
+    lw t8,-10240(t8)
+    bne t8,zero,pv_no
+    nop
+    j 0x0026AB18
+    nop
+pv_e2a:
+    lui t8,0x000E
+    lw t8,-10240(t8)
+    bne t8,zero,pv_no
+    nop
+    j 0x0027BF68
+    nop
+pv_e2b:
+    lui t8,0x000E
+    lw t8,-10240(t8)
+    bne t8,zero,pv_no
+    nop
+    j 0x0027C1C0
+    nop
+pv_e3:
+    lui t8,0x000E
+    lw t8,-10240(t8)
+    bne t8,zero,pv_no
+    nop
+    j 0x00263778
+    nop
+pv_e4:
+    lui t8,0x000E
+    lw t8,-10240(t8)
+    bne t8,zero,pv_no
+    nop
+    j 0x0026B0F8
+    nop
+pv_c1:                            # entry of 0x00273818 (Customize: item setting)
+    lui t8,0x000E
+    lw t8,-10240(t8)
+    bne t8,zero,pv_no
+    nop
+    addiu sp,sp,-64               # its first two words
+    j 0x00273820
+    sd s1,8(sp)
+pv_c2:                            # entry of 0x00273C40 (Customize: a setting of the record + 0xF4)
+    lui t8,0x000E
+    lw t8,-10240(t8)
+    bne t8,zero,pv_no
+    nop
+    addiu sp,sp,-16
+    j 0x00273C48
+    sd s0,0(sp)
+pv_no:
+    jr ra                         # a partner view: nothing is changed
+    move v0,zero
+pv_e3b:                           # the item yes/no page's "Yes" (jump table word 0x00373234)
+    lui t8,0x000E
+    lw t8,-10240(t8)
+    bne t8,zero,pe3_no
+    nop
+    j 0x00261AF0
+    nop
+pe3_no:
+    j 0x00261AC0                  # its "No"
+    nop
+pv_load:                          # 0x00240B84 (was j OR_LOAD)
+    lui t8,0x000E
+    j OR_LOAD
+    sw zero,-10240(t8)
+pv_new:                           # 0x00105770 (was jal OR_NEW)
+    lui t8,0x000E
+    j OR_NEW
+    sw zero,-10240(t8)
+"""
+
+# ---- eighty-fifth glue (only with --sound2) ----------------------------------------------------------------------
+SN_AT = 0x000DE900
+SN_END = 0x000DEB80
+SN_HOOKS = ((0x002BB630, 0x0C041A98, "sn_view"), (0x002BB968, 0x0C053B8A, "sn_area"), (0x0014EE64, 0x0C041A98, "sn_get"))
+SN_SRC = """
+sn_view:                          # 0x002BB630 (was jal 0x00106A60, a0 = 0) in the 3D sound routine; s1 = the sound (+0 position)
+    addiu sp,sp,-16
+    sd ra,0(sp)
+    jal 0x00106A60                # the game's view block
+    nop
+    ld ra,0(sp)
+    addiu sp,sp,16
+    lui t7,0x000F
+    lw t6,0x6F04(t7)              # V_ON: two views (camera 2 writes view 1)
+    beq t6,zero,sv_out
+    lw t6,0x05CC(t7)              # the twin
+    beq t6,zero,sv_out
+    lui t5,0x003A
+    ori t5,t5,0x7F70              # view 0's block
+    bne v0,t5,sv_out              # the game took another block just now: as it is
+    nop
+    lwc1 f2,0(s1)                 # the sound's position
+    lwc1 f3,4(s1)
+    lwc1 f4,8(s1)
+    lwc1 f5,0x50(t5)              # camera 1's eye
+    lwc1 f6,0x54(t5)
+    lwc1 f7,0x58(t5)
+    sub.s f5,f5,f2
+    sub.s f6,f6,f3
+    sub.s f7,f7,f4
+    mul.s f5,f5,f5
+    mul.s f6,f6,f6
+    mul.s f7,f7,f7
+    add.s f5,f5,f6
+    add.s f5,f5,f7                # to camera 1, squared
+    lwc1 f8,0xE0(t5)              # camera 2's eye (view 1's block + 0x50)
+    lwc1 f9,0xE4(t5)
+    lwc1 f10,0xE8(t5)
+    sub.s f8,f8,f2
+    sub.s f9,f9,f3
+    sub.s f10,f10,f4
+    mul.s f8,f8,f8
+    mul.s f9,f9,f9
+    mul.s f10,f10,f10
+    add.s f8,f8,f9
+    add.s f8,f8,f10               # to camera 2, squared
+    c.lt.s f8,f5
+    bc1f sv_out                   # camera 1 nearer (or as near): as the game
+    nop
+    addiu v0,t5,0x90              # view 1's block: heard from camera 2
+sv_out:
+    jr ra
+    nop
+sn_get:                           # 0x0014EE64 (was jal 0x00106A60) inside the area routine 0x0014EE28
+    lui t7,0x000E
+    lw t6,-6096(t7)               # V_SNFORCE (0x000DE830)
+    beq t6,zero,sg_game
+    lui v0,0x003A
+    jr ra
+    ori v0,v0,0x8000              # view 1's block (camera 2's eye)
+sg_game:
+    j 0x00106A60
+    nop
+sn_area:                          # 0x002BB968 (was jal 0x0014EE28): a0 = the area, a1 = the sound, a2 = its "inside" byte
+    lui t7,0x000F
+    lw t6,0x6F04(t7)
+    beq t6,zero,sa_game
+    lw t6,0x05CC(t7)
+    beq t6,zero,sa_game
+    nop
+    addiu sp,sp,-80
+    sd ra,0(sp)
+    sd s0,8(sp)
+    sd s1,16(sp)
+    sd s2,24(sp)
+    sd s3,32(sp)
+    move s0,a0
+    move s1,a1
+    move s2,a2
+    jal 0x00106A60                # the view the game would take now
+    move a0,zero
+    lui t5,0x003A
+    ori t5,t5,0x7F70
+    bne v0,t5,sa_one              # not view 0 (one view, or index 1 just now): as the game
+    nop
+    lui t7,0x000E
+    addiu t6,zero,1
+    sw t6,-6096(t7)               # V_SNFORCE = 1: camera 2
+    move a0,s0                    # the area (a0 was used for the view check above)
+    addiu a1,sp,48                # its point (16 bytes, aligned)
+    jal 0x0014EE28
+    addiu a2,sp,40                # its "inside" byte
+    move s3,v0
+    lui t7,0x000E
+    sw zero,-6096(t7)             # V_SNFORCE = 0
+    move a0,s0
+    move a1,s1
+    jal 0x0014EE28                # camera 1, as the game, into the sound
+    move a2,s2
+    beq s3,zero,sa_done           # no point for camera 2: camera 1's answer
+    nop
+    beq v0,zero,sa_two            # no point for camera 1: camera 2's
+    nop
+    lui t5,0x003A
+    ori t5,t5,0x7F70
+    lwc1 f2,0(s1)                 # camera 1's point to camera 1's eye, squared
+    lwc1 f3,4(s1)
+    lwc1 f4,8(s1)
+    lwc1 f5,0x50(t5)
+    lwc1 f6,0x54(t5)
+    lwc1 f7,0x58(t5)
+    sub.s f5,f5,f2
+    sub.s f6,f6,f3
+    sub.s f7,f7,f4
+    mul.s f5,f5,f5
+    mul.s f6,f6,f6
+    mul.s f7,f7,f7
+    add.s f5,f5,f6
+    add.s f5,f5,f7
+    lwc1 f2,48(sp)                # camera 2's point to camera 2's eye, squared
+    lwc1 f3,52(sp)
+    lwc1 f4,56(sp)
+    lwc1 f8,0xE0(t5)
+    lwc1 f9,0xE4(t5)
+    lwc1 f10,0xE8(t5)
+    sub.s f8,f8,f2
+    sub.s f9,f9,f3
+    sub.s f10,f10,f4
+    mul.s f8,f8,f8
+    mul.s f9,f9,f9
+    mul.s f10,f10,f10
+    add.s f8,f8,f9
+    add.s f8,f8,f10
+    c.lt.s f8,f5
+    bc1f sa_done                  # camera 1's point is as near or nearer: kept
+    nop
+sa_two:
+    lw t0,48(sp)                  # camera 2's point into the sound
+    lw t1,52(sp)
+    lw t2,56(sp)
+    lw t3,60(sp)
+    sw t0,0(s1)
+    sw t1,4(s1)
+    sw t2,8(s1)
+    sw t3,12(s1)
+    lbu t0,40(sp)
+    sb t0,0(s2)                   # and its "inside" byte
+    b sa_done
+    addiu v0,zero,1
+sa_one:
+    move a0,s0
+    move a1,s1
+    jal 0x0014EE28                # as the game
+    move a2,s2
+sa_done:
+    ld ra,0(sp)
+    ld s0,8(sp)
+    ld s1,16(sp)
+    ld s2,24(sp)
+    ld s3,32(sp)
+    jr ra
+    addiu sp,sp,80
+sa_game:
+    j 0x0014EE28
+    nop
+"""
+
+
+# ---- eighty-sixth glue (only with --hullgauges) ------------------------------------------------------------------
+GB_AT = 0x000D5000                                 # gb_new must stay the first routine (the sixty-sixth glue's gq_inst calls it)
+GB_END = 0x000D5800
+GB_POOL, GB_POOL_END = 0x000D0000, 0x000D4B00      # pool B: 48 places of 400 bytes
+GB_G2 = 0x000D4B00                                 # the second gauge object (232 bytes)
+GB_VARS = 0x000D4C00                               # V_WORK +0, V_POOLN +4, V_DIG2 +8
+GB_DX = -384                                       # gauge 2 = gauge 1 moved this far (places count 512 across, 448 down)
+GB_DY = 0
+GB_MARK2_X = 124                                   # its digit "2": right of gauge 2
+GB_MARK2_Y = 396
+GB_SITES = (                                       # (place in the flight module, its first word, the routine that takes it over)
+    (0x01F693B0, 0x240F0001, "gb_start"),          # the gauge starts (state 1)
+    (0x01F693C0, 0x240F0003, "gb_end"),            # the gauge ends (state 3)
+    (0x01F69210, 0x27BDFFE0, "gb_free"),           # the gauge's pictures are freed
+)
+GB_CALLS = (                                       # (a call in the flight module, its word, the routine called in its place)
+    (0x01F66D10, 0x0C7DA776, "gb_step"),           # the HUD manager steps the gauge
+    (0x01F69440, 0x0C7C6458, "gb_raw"),            # the gauge's make: a picture's 388 bytes, straight from the module's heap
+    (0x01F6948C, 0x0C7C6458, "gb_raw"),            # the same, the second one
+    (0x01F47C5C, 0x0C7C6458, "gb_raw"),            # a picture's 8-byte link block (0x01F47C30)
+    (0x01F699F8, 0x0C7D1DA4, "gb_place"),          # the show asks the gauge's place (0x01F47690)
+)
+GB_SRC = """
+gb_new:                           # (first, at GB_AT) the call at 0x01F47164 (a new picture's 388 bytes; gq_inst writes it)
+    lui t7,0x000D
+    lw t6,19456(t7)               # V_WORK (0x000D4C00): the second gauge is in work
+    bne t6,zero,gb_pool
+    nop
+    j GQ_NEW                      # as before: the sixty-sixth glue's gq_new
+    nop
+gb_raw:                           # 0x01F69440 / 0x01F6948C (the gauge's two direct pictures), 0x01F47C5C (a link block)
+    lui t7,0x000D
+    lw t6,19456(t7)
+    bne t6,zero,gb_pool
+    nop
+    j 0x01F19160                  # as the game: the module's heap
+    nop
+gb_pool:                          # t7 = 0x000D0000: the next place of pool B (400 bytes each)
+    lw t5,19460(t7)               # V_POOLN: places given out
+    sltiu t4,t5,48
+    beq t4,zero,gbp_full
+    addiu t4,t5,1
+    sw t4,19460(t7)
+    sll t3,t5,8
+    sll t2,t5,7
+    addu t3,t3,t2
+    sll t2,t5,4
+    addu t3,t3,t2                 # 400 x its number
+    lui v0,0x000D
+    jr ra
+    addu v0,v0,t3
+gbp_full:
+    j 0x01F19160                  # (never: the worst case is 42 pictures + 2 link blocks + the digit)
+    nop
+
+gb_inst:                          # from 0x00167E90 (the controller task, every frame), first: a fresh flight module gets the words
+    lui t7,0x01F2
+    lhu t6,-32748(t7)             # 0x01F18014: which Gummi module is in memory (0x636A = the flight)
+    ori t4,zero,0x636A
+    bne t6,t4,gbi_go
+    nop
+@CHECKS@
+@WRITES@
+    lui t7,0x000D
+    ori t6,t7,0x4B00              # a fresh module: the second gauge and the values are cleared (0x000D4B00 .. 0x000D4C10)
+    addiu t5,zero,68
+gbi_clr:
+    sw zero,0(t6)
+    addiu t5,t5,-1
+    bne t5,zero,gbi_clr
+    addiu t6,t6,4
+gbi_go:
+    j GB_NEXT
+    nop
+
+gb_step:                          # the call at 0x01F66D10 (a0 = the game's gauge): it steps, then the second gauge for ship 2
+    addiu sp,sp,-32
+    sd ra,0(sp)
+    sd s0,8(sp)
+    jal 0x01F69DD8                # the game's gauge, as the game
+    nop
+    lui s0,0x000D
+    ori a0,s0,0x4B00              # the second gauge
+    lw t6,0(a0)
+    lui t5,0x01F8
+    addiu t5,t5,0x17C8            # its class 0x01F817C8: it is built
+    bne t6,t5,gbt_out
+    lw t6,212(a0)
+    beq t6,zero,gbt_out           # nothing to do
+    lui t7,0x000F
+    lw t4,0x2604(t7)              # ship 2
+    beq t4,zero,gbt_out
+    lw t3,0x2600(t7)              # ship 1
+    lui t2,0x01F8
+    lw t1,-8636(t2)               # the game's player ship (0x01F7DE44)
+    bne t1,t3,gbt_out             # only while ship 1 is the game's (as gs_low)
+    nop
+    sd t1,16(sp)
+    sw t4,-8636(t2)               # the second gauge's step sees ship 2 as the player ship
+    addiu t6,zero,1
+    sw t6,19456(s0)               # V_WORK: its memory from pool B
+    jal 0x01F69DD8
+    nop
+    sw zero,19456(s0)
+    ld t1,16(sp)
+    lui t2,0x01F8
+    sw t1,-8636(t2)               # the game's player ship again
+    jal gb_after
+    nop
+gbt_out:
+    ld ra,0(sp)
+    ld s0,8(sp)
+    jr ra
+    addiu sp,sp,32
+
+gb_after:                         # after the second gauge's step: its own offset for the pictures the show does not place; its digit
+    lui t7,0x000D
+    ori t6,t7,0x4B00
+    lw t5,212(t6)
+    sltiu t4,t5,2
+    bne t4,zero,gba_ret           # not made yet
+    addiu t3,zero,@DX@
+    addiu t2,zero,@DY@
+    lw a0,4(t6)
+    beq a0,zero,gba_8
+    nop
+    sw t3,356(a0)
+    sw t2,360(a0)
+gba_8:
+    lw a0,8(t6)                   # (the picture whose place the show asks)
+    beq a0,zero,gba_12
+    nop
+    sw t3,356(a0)
+    sw t2,360(a0)
+gba_12:
+    lw a0,12(t6)
+    beq a0,zero,gba_168
+    nop
+    sw t3,356(a0)
+    sw t2,360(a0)
+gba_168:
+    lw a0,168(t6)
+    beq a0,zero,gba_dig
+    nop
+    sw t3,356(a0)
+    sw t2,360(a0)
+gba_dig:
+    addiu t4,zero,2
+    bne t5,t4,gba_ret             # the digit only while it is shown
+    nop
+    addiu sp,sp,-32
+    sd ra,0(sp)
+    sd s0,8(sp)
+    lui s0,0x000D
+    lw t3,19464(s0)               # V_DIG2
+    bne t3,zero,gbg_have
+    nop
+    jal 0x01F48038                # the HUD's picture sheet
+    nop
+    addiu t6,zero,1
+    sw t6,19456(s0)               # (its memory: pool B)
+    move a0,v0
+    addiu a1,zero,8
+    jal 0x01F46E80                # a new picture: a digit
+    addiu a2,zero,72
+    sw zero,19456(s0)
+    beq v0,zero,gbg_out
+    sw v0,19464(s0)
+gbg_have:
+    jal 0x01F47A58                # its picture number now
+    lw a0,19464(s0)
+    addiu t6,zero,56              # the digit 2
+    beq v0,t6,gbg_pos
+    lw a0,19464(s0)
+    jal 0x01F47A10                # another one
+    addiu a1,zero,56
+gbg_pos:
+    lw a0,19464(s0)
+    addiu a1,zero,@MARK2_X@
+    jal 0x01F477C0                # its place
+    addiu a2,zero,@MARK2_Y@
+gbg_out:
+    ld ra,0(sp)
+    ld s0,8(sp)
+    addiu sp,sp,32
+gba_ret:
+    jr ra
+    nop
+
+gb_place:                         # the call at 0x01F699F8 in the show (0x01F47690: a0 = the gauge's +8 picture, a1 / a2 = x / y)
+    addiu sp,sp,-32
+    sd ra,0(sp)
+    sd a1,8(sp)
+    jal 0x01F47690
+    sd a2,16(sp)
+    lui t7,0x000D
+    lw t6,19456(t7)               # the second gauge's show: its place is moved
+    beq t6,zero,gbl_out
+    ld a1,8(sp)
+    ld a2,16(sp)
+    lw t5,0(a1)
+    addiu t5,t5,@DX@
+    sw t5,0(a1)
+    lw t5,0(a2)
+    addiu t5,t5,@DY@
+    sw t5,0(a2)
+gbl_out:
+    ld ra,0(sp)
+    jr ra
+    addiu sp,sp,32
+
+gb_start:                         # 0x01F693B0 (a0 = the game's gauge): it starts; the second gauge too (built the first time)
+    addiu sp,sp,-16
+    sd ra,0(sp)
+    addiu t7,zero,1
+    sb zero,228(a0)
+    sw t7,212(a0)                 # the game's gauge, as the game
+    lui t7,0x000D
+    ori a0,t7,0x4B00
+    lw t6,0(a0)
+    lui t5,0x01F8
+    addiu t5,t5,0x17C8
+    beq t6,t5,gbs_have
+    nop
+    jal 0x01F69098                # the second gauge is built (its two bars; all its places empty)
+    nop
+    b gbs_go
+    nop
+gbs_have:
+    jal gb_drop                   # its old pictures (if any) are ended
+    nop
+gbs_go:
+    lui t7,0x000D
+    ori a0,t7,0x4B00
+    addiu t6,zero,1
+    sb zero,228(a0)
+    sw t6,212(a0)
+    ld ra,0(sp)
+    jr ra
+    addiu sp,sp,16
+
+gb_end:                           # 0x01F693C0 (a0 = the game's gauge): it ends (fades); the second gauge too
+    addiu t7,zero,3
+    sw t7,212(a0)                 # the game's gauge, as the game
+    lui t6,0x000D
+    ori t5,t6,0x4B00
+    lw t4,212(t5)
+    addiu t3,zero,2
+    beq t4,t3,gbe_fade
+    addiu t3,zero,1
+    bne t4,t3,gbe_out
+    nop
+    sw zero,212(t5)               # never made: nothing to fade
+gbe_out:
+    jr ra
+    nop
+gbe_fade:
+    jr ra
+    sw t7,212(t5)                 # shown: it fades with the game's
+
+gb_free:                          # 0x01F69210 (a0 = the game's gauge): its pictures are freed; the second gauge's too
+    addiu sp,sp,-16
+    sd ra,0(sp)
+    jal gbf_body                  # the game's, as the game
+    nop
+    jal gb_drop
+    nop
+    ld ra,0(sp)
+    jr ra
+    addiu sp,sp,16
+gbf_body:
+    addiu sp,sp,-32               # the two instructions that sat at 0x01F69210
+    j 0x01F69218
+    sd s2,16(sp)
+
+gb_drop:                          # the second gauge's pictures (+4 .. +168) and its digit are ended; pool B is empty again
+    addiu sp,sp,-32
+    sd ra,0(sp)
+    sd s0,8(sp)
+    sd s1,16(sp)
+    lui s0,0x000D
+    ori s0,s0,0x4B04
+    addiu s1,zero,42
+gbd_l:
+    lw a0,0(s0)
+    beq a0,zero,gbd_n
+    nop
+    sw zero,376(a0)               # its link block is pool memory: not for the module's delete
+    lw t6,0(a0)                   # its class
+    lw t6,0(t6)                   # the first method: destroy only (as gq_end for own pictures)
+    jalr t6
+    nop
+    sw zero,0(s0)
+gbd_n:
+    addiu s1,s1,-1
+    bne s1,zero,gbd_l
+    addiu s0,s0,4
+    lui s0,0x000D
+    lw a0,19464(s0)               # the digit
+    beq a0,zero,gbd_0
+    sw zero,19464(s0)
+    sw zero,376(a0)
+    lw t6,0(a0)
+    lw t6,0(t6)
+    jalr t6
+    nop
+gbd_0:
+    lui t7,0x000D
+    sw zero,19460(t7)             # V_POOLN: pool B is empty again
+    ld ra,0(sp)
+    ld s0,8(sp)
+    ld s1,16(sp)
+    jr ra
+    addiu sp,sp,32
+"""
+
+
+def gb_source(labels):
+    """The eighty-sixth glue's source with the installer's checks and writes (labels = None: the first pass)."""
+    checks, writes = "", ""
+    for site, word0, name in GB_SITES + GB_CALLS:
+        hi = (site + 0x8000) >> 16
+        lo = site - (hi << 16)
+        checks += ("    lui t7,0x%04X\n    lw t5,%d(t7)                 # 0x%08X: still the game's word?\n    lui t4,0x%04X\n"
+                   "    ori t4,t4,0x%04X\n    bne t5,t4,gbi_go\n    nop\n") % (hi, lo, site, word0 >> 16, word0 & 0xFFFF)
+    for site, word0, name in GB_SITES:
+        hi = (site + 0x8000) >> 16
+        lo = site - (hi << 16)
+        j = ((2 << 26) | ((labels[name] >> 2) & 0x3FFFFFF)) if labels else 0
+        writes += ("    lui t7,0x%04X\n    lui t4,0x%04X\n    ori t4,t4,0x%04X\n    sw t4,%d(t7)                 # 0x%08X: j %s\n"
+                   "    sw zero,%d(t7)\n") % (hi, j >> 16, j & 0xFFFF, lo, site, name, lo + 4)
+    for site, word0, name in GB_CALLS:
+        hi = (site + 0x8000) >> 16
+        lo = site - (hi << 16)
+        j = ((3 << 26) | ((labels[name] >> 2) & 0x3FFFFFF)) if labels else 0
+        writes += ("    lui t7,0x%04X\n    lui t4,0x%04X\n    ori t4,t4,0x%04X\n    sw t4,%d(t7)                 # 0x%08X: jal %s\n"
+                   ) % (hi, j >> 16, j & 0xFFFF, lo, site, name)
+    src = GB_SRC.replace("@DX@", str(GB_DX)).replace("@DY@", str(GB_DY))
+    src = src.replace("@MARK2_X@", str(GB_MARK2_X)).replace("@MARK2_Y@", str(GB_MARK2_Y))
+    return src.replace("@CHECKS@", checks.rstrip("\n")).replace("@WRITES@", writes.rstrip("\n"))
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     out = ROOT / (args[0] if args else "patches/merged-v7")
@@ -7389,6 +8629,10 @@ rc_drop2:
 """)
         else:
             gs_src = GS_SRC
+        if "--hullgauges" in sys.argv:                                     # (eighty-sixth glue: gauge 1 = ship 1, no gs_low)
+            x = "    sw t4,-26684(t3)              # jal gs_low\n    sw t4,-26668(t3)\n"
+            assert gs_src.count(x) == 1
+            gs_src = gs_src.replace(x, "    nop                           # (--hullgauges: gs_low is not written)\n    nop\n")
         src = gs_src
         for k in ("TEST", "ABLE", "HIT", "DMG", "REP"):                    # first pass: where the routines stand
             src = src.replace("@J_%s_HI@" % k, "0").replace("@J_%s_LO@" % k, "0")
@@ -7413,6 +8657,7 @@ rc_drop2:
         _code, gq_labels = assemble(GQ_AT, gq_source(None), syms)
         labels, n = add_code(GQ_AT, GQ_END, gq_source(gq_labels), syms, "the Gummi flight counts player 2's points")
         assert labels == gq_labels
+        gq_new_at = labels["gq_new"]                                      # (the eighty-sixth glue's gb_new goes on to it)
         hook_base(0x00167E90, gq_next, jal(labels["gq_inst"]), "the controller task: first the sixty-sixth glue's jumps into a fresh flight module")
         n_glue += n
         gq_own = list(range(GQ_OWN_AT, GQ_OWN_AT + 9 * 388, 4)) + list(range(GQ_OWN_LAST, GQ_OWN_LAST + 388, 4))
@@ -7762,6 +9007,169 @@ rc_drop2:
         hook_base(gqh[0], 0x3C0F000E, (2 << 26) | ((labels["gt_hit"] >> 2) & 0x3FFFFFF), "gq_hit: first gt_hit (a tagged shot's ship)")
         hook_base(0x00167E90, gt_next, jal(labels["gt_inst"]), "the controller task: first, the seventy-eighth glue's jumps into a fresh flight module")
         n_glue += n
+
+    if "--menuowner" in sys.argv:                                          # seventy-ninth glue (the opener alone controls)
+        assert "--ownmenu" in sys.argv and "--ownwallet" in sys.argv, "--menuowner needs --ownmenu (mo_open) and --ownwallet (ww_cmd)"
+        tick_next, open_next, cmd_next = words[0x00138538], words[0x00138574], words[0x00178AE8]
+        assert (tick_next >> 26) == 3 and (open_next >> 26) == 3 and (cmd_next >> 26) == 2, "the three hooks are not jal / jal / j"
+        assert words.get(0x00178AEC) == 0, "the green command's hook has no empty delay slot"
+        syms = {"TICK_NEXT": (tick_next & 0x3FFFFFF) << 2, "OPEN_NEXT": (open_next & 0x3FFFFFF) << 2,
+                "CMD_NEXT": (cmd_next & 0x3FFFFFF) << 2, "MO_HOLD": MO_HOLD, "MO_MSGHOLD": MO_MSGHOLD}
+        assert V_OWNER == 0x000E0000 - 6144 and V_OWNSTEP == V_OWNER + 4 and V_MSGSTEP == V_OWNER + 8
+        code, labels = assemble(MO_AT, MO_SRC, syms)
+        code = [w if isinstance(w, int) else w[1] for w in code]
+        assert MO_AT + 4 * len(code) <= MO_END, "the seventy-ninth glue does not fit"
+        clash = [a for a in words if MO_AT <= a < GQ_TAB]
+        assert not clash, "patch words in 0x000DE000 .. 0x000DEFFF: %08X" % clash[0]
+        for i, w in enumerate(code):
+            a = MO_AT + 4 * i
+            words[a] = w
+            order.append(a)
+            origin[a] = "glue 8 (the opener alone controls the screen)"
+        hook_base(0x000F4740, 0x3C0F0035, (2 << 26) | ((labels["po_pad"] >> 2) & 0x3FFFFFF), "pad_both: first, does a player own the screen?")
+        hook_base(0x000F4744, 0x25EED6C0, 0, "(its delay slot; po_both does the two instructions)")
+        hook_base(0x00138538, tick_next, jal(labels["po_tick"]), "the field's START look-out: first, the owner of a closed screen is let go")
+        hook_base(0x00138574, open_next, jal(labels["po_open"]), "START opens the main menu: whoever pressed START owns it")
+        hook_base(0x00178AE8, cmd_next, (2 << 26) | ((labels["po_cmd"] >> 2) & 0x3FFFFFF), "a hero runs a green command: his player owns what it opens")
+        n_glue += len(code)
+
+    if "--difficulty" in sys.argv:                                         # eightieth glue (a co-op difficulty)
+        assert V_DIFF == 0x000E0000 - 6128
+        code, labels = assemble(DH_AT, DH_SRC, {})
+        code = [w if isinstance(w, int) else w[1] for w in code]
+        assert DH_AT + 4 * len(code) <= DH_END, "the eightieth glue does not fit"
+        clash = [a for a in words if DH_AT <= a < DH_END]
+        assert not clash, "patch words in 0x000DE200 .. 0x000DE3FF: %08X" % clash[0]
+        assert V_DIFF not in words, "the difficulty word is written by the launcher's line, not by the builder"
+        for i, w in enumerate(code):
+            a = DH_AT + 4 * i
+            words[a] = w
+            order.append(a)
+            origin[a] = "glue 8 (a co-op difficulty for ordinary enemies)"
+        a, w0 = DH_HOOK
+        hook_game(a, w0, (2 << 26) | ((labels["dh_hp"] >> 2) & 0x3FFFFFF), "the HP loop of an enemy's unit slot is done: dh_hp (difficulty)")
+        n_glue += len(code) + 1
+
+    if "--sumscene2" in sys.argv:                                          # eighty-first glue (player 2's summon scene)
+        tp_next = words[0x00171074]
+        assert (tp_next >> 26) == 3, "0x00171074 is not a jal"
+        assert words.get(0x001C8444) == 0x0C03DF62, "0x001C8444 is not the base patch's jal sm_skip"
+        code, labels = assemble(SU_AT, SU_SRC, {"TP_NEXT": (tp_next & 0x3FFFFFF) << 2})
+        code = [w if isinstance(w, int) else w[1] for w in code]
+        assert SU_AT + 4 * len(code) <= SU_END, "the eighty-first glue does not fit"
+        clash = [a for a in words if SU_AT <= a < SU_END]
+        assert not clash, "patch words in 0x000DE400 .. 0x000DE47F: %08X" % clash[0]
+        for i, w in enumerate(code):
+            a = SU_AT + 4 * i
+            words[a] = w
+            order.append(a)
+            origin[a] = "glue 8 (player 2's summon plays its entrance scene)"
+        hook_base(0x00171074, tp_next, jal(labels["su_player"]), "trap_sysobj_player: first, a summon friend the twin called gets the twin")
+        hook_base(0x001C8444, 0x0C03DF62, 0x0C0721E2, "the entrance scene: the game's own call again (also for the twin's summon)")
+        n_glue += len(code)
+
+    if "--windrider" in sys.argv:                                          # eighty-second glue (each whirlwind rider's button)
+        code, labels = assemble(RW_AT, RW_SRC, {})
+        code = [w if isinstance(w, int) else w[1] for w in code]
+        assert RW_AT + 4 * len(code) <= RW_END, "the eighty-second glue does not fit"
+        clash = [a for a in words if RW_AT <= a < RW_END]
+        assert not clash, "patch words in 0x000DE480 .. 0x000DE57F: %08X" % clash[0]
+        for i, w in enumerate(code):
+            a = RW_AT + 4 * i
+            words[a] = w
+            order.append(a)
+            origin[a] = "glue 8 (each whirlwind rider's own button)"
+        for a in RW_HOOKS:
+            hook_base(a, 0x0C03D1D0, jal(labels["rw_pad"]), "a script's button test: a whirlwind rider's own controller, else pad_both")
+        n_glue += len(code)
+
+    if "--lcrevive" in sys.argv:                                           # eighty-third glue (a destroyed Light Cycle comes back)
+        code, labels = assemble(LC_AT, LC_SRC.replace("LC_DOWN", str(LC_DOWN)), {})
+        code = [w if isinstance(w, int) else w[1] for w in code]
+        assert LC_AT + 4 * len(code) <= LC_END, "the eighty-third glue does not fit"
+        clash = [a for a in words if LC_AT <= a < LC_END or 0x000DE820 <= a < 0x000DE82C]
+        assert not clash, "patch words in the eighty-third glue's room: %08X" % clash[0]
+        for i, w in enumerate(code):
+            a = LC_AT + 4 * i
+            words[a] = w
+            order.append(a)
+            origin[a] = "glue 8 (a destroyed Light Cycle comes back)"
+        for a, w0, label in LC_HOOKS:
+            hook_game(a, w0, labels[label], "the Light Cycle's class table: " + label)
+        n_glue += len(code) + 2
+
+    if "--partnerview" in sys.argv:                                        # eighty-fourth glue (the partner's gear, read-only)
+        assert "--ownmenu" in sys.argv and "--menuowner" in sys.argv, "--partnerview needs --ownmenu and --menuowner"
+        assert V_VIEW == 0x000E0000 - 10240 and PV_NET == 0x000E0000 - 10176
+        _c, rm_pv = assemble(RM_AT, RM_SRC, {})
+        j_mo = (2 << 26) | ((rm_pv["mo_open"] >> 2) & 0x3FFFFFF)
+        po_end = [a for a in range(MO_AT, MO_END, 4) if words.get(a) == j_mo]
+        assert len(po_end) == 1, "po_open's j mo_open: %r" % po_end
+        tick_w = words[0x00138538]
+        assert (tick_w >> 26) == 3, "0x00138538 is not a jal"
+        lw_l, lw_n = words[0x00240B84], words[0x00105770]
+        assert (lw_l >> 26) == 2 and (lw_n >> 26) == 3, "or_load / or_new hooks are not j / jal"
+        syms = {"MO_OPEN": rm_pv["mo_open"], "OW_SWAP": rm_pv["ow_swap"], "OW_LOAD": rm_pv["ow_load"],
+                "PO_TICK": (tick_w & 0x3FFFFFF) << 2, "OR_LOAD": (lw_l & 0x3FFFFFF) << 2, "OR_NEW": (lw_n & 0x3FFFFFF) << 2}
+        assert syms["OR_LOAD"] == rm_pv["or_load"] and syms["OR_NEW"] == rm_pv["or_new"]
+        code, labels = assemble(PV_AT, PV_SRC, syms)
+        code = [w if isinstance(w, int) else w[1] for w in code]
+        assert PV_AT + 4 * len(code) <= PV_END, "the eighty-fourth glue does not fit"
+        clash = [a for a in words if PV_AT <= a < PV_END or V_VIEW <= a < PV_NET + 76]
+        assert not clash, "patch words in the eighty-fourth glue's room: %08X" % clash[0]
+        for i, w in enumerate(code):
+            a = PV_AT + 4 * i
+            words[a] = w
+            order.append(a)
+            origin[a] = "glue 8 (the partner's gear, read-only)"
+        hook_base(po_end[0], j_mo, (2 << 26) | ((labels["pv_open"] >> 2) & 0x3FFFFFF), "START: with L2 held, the partner's gear (read-only)")
+        hook_base(0x00138538, tick_w, jal(labels["pv_tick"]), "the field's START look-out: first, a partner view's net goes back")
+        hook_base(0x00240B84, lw_l, (2 << 26) | ((labels["pv_load"] >> 2) & 0x3FFFFFF), "a save file is loaded: no partner view")
+        hook_base(0x00105770, lw_n, jal(labels["pv_new"]), "the save data are made new: no partner view")
+        for a, w0, label in PV_GATES:
+            hook_game(a, w0, jal(labels[label]), "a menu edit point: nothing in a partner view (" + label + ")")
+        hook_game(0x00373234, 0x00261AF0, labels["pv_e3b"], "the item yes/no page's Yes: its No in a partner view")
+        hook_game(0x00273818, 0x27BDFFC0, (2 << 26) | ((labels["pv_c1"] >> 2) & 0x3FFFFFF), "Customize (item setting): nothing in a partner view")
+        hook_game(0x0027381C, 0xFFB10008, 0, "(pv_c1 does the two words)")
+        hook_game(0x00273C40, 0x27BDFFF0, (2 << 26) | ((labels["pv_c2"] >> 2) & 0x3FFFFFF), "Customize (record + 0xF4): nothing in a partner view")
+        hook_game(0x00273C44, 0xFFB00000, 0, "(pv_c2 does the two words)")
+        n_glue += len(code) + 11
+
+    if "--sound2" in sys.argv:                                             # eighty-fifth glue (3D sound from the nearer camera)
+        code, labels = assemble(SN_AT, SN_SRC, {})
+        code = [w if isinstance(w, int) else w[1] for w in code]
+        assert SN_AT + 4 * len(code) <= SN_END, "the eighty-fifth glue does not fit"
+        clash = [a for a in words if SN_AT <= a < SN_END or 0x000DE830 <= a < 0x000DE834]
+        assert not clash, "patch words in the eighty-fifth glue's room: %08X" % clash[0]
+        for i, w in enumerate(code):
+            a = SN_AT + 4 * i
+            words[a] = w
+            order.append(a)
+            origin[a] = "glue 8 (3D sound from the nearer camera)"
+        for a, w0, label in SN_HOOKS:                                      # the area part (sn_area, sn_get) only with
+            if label == "sn_view" or "--sound2area" in sys.argv:            # --sound2area: not run-tested yet (part 148)
+                hook_game(a, w0, jal(labels[label]), "3D sound from the nearer camera: " + label)
+        n_glue += len(code) + (3 if "--sound2area" in sys.argv else 1)
+
+    if "--hullgauges" in sys.argv:                                         # eighty-sixth glue (both Gummi ships' hull gauges)
+        assert "--ship2hit" in sys.argv and "--ship2score" in sys.argv, "--hullgauges needs --ship2hit and --ship2score"
+        gb_next = words[0x00167E90]                                        # the last glue's installer call there
+        assert (gb_next >> 26) == 3
+        syms = {"GB_NEXT": (gb_next & 0x3FFFFFF) << 2, "GQ_NEW": gq_new_at}
+        _code, gb_labels = assemble(GB_AT, gb_source(None), syms)
+        code, labels = assemble(GB_AT, gb_source(gb_labels), syms)
+        assert labels == gb_labels and labels["gb_new"] == GB_AT
+        code = [w if isinstance(w, int) else w[1] for w in code]
+        assert GB_AT + 4 * len(code) <= GB_END, "the eighty-sixth glue does not fit"
+        clash = [a for a in words if GB_POOL <= a < GB_VARS + 16 or GB_AT <= a < GB_END]
+        assert not clash, "patch words in the eighty-sixth glue's room: %08X" % clash[0]
+        for i, w in enumerate(code):
+            a = GB_AT + 4 * i
+            words[a] = w
+            order.append(a)
+            origin[a] = "glue 8 (both Gummi hull gauges)"
+        hook_base(0x00167E90, gb_next, jal(labels["gb_inst"]), "the controller task: first the eighty-sixth glue's words into a fresh flight module")
+        n_glue += len(code)
 
     out.mkdir(parents=True, exist_ok=True)
     head = [

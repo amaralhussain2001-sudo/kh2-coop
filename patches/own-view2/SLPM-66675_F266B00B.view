@@ -1,0 +1,25 @@
+; Kingdom Hearts II Final Mix (SLPM-66675, CRC F266B00B): what each PC shows when the game draws one view per player.
+; Read by the PS2-ONLINE own-view emulator build (emulator-src\builds\view12 or later). Display only: nothing here
+; changes the game, and this file is not part of the patch check between the PCs. It belongs next to the .pnach file.
+; For the OWN SCREENS patch patches\merged-v6-own (tools\own\make_own.py, keep mode).
+
+LayoutAddress = 000F6F00     ; the game patch's layout byte: 0 one view, 2 two full-size pictures
+
+; layout 2: two full-size pictures per step. The game copies player 2's finished picture to the display, sends the
+; marker (LABEL register, id 56310002), then copies player 1's finished picture over it.
+; Player 2's PC shows the copy of the display taken at the marker; player 1's PC shows the display as it is.
+MarkerValue = 2
+Marker2Id = 56310002
+MarkerBuffer = display       ; copy the frame buffer that is on display
+MarkerHold = 0               ; keep showing the copy until the next marker (every two-view step has one)
+
+; Player 1's picture passes through the PS2's main memory inside the game and would come back at the PS2's own
+; sharpness. At marker 56310003 the emulator keeps a copy at its own resolution; at marker 56310004 it puts the copy
+; into the frame buffer at block 0E00 (page 112), where the game has just reloaded the picture. Every PC does this.
+KeepSaveId = 56310003
+KeepRestoreId = 56310004
+KeepRestoreBlock = 0E00
+
+; part 142 (build 28): the SYNC CHECK leaves out the picture copy of the field, menus, shops, talks and the save-point world map.
+; It holds what this PC drew, so it differs between PCs with different picture quality (8x / 3x: runs r12, 0 other bytes).
+SyncSkip = 00457580-004F3580

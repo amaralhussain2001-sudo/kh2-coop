@@ -1,0 +1,6 @@
+# part 147: player 2 HOLDS L2 AND PRESSES START (6200) = his partner view; Circle 6450, Triangle 6650, START 6850
+6200 4 L2 START
+6450 4 O
+6650 4 TRI
+6850 4 START
+7400 1

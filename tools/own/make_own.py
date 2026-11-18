@@ -991,6 +991,102 @@ def add_menu_looks(result, origin, sections, make_v2, elf_word):
     return len(code) + len(hooks)
 
 
+PD_AT, PD_END = 0x000DD400, 0x000DD600     # free: between the partner view's code (..0x000DD400) and its data (0x000DD800)
+PD_DX, PD_DY = 16, -84                    # where the partner's strip goes: left of his small gauge (top right), plus that gauge's row offset
+
+
+def add_partner_drive(result, origin, elf_word):
+    """Step 10 (--partnerdrive): the partner's DRIVE / FORM strip in each view picture, beside his small gauge."""
+    w = result.get(0x0013935C)
+    assert w is not None and w >> 26 == 3, "the HUD draw-all filter hook 0x0013935C is not a jal"
+    own_filter = (w & 0x3FFFFFF) << 2
+    assert result.get(0x00138A0C) is None and elf_word(0x00138A0C) == 0xAE0E0170, "0x00138A0C is not sw t6,368(s0)"
+    src = """
+pd_filter:                        # 0x0013935C (was jal OWN_FILTER). a0 = HUD object. Out as the filter: t7 flags, t6 = t7 & 0x40
+    lui t7,0x000F
+    lw t4,0x7F14(t7)              # O_PMODE: 1 = player 1's picture, 2 = player 2's picture
+    addiu t3,zero,1
+    beq t4,t3,pdf_p1
+    addiu t3,zero,2
+    bne t4,t3,pdf_game
+    lui t2,0x0035
+    b pdf_chk
+    lw t2,-31252(t2)              # player 2's picture: the partner's gauge = player 1's (0x003485EC)
+pdf_p1:
+    lw t2,0x7F20(t7)              # player 1's picture: the partner's gauge = player 2's (0x000F7F20)
+pdf_chk:
+    beq t2,zero,pdf_game
+    sltu t4,a0,t2
+    bne t4,zero,pdf_game          # below the gauge
+    addiu t4,t2,0x4000
+    sltu t4,a0,t4
+    beq t4,zero,pdf_game          # above it
+    addiu t3,t2,0x2D80            # the gauge's DRIVE / FORM strip
+    beq a0,t3,pdf_show
+    nop
+    lw t4,0x18C(a0)               # parent
+    beq t4,t3,pdf_show            # a part of the strip
+    sltu t5,t4,t2
+    bne t5,zero,pdf_game          # the parent word is not a part of this gauge (other objects keep other things there)
+    addiu t5,t2,0x4000
+    sltu t5,t4,t5
+    beq t5,zero,pdf_game
+    nop
+    lw t4,0x18C(t4)
+    bne t4,t3,pdf_game            # nor a part of a part of it
+    nop
+pdf_show:
+    lw t7,12(a0)                  # its own flags only (the game's "hidden" stays)
+    jr ra
+    andi t6,t7,0x40
+pdf_game:
+    j OWN_FILTER
+    nop
+pd_pos:                           # 0x00138A0C (was sw t6,368(s0); the delay slot stored y). s0 = the part, t6 = its x
+    lui t7,0x000F
+    lw t4,0x7F14(t7)
+    addiu t3,zero,1
+    beq t4,t3,pdp_p1
+    addiu t3,zero,2
+    bne t4,t3,pdp_out
+    lui t2,0x0035
+    lw t4,0x7F1C(t7)              # player 2's picture: the small gauge of player 1's hero (lane V2's O_TG2)
+    b pdp_chk
+    lw t2,-31252(t2)
+pdp_p1:
+    lw t4,0x7F00(t7)              # player 1's picture: the twin's small gauge (lane V2's V_TG)
+    lw t2,0x7F20(t7)
+pdp_chk:
+    beq t2,zero,pdp_out
+    addiu t2,t2,0x2D80
+    bne t2,s0,pdp_out             # only the strip's top part moves (its children take their place from it)
+    nop
+    addiu t6,t6,PD_DX
+    lw t3,372(s0)
+    beq t4,zero,pdp_y
+    addiu t3,t3,PD_DY
+    lw t4,0x508(t4)               # the small gauge's row offset (lane V2's tg_place: row height x friends present)
+    addu t3,t3,t4
+pdp_y:
+    sw t3,372(s0)
+pdp_out:
+    jr ra
+    sw t6,368(s0)
+""".replace("PD_DX", str(PD_DX)).replace("PD_DY", str(PD_DY))
+    code, labels = assemble(PD_AT, src, {"OWN_FILTER": own_filter})
+    code = [x if isinstance(x, int) else x[1] for x in code]
+    assert PD_AT + 4 * len(code) <= PD_END, "the partner's drive display does not fit"
+    for i, x in enumerate(code):
+        a = PD_AT + 4 * i
+        assert a not in result, "glue address already used: %08X" % a
+        result[a] = x
+        origin[a] = "glue (the partner's DRIVE / FORM strip in each view picture)"
+    result[0x0013935C] = (3 << 26) | ((labels["pd_filter"] >> 2) & 0x3FFFFFF)
+    origin[0x0013935C] = origin.get(0x0013935C, "") + " | glue: the partner's DRIVE strip first (pd_filter)"
+    result[0x00138A0C] = (3 << 26) | ((labels["pd_pos"] >> 2) & 0x3FFFFFF)
+    origin[0x00138A0C] = "glue hook: the partner's DRIVE strip moved beside his small gauge (pd_pos)"
+
+
 def add_boss_views(result, origin, elf_word=None):
     """Step 8: the routines the camera task of tools/own/views.py calls (BM_HOLD, BM_CAM1, BM_CAM2)."""
     src = BOSSV_SRC
@@ -1306,6 +1402,16 @@ def main():
     # tools/own/views.py calls three routines here unless the fork was made with --no-bossviews.
     if "--no-bossviews" not in sys.argv and park:
         add_boss_views(result, origin, elf_word)
+
+    # 10. THE PARTNER'S DRIVE DISPLAY (STATE part 150; his list item 8 (b) "each player sees both form gauges"), only with
+    # --partnerdrive. Each big gauge's "DRIVE / FORM" strip is the part at +0x2D80 and its children (+0x2F1C, +0x30B8,
+    # +0x0394, parent word +0x18C); every part is a HUD object of its own in the draw list. In a view picture the partner's
+    # gauge (player 2's 0x000F7F20 in player 1's picture, player 1's 0x003485EC in player 2's) was not drawn at all (lane V2's
+    # group rule). Now pd_filter (in front of the HUD draw-all filter at 0x0013935C) lets the partner's strip through with
+    # its own flags (the game's own "hidden", e.g. in towns, stays), and pd_pos (0x00138A0C, where a part stores its
+    # position x) moves the strip's top part by PD_DX / PD_DY in that picture; its children take their place from it.
+    if "--partnerdrive" in sys.argv:
+        add_partner_drive(result, origin, elf_word)
 
     out.mkdir(parents=True, exist_ok=True)
     head = [

@@ -188,6 +188,9 @@ def run(a):
             f"Peek = {a.peek}",
             f"Screen = {a.screen}",
         ]
+        extra = a.extra1 if k == 1 else a.extra2
+        if extra:
+            lines += [x.strip() for x in extra.split("|") if x.strip()]   # test only: raw session lines ("Key = value|Key = value")
         view = a.view1 if k == 1 else a.view2
         if view:
             lines.append(f"View = {view}")
@@ -284,12 +287,25 @@ def main():
     r.add_argument("--view2", default="")
     r.add_argument("--snapview1", type=int, default=0)
     r.add_argument("--snapview2", type=int, default=0)
+    r.add_argument("--extra1", default="", help="raw session lines for p1, separated by | (test only, e.g. TestPoke = 6000:000D1000:5A)")
+    r.add_argument("--extra2", default="", help="raw session lines for p2, separated by |")
     r.add_argument("--upscale1", type=int, default=0)
     r.add_argument("--upscale2", type=int, default=0)
     r.add_argument("--aspect", default="")
     r.add_argument("--shot-internal", action="store_true", help="screenshots at internal resolution")
     r.add_argument("--shot-raw", action="store_true", help="screenshots at internal resolution, no aspect correction")
     a = ap.parse_args()
+    # TEST ONLY (part 142): the whole regression at different picture quality: PIC_EXE (both copies), PIC_VIEW (the .view file),
+    # PIC_UP1 / PIC_UP2 (each copy's upscale) override the options when set.
+    if getattr(a, "iso", None) is not None:
+        if os.environ.get("PIC_EXE"):
+            a.exe1 = a.exe2 = os.environ["PIC_EXE"]
+        if os.environ.get("PIC_VIEW"):
+            a.view_file = os.environ["PIC_VIEW"]
+        if os.environ.get("PIC_UP1"):
+            a.upscale1 = int(os.environ["PIC_UP1"])
+        if os.environ.get("PIC_UP2"):
+            a.upscale2 = int(os.environ["PIC_UP2"])
     if a.cmd == "make":
         make(a.n, a.run_dir)
     else:

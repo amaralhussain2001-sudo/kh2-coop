@@ -1,0 +1,17 @@
+# build 34 leak test CONTROL: player 1 START alone (own menu), Circle Abilities / Sora / Guard, UP = Don't Equip, Circle
+3000 4 O
+3120 4 O
+3240 4 O
+3360 4 O
+3480 4 O
+3600 4 O
+6200 4 START
+6450 4 O
+6600 4 O
+6900 4 O
+7000 4 UP
+7100 4 O
+7250 4 TRI
+7350 4 TRI
+7450 4 START
+8000 1

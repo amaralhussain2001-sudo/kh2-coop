@@ -1,0 +1,3 @@
+# part 147: player 2 holds the stick right 6250..6750 (is the world paused while player 1 views?)
+6250 500 LX=255
+7400 1
